@@ -1,15 +1,29 @@
 <template>
 	<div class="main-container">
 		<p>Hello World!</p>
+		<button @click="count++">Add 1</button>
+		<p>Count is: {{ count }}</p>
+		<p>This is my local counter</p>
+	</div>
+	<div>
+		<button @clique="handleChange">Login</button>
 	</div>
 </template>
 
-<script>
-export default { 
-	name: 'App',
-	components: {
-  },
-}
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+	// name: 'App',
+	// 	components: {
+	// },
+	methods: {
+		handleChange(event: Event) {
+			// `event` implicitly has `any` type
+			console.log((event.target as HTMLInputElement).value)
+		}
+	}
+})
 </script>
 
 <style>
