@@ -1,16 +1,18 @@
 <template>
 <p>{{ "veloBall x-y " + veloBallX + " " + veloBallY }}</p>
-<div class="button-container">
+
+<div class="game-container">
+  <div class="button-container">
       <button @click="startMatch" :disabled="gameIsRunning">Start</button>
       <button @click="restartMatch" :disabled="!gameIsRunning">Restart</button>
     </div>
-<div class="game-container">
 <div class="pong-container">
-  <div class="pong">
-    <div class="scores">
+  <div class="scores">
       <div class="scorePlayer">{{ "Score A : " + scoreA }}</div>
       <div class="scorePlayer">{{ "Score B : " + scoreB }}</div>
     </div>
+  <div class="pong">
+    
     
     <div class="paddle" :style="leftPaddleStyle"></div>
     <div class="paddle" :style="rightPaddleStyle"></div>
@@ -41,7 +43,7 @@ const leftPlayerKeyDown = 's';
 
 //LEFT PADDLE PARAMETERS
 const leftPaddleWidth = ref(10);
-const leftPaddleHeight = ref(80);
+const leftPaddleHeight = ref(400);
 
 const leftPaddleY = ref(gameContainerHeight/2 - leftPaddleHeight.value/2);
 const leftPaddleSpeed = ref(12);
@@ -70,7 +72,7 @@ const ballStartSpeedY = 2;
 const veloBallX = ref(0);
 const veloBallY = ref(0);
 
-const ballMaxSpeedX = 12;
+const ballMaxSpeedX = 20;
 const ballMaxSpeedY = 10;
 
 
@@ -316,80 +318,70 @@ return {
 <style>
 
 .game-container {
-  position: flex; /* Set the container to absolute position */
-  top: 0; /* Position the container at the top of its parent */
+  position: absolute;
+  top: 0;
+  left: 0;
   right: 0;
+  bottom: 0;
   display: flex;
-  background-color: #000;
-}
-
-.button-container {
-  position: absolute; /* Set the container to absolute position */
-top: 0; /* Position the container at the top of its parent */
-left: 0;
-display: flex;
-align-items: center;
-justify-content: center;
-margin-top: 250px;
-height: 100px; /* Set a fixed height for the pong container */
-width: 100%;
+  align-items: center;
+  justify-content: center;
  
 }
 
-
-  .button-container button {
-    margin: 0 5px;
-  }
-
-
-.scores {
-display: flex;
-justify-content: center;
-align-items: center;
-height: 40px;
-font-size: 24px;
-color: #09024b;
-text-align: center;
-}
-
-.scorePlayer {
-flex: 1;
+.button-container {
+  position: absolute;
+  top: 0;
+  left: 5%;
+  margin-top: 250px;
+  height: 100px;
+  width: 100%;
 }
 
 .pong-container {
-position: absolute; /* Set the container to absolute position */
-top: 0; /* Position the container at the top of its parent */
-left: 0;
-display: flex;
-align-items: center;
-justify-content: center;
-margin-top: 320px;
-height: 400px; /* Set a fixed height for the pong container */
-width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 25%;
+  transform: translate(-50%, -50%);
 }
 
 .pong {
-position: relative;
-width: 600px;
-height: 400px;
-border: 1px solid #6b4d4d;
-overflow: hidden;
+  position: relative;
+  width: 600px;
+  height: 400px;
+  border: 1px solid #6b4d4d;
+  overflow: hidden;
+}
+
+.scores {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  font-size: 24px;
+  color: #09024b;
+  text-align: center;
+}
+
+.scorePlayer {
+  flex: 1;
 }
 
 .paddle {
-position: absolute;
-width: var(--paddle-width, 10px);
-height: var(--paddle-height, 10px);
-background-color: #147f83;
+  position: absolute;
+  width: var(--paddle-width, 10px);
+  height: var(--paddle-height, 10px);
+  background-color: #147f83;
 }
 
 .ball {
-position: absolute;
-width: var(--ball-size, 10px);
-height: var(--ball-size, 10px);
-background-color: rgba(247, 6, 166, 0.521);
-border-radius: 50%;
+  position: absolute;
+  width: var(--ball-size, 10px);
+  height: var(--ball-size, 10px);
+  background-color: rgba(247, 6, 166, 0.521);
+  border-radius: 50%;
 }
+
 
 
 </style>
