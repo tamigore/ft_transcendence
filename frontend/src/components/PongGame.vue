@@ -3,8 +3,8 @@
 
 <div class="game-container">
   <div class="button-container">
-      <button @click="startMatch" :disabled="gameIsRunning">Start</button>
-      <button @click="restartMatch" :disabled="!gameIsRunning">Restart</button>
+      <button @click="startMatchSolo" :disabled="gameIsRunning">Start</button>
+      <button @click="restartMatchSolo" :disabled="!gameIsRunning">Restart</button>
     </div>
 <div class="pong-container">
   <div class="scores">
@@ -43,7 +43,7 @@ const leftPlayerKeyDown = 's';
 
 //LEFT PADDLE PARAMETERS
 const leftPaddleWidth = ref(10);
-const leftPaddleHeight = ref(400);
+const leftPaddleHeight = ref(80);
 
 const leftPaddleY = ref(gameContainerHeight/2 - leftPaddleHeight.value/2);
 const leftPaddleSpeed = ref(12);
@@ -52,7 +52,7 @@ const leftPaddleJustHit = ref(false);
 
 //RIGHT PADDLE PARAMETERS
 const rightPaddleWidth = ref(10);
-const rightPaddleHeight = ref(400);
+const rightPaddleHeight = ref(80);
 
 const rightPaddleY = ref(gameContainerHeight/2 - rightPaddleHeight.value/2);
 const rightPaddleSpeed = ref(12);
@@ -95,26 +95,35 @@ const line = ref('');
 
 
 //GAME FUNCTIONS
-const startMatch = () => {
+const startMatchSolo = () => {
   if (!gameIsRunning.value)
   {
     veloBallX.value = ballStartSpeedX;
-    veloBallY.value = ballStartSpeedY;
+    veloBallY.value = Math.random() * 3 - 6;
+
     ballX.value = gameContainerWidth/2 - ballSize/2;
     ballY.value = gameContainerHeight/2 - ballSize/2;
+
+    rightPaddleHeight.value = 400;
+    rightPaddleY.value = 0;
+
     gameIsRunning.value = true;
   }
 }
 
-const restartMatch = () => {
-  if (gameIsRunning.value)
-  {
+const restartMatchSolo = () => {
+  if (gameIsRunning.value) {
     scoreA.value = 0;
     scoreB.value = 0;
+
     veloBallX.value = 0;
     veloBallY.value = 0;
-    ballX.value = gameContainerWidth/2 - ballSize/2;
-    ballY.value = gameContainerHeight/2 - ballSize/2;
+
+    
+
+    ballX.value = gameContainerWidth / 2 - ballSize / 2;
+    ballY.value = gameContainerHeight / 2 - ballSize / 2;
+
     gameIsRunning.value = false;
   }
 }
@@ -195,43 +204,6 @@ moovePaddles();
 
 };
 
-//   if (ballX.value <= paddleOffset + leftPaddleWidth.value)
-//     {
-//       if (ballY.value >= leftPaddleY.value && ballY.value <= leftPaddleY.value + leftPaddleHeight.value)
-//         {
-//           if (ballY.value <= leftPaddleY.value + leftPaddleHeight.value/2)
-//           {
-//             veloBallX.value = -veloBallX.value + ((ballY.value - leftPaddleY.value) / (leftPaddleHeight.value / 2));
-//             veloBallY.value = veloBallY.value - ( ((ballY.value - leftPaddleY.value) - leftPaddleHeight.value / 4) / leftPaddleHeight.value) ;
-//           }
-//           else
-//           {
-//             veloBallX.value = -veloBallX.value + ((ballY.value - (leftPaddleY.value + leftPaddleHeight.value/2)) / (leftPaddleHeight.value / 2));
-//             veloBallY.value = veloBallY.value - ( ((ballY.value - (leftPaddleY.value + leftPaddleHeight.value/2)) - leftPaddleHeight.value/4) / leftPaddleHeight.value );
-//           }
-//         }
-//     }
-
-//     if (ballX.value >= gameContainerWidth - paddleOffset - rightPaddleWidth.value - ballSize)
-//     {
-//       if (ballY.value >= rightPaddleY.value && ballY.value <= rightPaddleY.value + rightPaddleHeight.value)
-//         {
-//           if (ballY.value <= rightPaddleY.value + rightPaddleHeight.value/2)
-//           {
-//             veloBallX.value = -(veloBallX.value + ((ballY.value - rightPaddleY.value) / (rightPaddleHeight.value / 2)));
-//             veloBallY.value = veloBallY.value - ( ((ballY.value - rightPaddleY.value) - rightPaddleHeight.value / 4) / rightPaddleHeight.value) ;
-//           }
-//           else
-//           {
-//             veloBallX.value = -(veloBallX.value + ((ballY.value - (rightPaddleY.value + rightPaddleHeight.value/2)) / (rightPaddleHeight.value / 2)));
-//             veloBallY.value = veloBallY.value - ( ((ballY.value - (rightPaddleY.value + rightPaddleHeight.value/2)) - rightPaddleHeight.value/4) / rightPaddleHeight.value );
-//           }
-//         }
-//     }
-// }
-
-
-
 //KEY HANDLING
 
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -297,8 +269,8 @@ return {
   line,
   veloBallX,
   veloBallY,
-  startMatch,
-  restartMatch,
+  startMatchSolo,
+  restartMatchSolo,
   gameIsRunning,
 };
 
