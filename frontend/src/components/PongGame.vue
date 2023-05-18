@@ -1,11 +1,14 @@
 <template>
 
 <p>{{ "veloBall x-y " + veloBallX + " " + veloBallY }}</p>
+<p>{{ "Ping " + ping }}</p>
+<p>{{ "Pong " + pong}}</p>
 
 <div class="game-container">
   <div class="button-container">
-    <button @click="startMatchSolo" :disabled="gameIsRunning">Start Solo</button>
-    <button @click="startMatchMultiLocal" :disabled="gameIsRunning">Start Multiplayer</button>
+    <button @click="startMatchSolo" :disabled="gameIsRunning">Solo</button>
+    <button @click="startMatchMultiLocal" :disabled="gameIsRunning">MultiplayerLocal</button>
+    <button @click="startNoPlayer" :disabled="gameIsRunning">NoPlayer</button>
     <button @click="restartMatch" :disabled="!gameIsRunning">Restart</button>
     </div>
 <div class="pong-container">
@@ -92,6 +95,8 @@ const veloBallY = ref(0);
 const ballMaxSpeedX = 20;
 const ballMaxSpeedY = 10;
 
+const ping = ref(0);
+const pong = ref(0);
 
 const scoreA = ref(0);
 const scoreB = ref(0);
@@ -132,6 +137,33 @@ const startMatchSolo = () => {
   }
 }
 
+
+const startNoPlayer = () => {
+  if (!gameIsRunning.value)
+  {
+    const rand = Math.random() * 2 - 1;
+    veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
+    veloBallY.value = Math.random() * 6 - 3;
+
+    ballX.value = pongWidth/2 - ballSize/2;
+    ballY.value = pongHeight/2 - ballSize/2;
+
+    rightPaddleHeight.value = 400;
+    rightPaddleY.value = 0;
+
+    rightPlayerKeyDown.value = '';
+    rightPlayerKeyUp.value = '';
+
+    leftPaddleHeight.value = 400;
+    leftPaddleY.value = 0;
+
+    leftPlayerKeyDown.value = '';
+    leftPlayerKeyUp.value = '';
+
+    gameIsRunning.value = true;
+  }
+  }
+
 const startMatchMultiLocal = () => {
   if (!gameIsRunning.value)
   {
@@ -162,6 +194,9 @@ const restartMatch = () => {
 
     ballX.value = pongWidth / 2 - ballSize / 2;
     ballY.value = pongHeight / 2 - ballSize / 2;
+
+    ping.value = 0;
+    pong.value = 0;
 
     gameIsRunning.value = false;
   }
@@ -221,6 +256,10 @@ if (sign * ballX.value <= paddleX)
     const Ysign = veloBallY.value / Math.abs(veloBallY.value);
     const bounce = ref(25);
     veloBallY.value = ( (ballY.value - (paddleY + paddleHeight/2)) / paddleHeight/2) * bounce.value;
+    if (sign === 1)
+      ping.value++;
+    else
+      pong.value++;
     return true;
   }
 }
@@ -316,12 +355,15 @@ return {
   startMatchSolo,
   restartMatch,
   startMatchMultiLocal,
+  startNoPlayer,
   gameIsRunning,
   leftPlayerKeyUp,
   leftPlayerKeyDown,
   rightPlayerKeyUp,
   rightPlayerKeyDown,
   pongStyle,
+  ping,
+  pong,
 };
 
 
