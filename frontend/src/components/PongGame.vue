@@ -12,6 +12,7 @@
     <button @click="startMatchMultiLocal" :disabled="gameIsRunning">MultiplayerLocal</button>
     <button @click="startNoPlayer" :disabled="gameIsRunning">NoPlayer</button>
     <button @click="restartMatch" :disabled="!gameIsRunning">Restart</button>
+    <button @click="setBlocks" :disabled="gameIsRunning">{{"BLOCKS "+blockStatus}}</button>
   </div>
   <div class="pong-container">
 
@@ -27,7 +28,13 @@
       <div class="scorePlayer">{{ "Score A : " + scoreA }}</div>
       <div class="scorePlayer">{{ "Score B : " + scoreB }}</div>
     </div>
-  
+    <div
+      v-for="block in blocks"
+      :key="block.id"
+      class="block"
+      :style="{ top: block.y + 'px', left: block.x + 'px', width: block.width + 'px', height: block.height + 'px', backgroundColor: block.color}">
+      <p>{{ block.id }}</p>
+    </div>
     <div class="paddle" :style="leftPaddleStyle"></div>
     <div class="paddle" :style="rightPaddleStyle"></div>
     <div class="ball" :style="ballStyle"></div>
@@ -46,6 +53,11 @@
 </template>
 
 <style>
+
+.block {
+  position: absolute;
+  z-index: 1; /* Ensure the block is positioned above the Pong game elements */
+}
 
 .info-container {
   position: absolute;
@@ -123,7 +135,7 @@ justify-content: center;
 align-items: center;
 height: 40px;
 font-size: 24px;
-color: #09024b;
+color: #08225a;
 text-align: center;
 }
 
@@ -145,8 +157,6 @@ flex: 1;
   background-color: rgba(247, 6, 166, 0.521);
   border-radius: 50%;
 }
-
-
 
 </style>
 
@@ -173,9 +183,15 @@ import {
   ballMaxSpeedX,
   ballMaxSpeedY,
   gameTick,
+  SetBounce,
+  SetBlockWidth,
+  SetBlockHeight,
 } from './PongSettings'; 
 
 export default defineComponent({
+
+
+
 
     setup() {
 
@@ -186,10 +202,13 @@ const pongHeight = ref(SetPongHeight);
 //CONTROL PARAMETERS
 const rightPlayerKeyUp = ref(SetRightPlayerKeyUp);
 const rightPlayerKeyDown = ref(SetRightPlayerKeyDown);
+
 const leftPlayerKeyUp = ref(SetLeftPlayerKeyUp);
 const leftPlayerKeyDown = ref(SetLeftPlayerKeyDown);
 
 //LEFT PADDLE PARAMETERS
+const bounce = ref(SetBounce);
+
 const leftPaddleWidth = ref(SetLeftPaddleWidth);
 const leftPaddleHeight = ref(SetLeftPaddleHeight);
 
@@ -228,10 +247,21 @@ const pong = ref(0);
 const scoreA = ref(0);
 const scoreB = ref(0);
 
+//BLOCKS PARAMETERS
 
+const myBlocks = ref<(SolidBlock | EffectBlock)[]>([]);
+const blockWidth = ref(SetBlockWidth);
+const blockHeight = ref(SetBlockHeight);
 
 //VARIOUS PARAMETERS
+
+const whatId = ref(0);
+
 const gameIsRunning = ref(false);
+const gameIsBlocks = ref(false);
+const blockStatus = ref('DISABLED');
+
+const alreadyComputed = ref(false);
 
 const leftArrowUp = ref(0);
 const leftArrowDown = ref(0);
@@ -257,7 +287,7 @@ const startMatchSolo = () => {
     ballX.value = pongWidth.value/2 - ballSize.value/2;
     ballY.value = pongHeight.value/2 - ballSize.value/2;
 
-    rightPaddleHeight.value = 400;
+    rightPaddleHeight.value = pongHeight.value;
     rightPaddleY.value = 0;
 
     rightPlayerKeyDown.value = '';
@@ -278,13 +308,13 @@ const startNoPlayer = () => {
     ballX.value = pongWidth.value/2 - ballSize.value/2;
     ballY.value = pongHeight.value/2 - ballSize.value/2;
 
-    rightPaddleHeight.value = 400;
+    rightPaddleHeight.value = pongHeight.value;
     rightPaddleY.value = 0;
 
     rightPlayerKeyDown.value = '';
     rightPlayerKeyUp.value = '';
 
-    leftPaddleHeight.value = 400;
+    leftPaddleHeight.value = pongHeight.value;
     leftPaddleY.value = 0;
 
     leftPlayerKeyDown.value = '';
@@ -335,6 +365,21 @@ const restartMatch = () => {
     pong.value = 0;
 
     gameIsRunning.value = false;
+
+    myBlocks.value = [];
+  }
+}
+
+const setBlocks = () => {
+  if (!gameIsBlocks.value)
+  {
+    gameIsBlocks.value = true;
+    blockStatus.value = 'ENABLED';
+  }
+  else
+  {
+    gameIsBlocks.value = false;
+    blockStatus.value = 'DISABLED';
   }
 }
 
@@ -364,9 +409,7 @@ const ballWallColision = () => {
     }
 }
 
-const ballPaddleColision = (paddleX: number, paddleY: number, paddleHeight:number, sign: number) => {
-
-const newVelo = ref(0);
+const ballPaddleColision =  (paddleX: number, paddleY: number, paddleHeight:number, sign: number):boolean => {
 if (sign * ballX.value <= paddleX)
 {
   if (ballY.value >= paddleY && ballY.value <= paddleY + paddleHeight)
@@ -374,27 +417,81 @@ if (sign * ballX.value <= paddleX)
     veloBallX.value = sign * (Math.abs(veloBallX.value) + ((ballY.value - paddleY) / (paddleHeight / 2)));
     if (veloBallX.value >= ballMaxSpeedX || veloBallX.value <= -ballMaxSpeedX)
       veloBallX.value = ballMaxSpeedX * sign;
-    const Ysign = veloBallY.value / Math.abs(veloBallY.value);
-    const bounce = ref(25);
-    veloBallY.value = ( (ballY.value - (paddleY + paddleHeight/2)) / paddleHeight/2) * bounce.value;
-    if (sign === 1)
-      ping.value++;
-    else
-      pong.value++;
+    veloBallY.value = ( (ballY.value - (paddleY + paddleHeight/2)) / paddleHeight/2)  * bounce.value + Math.random();
+    if (gameIsBlocks.value && (ping.value + pong.value) % 10 < 5)
+      generateBlocks();
+    return true;
   }
 }
+return false;
+}
+
+const ballBlockColision = () =>
+{
+  for (let block of myBlocks.value) {
+    if (ballX.value <= block.x + block.width && ballX.value + ballSize.value >= block.x)
+    {
+      if (ballY.value <= block.y + block.height && ballY.value + ballSize.value >= block.y)
+      {
+        if (block instanceof SolidBlock && block.isSolid)
+          veloBallX.value = -veloBallX.value;
+        else if (block instanceof EffectBlock)
+          block.triggerEffect();
+        removeBlock(block.id);
+      }
+    }
+}
+}
+
+const preColision = ():boolean => {
+  const oldVeloX = veloBallX.value;
+  const oldVeloY = veloBallY.value;
+
+  if (ballPaddleColision(paddleOffset.value + leftPaddleWidth.value, leftPaddleY.value,leftPaddleHeight.value, 1)
+    || ballPaddleColision( (paddleOffset.value + rightPaddleWidth.value + ballSize.value) - pongWidth.value, rightPaddleY.value, rightPaddleHeight.value, -1))
+  {
+    if (ballX.value < 200)
+    {
+      ping.value += 1;
+      ballX.value = paddleOffset.value + leftPaddleWidth.value + ballSize.value/2 + 1;
+    }
+    else
+    {
+      pong.value += 1;
+      ballX.value = pongWidth.value - (paddleOffset.value + ballSize.value + rightPaddleWidth.value + 1);
+    }
+    return true;
+  }
+    veloBallX.value = oldVeloX;
+    veloBallY.value = oldVeloY;
+    return false;
 }
 
 const ballColision = () =>
 {
+  if (alreadyComputed.value)
+  {
+    alreadyComputed.value = false;
+    ballX.value += veloBallX.value;
+    ballY.value += veloBallY.value;
+
+    return;
+  }
   ballWallColision();
-  ballPaddleColision(paddleOffset.value + leftPaddleWidth.value, leftPaddleY.value,leftPaddleHeight.value, 1); 
-  ballPaddleColision( (paddleOffset.value + rightPaddleWidth.value + ballSize.value) - pongWidth.value, rightPaddleY.value, rightPaddleHeight.value, -1); 
-
-
+  ballBlockColision();
+  const nbr = ping.value + pong.value;
+  if (ballPaddleColision(paddleOffset.value + leftPaddleWidth.value, leftPaddleY.value,leftPaddleHeight.value, 1))
+    ping.value += 1;
+  else if (ballPaddleColision( (paddleOffset.value + rightPaddleWidth.value + ballSize.value) - pongWidth.value, rightPaddleY.value, rightPaddleHeight.value, -1))
+    pong.value += 1;
 
   ballX.value += veloBallX.value;
   ballY.value += veloBallY.value;
+
+  if (nbr == ping.value + pong.value)
+    alreadyComputed.value = preColision();
+  
+
 }
 
 const moovePaddles = () => {
@@ -413,6 +510,7 @@ const gameLoop = () => {
 
   ballColision();
 
+  
 
   moovePaddles();
 
@@ -446,6 +544,139 @@ const handleKeyUp = (event: KeyboardEvent) => {
   }
 };
 
+/***********************BLOCKS***********************/
+
+interface Block {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  id: number;
+}
+
+class SolidBlock implements Block {
+    isSolid: boolean;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    color: string;
+    id: number;
+
+    constructor(x: number, y: number, width: number, height: number, color: string, isSolid: boolean) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.isSolid = isSolid;
+        this.color = color;
+        this.id = whatId.value++;
+    }
+
+ 
+}
+
+class EffectBlock implements Block {
+    effect: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    color: string;
+    id: number;
+
+    constructor(x: number, y: number, width: number, height: number, color: string, effect: string) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.effect = effect;
+        this.color = color;
+        this.id = whatId.value++;
+    }
+
+    triggerEffect(): void {
+      if (this.effect === "PING")
+      {
+        veloBallX.value *= -1.5;
+        if (veloBallX.value > ballMaxSpeedX)
+          veloBallX.value = ballMaxSpeedX;
+      }
+      if (this.effect === "SLOWn")
+      {
+        veloBallX.value /= 2;
+        veloBallY.value /= 2;
+      }
+
+   
+}
+}
+
+const checkBlockColi = (genX:number, genY:number, block: Block):boolean => {
+if (Math.abs(genX - block.x) < blockWidth.value && Math.abs(genY - block.y) < blockHeight.value)
+        return true;
+    return false;
+}
+
+const isValidGen = (genX:number, genY:number):boolean => {
+  for (let block of myBlocks.value)
+    {
+      if (checkBlockColi(genX, genY, block))  
+        return (false);
+    }
+    return (true);
+  }
+
+const generateBlocks = () => {
+
+  const genX = ref(0);
+  const genY = ref(0);
+  const j = ref(0);
+  while ( j.value < 25)
+  {
+    genX.value = pongWidth.value/3 + pongWidth.value/3 * Math.random();
+    genY.value = pongHeight.value*3/4 - pongHeight.value * Math.random()/2;
+    if (isValidGen(genX.value, genY.value))
+      break ;
+    j.value++;
+  }
+  if (j.value == 25)
+    return ;
+  switch ((ping.value + pong.value) % 3)
+  {
+    case 0:
+    {
+      myBlocks.value.push(new EffectBlock(genX.value,
+                            genY.value,
+                            blockWidth.value, blockHeight.value, '#deec1c' , "PING"));
+      break ;
+    }
+    case 1:
+    {
+      myBlocks.value.push(new EffectBlock(genX.value,
+                            genY.value,
+                            blockWidth.value, blockHeight.value, '#d24dff' , "SLOW"));
+      break ;
+    }
+    case 2:
+    {
+      myBlocks.value.push(new SolidBlock(genX.value,
+                            genY.value,
+                            blockWidth.value, blockHeight.value, '#ff0000' , true));
+      break ;
+    }
+  }
+
+
+  
+}
+
+const removeBlock = (blockId: number) => {
+    myBlocks.value = myBlocks.value.filter(block => block.id !== blockId);
+}
+ 
+
 /***********************COMPUTED***********************/
 
 const leftPaddleStyle = computed(() => ({
@@ -472,12 +703,14 @@ const ballStyle = computed(() => ({
   left: `${ballX.value}px`,
 }));
 
+const blocks = computed(() => myBlocks.value);
+
 onMounted(() => {
-  
   setInterval(gameLoop, gameTick);
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
-});
+})
+
 
 return {
   ballStyle,
@@ -500,12 +733,14 @@ return {
   pongStyle,
   ping,
   pong,
+  blocks,
+  setBlocks,
+  blockStatus,
 };
-
+}
 
 },
 
-}
 
 
 

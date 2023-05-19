@@ -1,6 +1,6 @@
 // GAME CONTAINER PARAMETERS
-export const SetPongWidth = 600;
-export const SetPongHeight = 400;
+export const SetPongWidth = 900;
+export const SetPongHeight = 600;
 
 // CONTROL PARAMETERS
 export const SetRightPlayerKeyUp = 'ArrowUp';
@@ -26,12 +26,16 @@ export const SetRightPaddleSpeed = 12;
 
 // BALL PARAMETERS
 export const SetBallSize = 10;
-export const SetPaddleOffset = 10;
+export const SetPaddleOffset = 20;
 
 
 export const gameTick = 16;
 
 
-export const ballMaxSpeedX = 17;
+export const ballMaxSpeedX = 35;
 export const ballMaxSpeedY = 10;
+export const SetBounce = 25;
+
+export const SetBlockWidth = SetPongHeight  * 0.05;
+export const SetBlockHeight = SetPongWidth * 0.05;
 
