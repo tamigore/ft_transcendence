@@ -1,10 +1,12 @@
 <template>
+  <div class="game-container">
 
-<p>{{ "veloBall x-y " + veloBallX + " " + veloBallY }}</p>
-<p>{{ "Ping " + ping }}</p>
-<p>{{ "Pong " + pong}}</p>
+  <div class="info-container">
+    <p>{{ "veloBall x-y " + veloBallX + " " + veloBallY }}</p>
+    <p>{{ "Ping " + ping }}</p>
+    <p>{{ "Pong " + pong}}</p>
+  </div>
 
-<div class="game-container">
   <div class="button-container">
     <button @click="startMatchSolo" :disabled="gameIsRunning">Solo</button>
     <button @click="startMatchMultiLocal" :disabled="gameIsRunning">MultiplayerLocal</button>
@@ -42,6 +44,111 @@
 </div>
 
 </template>
+
+<style>
+
+.info-container {
+  position: absolute;
+  top: 0;
+  bottom: 5%;
+  left: 1%;
+  margin-top: 50px;
+  height: 100px;
+  width: 10%;
+}
+
+.button-container {
+  position: absolute;
+  bottom: 100%;  /* Make the button container stick to the top of the game container */
+  left: 0;       /* Align to the left of the game container */
+  height: auto;  /* Let the height be determined by its content */
+  width: 100%;   /* Full width to match game container */
+  display: flex; /* Make it a flex container */
+  justify-content: center; /* Center buttons horizontally */
+  align-items: center; /* Center buttons vertically */
+  gap: 10px; /* Add some space between the buttons */
+}
+
+.game-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-top: 5%;
+  margin-right: 5%;
+  padding-top: 120px; /* Space for the buttons. This should be greater than the height of the buttons */
+}
+
+
+.pong-container {
+display: flex;
+align-items: center;
+}
+
+.input-container {
+display: flex;
+justify-content: space-between;
+align-items: center;
+
+}
+
+.left-input,
+.right-input {
+width: 150px;
+}
+
+.left-input {
+text-align: right;
+}
+
+.right-input {
+text-align: left;
+}
+
+
+
+.pong {
+  position: relative;
+  width: var(--pongWidth, 10px);
+  height: var(--pongHeight, 10px);
+  border: 1px solid #6b4d4d;
+  overflow: hidden;
+}
+
+.scores {
+display: flex;
+justify-content: center;
+align-items: center;
+height: 40px;
+font-size: 24px;
+color: #09024b;
+text-align: center;
+}
+
+.scorePlayer {
+flex: 1;
+}
+
+.paddle {
+  position: absolute;
+  width: var(--paddle-width, 10px);
+  height: var(--paddle-height, 10px);
+  background-color: #147f83;
+}
+
+.ball {
+  position: absolute;
+  width: var(--ball-size, 10px);
+  height: var(--ball-size, 10px);
+  background-color: rgba(247, 6, 166, 0.521);
+  border-radius: 50%;
+}
+
+
+
+</style>
 
 <script lang="ts">
 
@@ -92,7 +199,7 @@ const ballStartSpeedY = 2;
 const veloBallX = ref(0);
 const veloBallY = ref(0);
 
-const ballMaxSpeedX = 20;
+const ballMaxSpeedX = 17;
 const ballMaxSpeedY = 10;
 
 const ping = ref(0);
@@ -192,6 +299,12 @@ const restartMatch = () => {
     rightPlayerKeyDown.value = 'ArrowDown';
     rightPlayerKeyUp.value = 'ArrowUp';
 
+    leftPaddleHeight.value = 80;
+    leftPaddleY.value = pongHeight/2 - leftPaddleHeight.value/2;
+
+    leftPlayerKeyDown.value = 's';
+    leftPlayerKeyUp.value = 'w';
+
     ballX.value = pongWidth / 2 - ballSize / 2;
     ballY.value = pongHeight / 2 - ballSize / 2;
 
@@ -230,7 +343,7 @@ const ballWallColistion = () => {
       scoreB.value += 1;
       ballX.value = pongWidth/2 - ballSize/2;
       ballY.value = pongHeight/2 - ballSize/2;
-      veloBallX.value = -ballStartSpeedX;
+      veloBallX.value = (2 + Math.random());
       veloBallY.value = (Math.random() * 6) - 3;
     }
   if (ballX.value >= pongWidth - ballSize - 1)
@@ -238,7 +351,7 @@ const ballWallColistion = () => {
       scoreA.value += 1;
       ballX.value = pongWidth/2 - ballSize/2;
       ballY.value = pongHeight/2 - ballSize/2;
-      veloBallX.value = ballStartSpeedX;
+      veloBallX.value = -(2 + Math.random());
       veloBallY.value = (Math.random() * 6) - 3;
     }
 }
@@ -379,90 +492,3 @@ return {
 
 
 
-<style>
-
-.button-container {
-  position: absolute;
-  top: 0;
-  left: 5%;
-  margin-top: 250px;
-  height: 100px;
-  width: 100%;
-}
-
-.game-container {
-
-position :relative;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-}
-
-.pong-container {
-display: flex;
-align-items: center;
-}
-
-.input-container {
-display: flex;
-justify-content: space-between;
-align-items: center;
-
-}
-
-.left-input,
-.right-input {
-width: 150px;
-}
-
-.left-input {
-text-align: right;
-}
-
-.right-input {
-text-align: left;
-}
-
-
-
-.pong {
-  position: relative;
-  width: var(--pongWidth, 10px);
-  height: var(--pongHeight, 10px);
-  border: 1px solid #6b4d4d;
-  overflow: hidden;
-}
-
-.scores {
-display: flex;
-justify-content: center;
-align-items: center;
-height: 40px;
-font-size: 24px;
-color: #09024b;
-text-align: center;
-}
-
-.scorePlayer {
-flex: 1;
-}
-
-.paddle {
-  position: absolute;
-  width: var(--paddle-width, 10px);
-  height: var(--paddle-height, 10px);
-  background-color: #147f83;
-}
-
-.ball {
-  position: absolute;
-  width: var(--ball-size, 10px);
-  height: var(--ball-size, 10px);
-  background-color: rgba(247, 6, 166, 0.521);
-  border-radius: 50%;
-}
-
-
-
-</style>
