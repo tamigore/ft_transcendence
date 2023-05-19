@@ -1,4 +1,5 @@
 <template>
+
   <div class="container">
     <div class="flex-item">
       <MessagesDisplay />
@@ -7,6 +8,7 @@
       <PongGame />
     </div>
   </div>
+  
 </template>
 
 <style>

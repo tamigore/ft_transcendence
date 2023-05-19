@@ -12,8 +12,8 @@
     <button @click="startMatchMultiLocal" :disabled="gameIsRunning">MultiplayerLocal</button>
     <button @click="startNoPlayer" :disabled="gameIsRunning">NoPlayer</button>
     <button @click="restartMatch" :disabled="!gameIsRunning">Restart</button>
-    </div>
-<div class="pong-container">
+  </div>
+  <div class="pong-container">
 
     <div class="input-container">
       <div class="left-input">
@@ -23,7 +23,7 @@
     </div>
 
   <div class="pong" :style="pongStyle">
-  <div class="scores">
+   <div class="scores">
       <div class="scorePlayer">{{ "Score A : " + scoreA }}</div>
       <div class="scorePlayer">{{ "Score B : " + scoreB }}</div>
     </div>
@@ -153,45 +153,66 @@ flex: 1;
 <script lang="ts">
 
 import { defineComponent,onMounted, ref, computed } from 'vue';
+import {
+  SetPongWidth,
+  SetPongHeight,
+  SetRightPlayerKeyUp,
+  SetRightPlayerKeyDown,
+  SetLeftPlayerKeyUp,
+  SetLeftPlayerKeyDown,
+  SetLeftPaddleWidth,
+  SetLeftPaddleHeight,
+  SetLeftPaddleY,
+  SetLeftPaddleSpeed,
+  SetRightPaddleWidth,
+  SetRightPaddleHeight,
+  SetRightPaddleY,
+  SetRightPaddleSpeed,
+  SetBallSize,
+  SetPaddleOffset,
+  ballMaxSpeedX,
+  ballMaxSpeedY,
+  gameTick,
+} from './PongSettings'; 
 
 export default defineComponent({
 
     setup() {
 
 //GAME CONTAINER PARAMETERS
-const pongWidth = 600;
-const pongHeight = 400;
+const pongWidth = ref(SetPongWidth);
+const pongHeight = ref(SetPongHeight);
 
 //CONTROL PARAMETERS
-const rightPlayerKeyUp = ref('ArrowUp');
-const rightPlayerKeyDown = ref('ArrowDown');
-const leftPlayerKeyUp = ref('w');
-const leftPlayerKeyDown = ref('s');
+const rightPlayerKeyUp = ref(SetRightPlayerKeyUp);
+const rightPlayerKeyDown = ref(SetRightPlayerKeyDown);
+const leftPlayerKeyUp = ref(SetLeftPlayerKeyUp);
+const leftPlayerKeyDown = ref(SetLeftPlayerKeyDown);
 
 //LEFT PADDLE PARAMETERS
-const leftPaddleWidth = ref(10);
-const leftPaddleHeight = ref(80);
+const leftPaddleWidth = ref(SetLeftPaddleWidth);
+const leftPaddleHeight = ref(SetLeftPaddleHeight);
 
-const leftPaddleY = ref(pongHeight/2 - leftPaddleHeight.value/2);
-const leftPaddleSpeed = ref(12);
+const leftPaddleY = ref(SetLeftPaddleY);
+const leftPaddleSpeed = ref(SetLeftPaddleSpeed);
 
 const leftPaddleJustHit = ref(false);
 
 //RIGHT PADDLE PARAMETERS
-const rightPaddleWidth = ref(10);
-const rightPaddleHeight = ref(80);
+const rightPaddleWidth = ref(SetRightPaddleWidth);
+const rightPaddleHeight = ref(SetRightPaddleHeight);
 
-const rightPaddleY = ref(pongHeight/2 - rightPaddleHeight.value/2);
-const rightPaddleSpeed = ref(12);
+const rightPaddleY = ref(SetRightPaddleY);
+const rightPaddleSpeed = ref(SetRightPaddleSpeed);
 
 const rightPaddleJustHit = ref(false);
 
 //BALL PARAMETERS
-const ballSize = 10;
-const paddleOffset = 10;
+const ballSize = ref(SetBallSize);
+const paddleOffset = ref(SetPaddleOffset);
 
-const ballX = ref(pongWidth/2 - ballSize/2);
-const ballY = ref(pongHeight/2 - ballSize/2);
+const ballX = ref(pongWidth.value/2 - ballSize.value/2);
+const ballY = ref(pongHeight.value/2 - ballSize.value/2);
 
 const ballStartSpeedX = -4;
 const ballStartSpeedY = 2;
@@ -199,8 +220,7 @@ const ballStartSpeedY = 2;
 const veloBallX = ref(0);
 const veloBallY = ref(0);
 
-const ballMaxSpeedX = 17;
-const ballMaxSpeedY = 10;
+
 
 const ping = ref(0);
 const pong = ref(0);
@@ -223,7 +243,10 @@ const x = ref(1);
 const line = ref('');
 
 
-//GAME FUNCTIONS
+/***********************GAME FUNCTIONS***********************/
+
+
+/***********************START GAME***********************/
 const startMatchSolo = () => {
   if (!gameIsRunning.value)
   {
@@ -231,8 +254,8 @@ const startMatchSolo = () => {
     veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
     veloBallY.value = Math.random() * 6 - 3;
 
-    ballX.value = pongWidth/2 - ballSize/2;
-    ballY.value = pongHeight/2 - ballSize/2;
+    ballX.value = pongWidth.value/2 - ballSize.value/2;
+    ballY.value = pongHeight.value/2 - ballSize.value/2;
 
     rightPaddleHeight.value = 400;
     rightPaddleY.value = 0;
@@ -252,8 +275,8 @@ const startNoPlayer = () => {
     veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
     veloBallY.value = Math.random() * 6 - 3;
 
-    ballX.value = pongWidth/2 - ballSize/2;
-    ballY.value = pongHeight/2 - ballSize/2;
+    ballX.value = pongWidth.value/2 - ballSize.value/2;
+    ballY.value = pongHeight.value/2 - ballSize.value/2;
 
     rightPaddleHeight.value = 400;
     rightPaddleY.value = 0;
@@ -278,8 +301,8 @@ const startMatchMultiLocal = () => {
     veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
     veloBallY.value = Math.random() * 6 - 3;
 
-    ballX.value = pongWidth/2 - ballSize/2;
-    ballY.value = pongHeight/2 - ballSize/2;
+    ballX.value = pongWidth.value/2 - ballSize.value/2;
+    ballY.value = pongHeight.value/2 - ballSize.value/2;
 
     gameIsRunning.value = true;
   }
@@ -294,19 +317,19 @@ const restartMatch = () => {
     veloBallY.value = 0;
 
     rightPaddleHeight.value = 80;
-    rightPaddleY.value = pongHeight/2 - rightPaddleHeight.value/2;
+    rightPaddleY.value = pongHeight.value/2 - rightPaddleHeight.value/2;
 
     rightPlayerKeyDown.value = 'ArrowDown';
     rightPlayerKeyUp.value = 'ArrowUp';
 
     leftPaddleHeight.value = 80;
-    leftPaddleY.value = pongHeight/2 - leftPaddleHeight.value/2;
+    leftPaddleY.value = pongHeight.value/2 - leftPaddleHeight.value/2;
 
     leftPlayerKeyDown.value = 's';
     leftPlayerKeyUp.value = 'w';
 
-    ballX.value = pongWidth / 2 - ballSize / 2;
-    ballY.value = pongHeight / 2 - ballSize / 2;
+    ballX.value = pongWidth.value / 2 - ballSize.value / 2;
+    ballY.value = pongHeight.value / 2 - ballSize.value / 2;
 
     ping.value = 0;
     pong.value = 0;
@@ -315,42 +338,27 @@ const restartMatch = () => {
   }
 }
 
+/***********************BALL COLISIONS***********************/
 
-
-const moovePaddles = () => {
-  if (leftArrowUp.value && leftPaddleY.value > 1 - leftPaddleHeight.value)
-    leftPaddleY.value -= leftPaddleSpeed.value * leftArrowUp.value;
-  else if (leftArrowDown.value && leftPaddleY.value < pongHeight - 1)
-    leftPaddleY.value += leftPaddleSpeed.value * leftArrowDown.value;
-
-  if (rightArrowUp.value && rightPaddleY.value > 1 - rightPaddleHeight.value)
-    rightPaddleY.value -= rightPaddleSpeed.value * rightArrowUp.value;
-  else if (rightArrowDown.value && rightPaddleY.value < pongHeight - 1)
-    rightPaddleY.value += rightPaddleSpeed.value * rightArrowDown.value;
-}
-
-
-
-
-const ballWallColistion = () => {
+const ballWallColision = () => {
   if (ballY.value <= 0 )
     veloBallY.value = Math.abs(veloBallY.value);
-  else if (ballY.value >= pongHeight - ballSize)
+  else if (ballY.value >= pongHeight.value - ballSize.value)
   veloBallY.value = -Math.abs(veloBallY.value);
 
   if (ballX.value <= 1)
     {
       scoreB.value += 1;
-      ballX.value = pongWidth/2 - ballSize/2;
-      ballY.value = pongHeight/2 - ballSize/2;
+      ballX.value = pongWidth.value/2 - ballSize.value/2;
+      ballY.value = pongHeight.value/2 - ballSize.value/2;
       veloBallX.value = (2 + Math.random());
       veloBallY.value = (Math.random() * 6) - 3;
     }
-  if (ballX.value >= pongWidth - ballSize - 1)
+  if (ballX.value >= pongWidth.value - ballSize.value - 1)
     {
       scoreA.value += 1;
-      ballX.value = pongWidth/2 - ballSize/2;
-      ballY.value = pongHeight/2 - ballSize/2;
+      ballX.value = pongWidth.value/2 - ballSize.value/2;
+      ballY.value = pongHeight.value/2 - ballSize.value/2;
       veloBallX.value = -(2 + Math.random());
       veloBallY.value = (Math.random() * 6) - 3;
     }
@@ -373,29 +381,44 @@ if (sign * ballX.value <= paddleX)
       ping.value++;
     else
       pong.value++;
-    return true;
   }
 }
-return false;
+}
+
+const ballColision = () =>
+{
+  ballWallColision();
+  ballPaddleColision(paddleOffset.value + leftPaddleWidth.value, leftPaddleY.value,leftPaddleHeight.value, 1); 
+  ballPaddleColision( (paddleOffset.value + rightPaddleWidth.value + ballSize.value) - pongWidth.value, rightPaddleY.value, rightPaddleHeight.value, -1); 
+
+
+
+  ballX.value += veloBallX.value;
+  ballY.value += veloBallY.value;
+}
+
+const moovePaddles = () => {
+  if (leftArrowUp.value && leftPaddleY.value > 1 - leftPaddleHeight.value)
+    leftPaddleY.value -= leftPaddleSpeed.value * leftArrowUp.value;
+  else if (leftArrowDown.value && leftPaddleY.value < pongHeight.value - 1)
+    leftPaddleY.value += leftPaddleSpeed.value * leftArrowDown.value;
+
+  if (rightArrowUp.value && rightPaddleY.value > 1 - rightPaddleHeight.value)
+    rightPaddleY.value -= rightPaddleSpeed.value * rightArrowUp.value;
+  else if (rightArrowDown.value && rightPaddleY.value < pongHeight.value - 1)
+    rightPaddleY.value += rightPaddleSpeed.value * rightArrowDown.value;
 }
 
 const gameLoop = () => {
 
-
-ballWallColistion();
-ballPaddleColision(paddleOffset + leftPaddleWidth.value, leftPaddleY.value,leftPaddleHeight.value, 1); 
-ballPaddleColision( (paddleOffset + rightPaddleWidth.value + ballSize) - pongWidth, rightPaddleY.value, rightPaddleHeight.value, -1); 
+  ballColision();
 
 
-
-ballX.value += veloBallX.value;
-ballY.value += veloBallY.value;
-
-moovePaddles();
+  moovePaddles();
 
 };
 
-//KEY HANDLING
+/***********************KEYBOARD EVENTS***********************/
 
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === leftPlayerKeyUp.value) 
@@ -423,25 +446,25 @@ const handleKeyUp = (event: KeyboardEvent) => {
   }
 };
 
-//COMPUTING
+/***********************COMPUTED***********************/
 
 const leftPaddleStyle = computed(() => ({
   top: `${leftPaddleY.value}px`,
-  left: `${paddleOffset}px`,
+  left: `${paddleOffset.value}px`,
   '--paddle-width': `${leftPaddleWidth.value}px`,
   '--paddle-height': `${leftPaddleHeight.value}px`,
 }));
 
 const rightPaddleStyle = computed(() => ({
   top: `${rightPaddleY.value}px`,
-  right: `${paddleOffset}px`,
+  right: `${paddleOffset.value}px`,
   '--paddle-width': `${rightPaddleWidth.value}px`,
   '--paddle-height': `${rightPaddleHeight.value}px`,
 }));
 
 const pongStyle = computed(() => ({
-  '--pongWidth': `${pongWidth}px`,
-  '--pongHeight': `${pongHeight}px`,
+  '--pongWidth': `${pongWidth.value}px`,
+  '--pongHeight': `${pongHeight.value}px`,
 }));
 
 const ballStyle = computed(() => ({
@@ -451,7 +474,7 @@ const ballStyle = computed(() => ({
 
 onMounted(() => {
   
-  setInterval(gameLoop, 16);
+  setInterval(gameLoop, gameTick);
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
 });
