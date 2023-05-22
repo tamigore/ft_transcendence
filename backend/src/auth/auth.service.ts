@@ -1,20 +1,20 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
 // import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/binary';
-import * as argon from 'argon2';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
+import * as argon from "argon2";
+import { PrismaService } from "../prisma/prisma.service";
 
-import { AuthDto } from './dto';
-import { JwtPayload, Tokens } from './types';
+import { AuthDto } from "./dto";
+import { JwtPayload, Tokens } from "./types";
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private config: ConfigService,
+    private config: ConfigService
   ) {}
 
   async signupLocal(dto: AuthDto): Promise<Tokens> {
@@ -29,8 +29,8 @@ export class AuthService {
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
-          if (error.code === 'P2002') {
-            throw new ForbiddenException('Credentials incorrect');
+          if (error.code === "P2002") {
+            throw new ForbiddenException("Credentials incorrect");
           }
         }
         throw error;
@@ -49,10 +49,10 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new ForbiddenException('Access Denied');
+    if (!user) throw new ForbiddenException("Access Denied");
 
     const passwordMatches = await argon.verify(user.hash, dto.password);
-    if (!passwordMatches) throw new ForbiddenException('Access Denied');
+    if (!passwordMatches) throw new ForbiddenException("Access Denied");
 
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
@@ -81,10 +81,10 @@ export class AuthService {
         id: userId,
       },
     });
-    if (!user || !user.hashedRt) throw new ForbiddenException('Access Denied');
+    if (!user || !user.hashedRt) throw new ForbiddenException("Access Denied");
 
     const rtMatches = await argon.verify(user.hashedRt, rt);
-    if (!rtMatches) throw new ForbiddenException('Access Denied');
+    if (!rtMatches) throw new ForbiddenException("Access Denied");
 
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
@@ -112,12 +112,12 @@ export class AuthService {
 
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
-        secret: this.config.get<string>('AT_SECRET'),
-        expiresIn: '15m',
+        secret: this.config.get<string>("AT_SECRET"),
+        expiresIn: "15m",
       }),
       this.jwtService.signAsync(jwtPayload, {
-        secret: this.config.get<string>('RT_SECRET'),
-        expiresIn: '7d',
+        secret: this.config.get<string>("RT_SECRET"),
+        expiresIn: "7d",
       }),
     ]);
 

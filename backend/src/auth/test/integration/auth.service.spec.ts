@@ -1,17 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { User } from '@prisma/client';
-import { decode } from 'jsonwebtoken';
-import { AppModule } from '../../../app.module';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { AuthService } from '../../auth.service';
-import { Tokens } from '../../types';
+import { Test, TestingModule } from "@nestjs/testing";
+import { User } from "@prisma/client";
+import { decode } from "jsonwebtoken";
+import { AppModule } from "../../../app.module";
+import { PrismaService } from "../../../prisma/prisma.service";
+import { AuthService } from "../../auth.service";
+import { Tokens } from "../../types";
 
 const user = {
-  email: 'test@gmail.com',
-  password: 'super-secret-password',
+  email: "test@gmail.com",
+  password: "super-secret-password",
 };
 
-describe('Auth Flow', () => {
+describe("Auth Flow", () => {
   let prisma: PrismaService;
   let authService: AuthService;
   let moduleRef: TestingModule;
@@ -29,12 +29,12 @@ describe('Auth Flow', () => {
     await moduleRef.close();
   });
 
-  describe('signup', () => {
+  describe("signup", () => {
     beforeAll(async () => {
       await prisma.cleanDatabase();
     });
 
-    it('should signup', async () => {
+    it("should signup", async () => {
       const tokens = await authService.signupLocal({
         email: user.email,
         password: user.password,
@@ -44,7 +44,7 @@ describe('Auth Flow', () => {
       expect(tokens.refresh_token).toBeTruthy();
     });
 
-    it('should throw on duplicate user signup', async () => {
+    it("should throw on duplicate user signup", async () => {
       let tokens: Tokens | undefined;
       try {
         tokens = await authService.signupLocal({
@@ -59,11 +59,11 @@ describe('Auth Flow', () => {
     });
   });
 
-  describe('signin', () => {
+  describe("signin", () => {
     beforeAll(async () => {
       await prisma.cleanDatabase();
     });
-    it('should throw if no existing user', async () => {
+    it("should throw if no existing user", async () => {
       let tokens: Tokens | undefined;
       try {
         tokens = await authService.signinLocal({
@@ -77,7 +77,7 @@ describe('Auth Flow', () => {
       expect(tokens).toBeUndefined();
     });
 
-    it('should login', async () => {
+    it("should login", async () => {
       await authService.signupLocal({
         email: user.email,
         password: user.password,
@@ -92,12 +92,12 @@ describe('Auth Flow', () => {
       expect(tokens.refresh_token).toBeTruthy();
     });
 
-    it('should throw if password incorrect', async () => {
+    it("should throw if password incorrect", async () => {
       let tokens: Tokens | undefined;
       try {
         tokens = await authService.signinLocal({
           email: user.email,
-          password: user.password + 'a',
+          password: user.password + "a",
         });
       } catch (error) {
         expect(error.status).toBe(403);
@@ -107,17 +107,17 @@ describe('Auth Flow', () => {
     });
   });
 
-  describe('logout', () => {
+  describe("logout", () => {
     beforeAll(async () => {
       await prisma.cleanDatabase();
     });
 
-    it('should pass if call to non existent user', async () => {
+    it("should pass if call to non existent user", async () => {
       const result = await authService.logout(4);
       expect(result).toBeDefined();
     });
 
-    it('should logout', async () => {
+    it("should logout", async () => {
       await authService.signupLocal({
         email: user.email,
         password: user.password,
@@ -145,15 +145,15 @@ describe('Auth Flow', () => {
     });
   });
 
-  describe('refresh', () => {
+  describe("refresh", () => {
     beforeAll(async () => {
       await prisma.cleanDatabase();
     });
 
-    it('should throw if no existing user', async () => {
+    it("should throw if no existing user", async () => {
       let tokens: Tokens | undefined;
       try {
-        tokens = await authService.refreshTokens(1, '');
+        tokens = await authService.refreshTokens(1, "");
       } catch (error) {
         expect(error.status).toBe(403);
       }
@@ -161,7 +161,7 @@ describe('Auth Flow', () => {
       expect(tokens).toBeUndefined();
     });
 
-    it('should throw if user logged out', async () => {
+    it("should throw if user logged out", async () => {
       // signup and save refresh token
       const _tokens = await authService.signupLocal({
         email: user.email,
@@ -189,7 +189,7 @@ describe('Auth Flow', () => {
       expect(tokens).toBeUndefined();
     });
 
-    it('should throw if refresh token incorrect', async () => {
+    it("should throw if refresh token incorrect", async () => {
       await prisma.cleanDatabase();
 
       const _tokens = await authService.signupLocal({
@@ -207,7 +207,7 @@ describe('Auth Flow', () => {
 
       let tokens: Tokens | undefined;
       try {
-        tokens = await authService.refreshTokens(userId, rt + 'a');
+        tokens = await authService.refreshTokens(userId, rt + "a");
       } catch (error) {
         expect(error.status).toBe(403);
       }
@@ -215,7 +215,7 @@ describe('Auth Flow', () => {
       expect(tokens).toBeUndefined();
     });
 
-    it('should refresh tokens', async () => {
+    it("should refresh tokens", async () => {
       await prisma.cleanDatabase();
       // log in the user again and save rt + at
       const _tokens = await authService.signupLocal({

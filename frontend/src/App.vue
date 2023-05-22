@@ -7,6 +7,9 @@
     <div class="flex-item">
       <PongGame />
     </div>
+	<div class="flex-item">
+      <User />
+    </div>
   </div>
   
 </template>
@@ -27,15 +30,13 @@
 import { defineComponent } from 'vue';
 import MessagesDisplay from './components/MessagesDisplay.vue';
 import PongGame from './components/PongGame.vue';
+import User from './user/User.vue';
 
 export default defineComponent({
   components: {
     MessagesDisplay,
     PongGame,
+	User
   },
 });
 </script>
-
-
-
-

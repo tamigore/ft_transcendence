@@ -1,8 +1,7 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import * as cookieParser from 'cookie-parser';
-
+import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -10,20 +9,17 @@ async function bootstrap() {
   // Protecting endpoints from receiving incorrect data
   app.useGlobalPipes(new ValidationPipe());
 
-  // Voir Kevin, on avait pas supprime ca ?
+  // Is it important ?
   app.enableCors({
-    origin: [
-      'http://localhost:8080',
-      'http://localhost:8080/',
-    ],
+    origin: ["http://localhost:8080", "http://localhost:8080/"],
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
-  })
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"],
+  });
 
-  // Use Cookie 
+  // Use Cookie
   app.use(cookieParser());
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix("api");
   await app.listen(3000);
 }
 bootstrap();

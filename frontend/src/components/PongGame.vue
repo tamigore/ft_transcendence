@@ -181,7 +181,7 @@ import {
   SetBallSize,
   SetPaddleOffset,
   ballMaxSpeedX,
-  ballMaxSpeedY,
+  // ballMaxSpeedY,
   gameTick,
   SetBounce,
   SetBlockWidth,
@@ -215,7 +215,7 @@ const leftPaddleHeight = ref(SetLeftPaddleHeight);
 const leftPaddleY = ref(SetLeftPaddleY);
 const leftPaddleSpeed = ref(SetLeftPaddleSpeed);
 
-const leftPaddleJustHit = ref(false);
+// const leftPaddleJustHit = ref(false);
 
 //RIGHT PADDLE PARAMETERS
 const rightPaddleWidth = ref(SetRightPaddleWidth);
@@ -224,7 +224,7 @@ const rightPaddleHeight = ref(SetRightPaddleHeight);
 const rightPaddleY = ref(SetRightPaddleY);
 const rightPaddleSpeed = ref(SetRightPaddleSpeed);
 
-const rightPaddleJustHit = ref(false);
+// const rightPaddleJustHit = ref(false);
 
 //BALL PARAMETERS
 const ballSize = ref(SetBallSize);
@@ -233,8 +233,8 @@ const paddleOffset = ref(SetPaddleOffset);
 const ballX = ref(pongWidth.value/2 - ballSize.value/2);
 const ballY = ref(pongHeight.value/2 - ballSize.value/2);
 
-const ballStartSpeedX = -4;
-const ballStartSpeedY = 2;
+// const ballStartSpeedX = -4;
+// const ballStartSpeedY = 2;
 
 const veloBallX = ref(0);
 const veloBallY = ref(0);
@@ -269,7 +269,7 @@ const leftArrowDown = ref(0);
 const rightArrowUp = ref(0);
 const rightArrowDown = ref(0);
 
-const x = ref(1);
+// const x = ref(1);
 const line = ref('');
 
 
@@ -428,7 +428,7 @@ return false;
 
 const ballBlockColision = () =>
 {
-  for (let block of myBlocks.value) {
+  for (const block of myBlocks.value) {
     if (ballX.value <= block.x + block.width && ballX.value + ballSize.value >= block.x)
     {
       if (ballY.value <= block.y + block.height && ballY.value + ballSize.value >= block.y)
@@ -620,7 +620,7 @@ if (Math.abs(genX - block.x) < blockWidth.value && Math.abs(genY - block.y) < bl
 }
 
 const isValidGen = (genX:number, genY:number):boolean => {
-  for (let block of myBlocks.value)
+  for (const block of myBlocks.value)
     {
       if (checkBlockColi(genX, genY, block))  
         return (false);
