@@ -11,15 +11,26 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   email       String  @unique
-  username    String?
+  username    String? @unique
   description String?
   hash        String
   hashedRt    String?
 
   @@map("users")
+}
+
+model Chat {
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now())
+
+  username    String
+  object      String?
+  text        String
+
+  @@map("chats")
 }

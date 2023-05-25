@@ -27,7 +27,7 @@ export class AuthService {
           hash,
         },
       })
-      .catch((error) => {
+      .catch((error: any) => {
         if (error instanceof PrismaClientKnownRequestError) {
           if (error.code === "P2002") {
             throw new ForbiddenException("Credentials incorrect");
