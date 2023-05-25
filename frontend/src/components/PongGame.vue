@@ -327,7 +327,7 @@ const startWall = () => {
 }
 
 const startNoPlayer = () => {
-  const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
+    const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
     veloBallX.value = rand;
     veloBallY.value = Math.random() * 6 - 3;
     veloBallX.value /= veloDiv;

@@ -34,14 +34,14 @@ export const SetRightPaddleSpeed = 12/veloDiv;
 
 
 // BALL PARAMETERS
-export const SetBallSize = 16;
+export const SetBallSize = 32;
 
 
 
 
 
 
-export const ballMaxSpeedX = 20;
+export const ballMaxSpeedX = 1000;
 export const ballMaxSpeedY = 11;
 export const SetBounce = 5;
 
