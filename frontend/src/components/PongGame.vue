@@ -289,8 +289,7 @@ const wallIsUp = ref(false);
 const startMatchSolo = () => {
   if (!gameIsRunning.value)
   {
-    // const rand = Math.random() * 3 - 1;
-    const rand = 3;
+    const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
     veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
     veloBallY.value = Math.random() * 6 - 3;
     veloBallX.value /= veloDiv;
@@ -309,8 +308,8 @@ const startMatchSolo = () => {
 
 const startWall = () => {
 
-  const rand = Math.random() * 3 - 1;
-    veloBallX.value = -10;
+  const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
+    veloBallX.value = rand;
     veloBallY.value = Math.random() * 6 - 3;
     veloBallX.value /= veloDiv;
     veloBallY.value /= veloDiv;
@@ -328,8 +327,8 @@ const startWall = () => {
 }
 
 const startNoPlayer = () => {
-    const rand = Math.random() * 3 - 1;
-    veloBallX.value = -10;
+  const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
+    veloBallX.value = rand;
     veloBallY.value = Math.random() * 6 - 3;
     veloBallX.value /= veloDiv;
     veloBallY.value /= veloDiv;
@@ -349,19 +348,16 @@ const startNoPlayer = () => {
 }
 
 const startMatchMultiLocal = () => {
-  if (!gameIsRunning.value)
-  {
-    const rand = Math.random() * 3 - 1;
-    veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
-    veloBallY.value = Math.random() * 6 - 3;
-    veloBallX.value /= veloDiv;
-    veloBallY.value /= veloDiv;
+  const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
+  veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
+  veloBallY.value = Math.random() * 6 - 3;
+  veloBallX.value /= veloDiv;
+  veloBallY.value /= veloDiv;
 
-    ballX.value = pongWidth.value/2 - ballSize.value/2;
-    ballY.value = pongHeight.value/2 - ballSize.value/2;
+  ballX.value = pongWidth.value/2 - ballSize.value/2;
+  ballY.value = pongHeight.value/2 - ballSize.value/2;
 
-    gameIsRunning.value = true;
-  }
+  gameIsRunning.value = true;
 }
 
 const restartMatch = () => {
@@ -449,11 +445,11 @@ const ballWallColision = () => {
 }
 
 const ballPaddleColision =  (paddleX: number, paddleY: number, paddleHeight:number, sign: number):boolean => {
-if (sign * ballX.value - 0.5*ballSize.value + sign*0.5*ballSize.value <= paddleX)
+if (sign * ballX.value  <= paddleX)
 {
 
 
-  if (ballY.value >= paddleY && ballY.value - 0.5*ballSize.value + sign*0.5*ballSize.value <= paddleY + paddleHeight)
+  if (ballY.value >= paddleY && ballY.value  <= paddleY + paddleHeight)
   {
     veloBallX.value = sign * (Math.abs(veloBallX.value) + ((ballY.value - paddleY) / (paddleHeight / 2))/10);
     if (veloBallX.value >= ballMaxSpeedX || veloBallX.value <= -ballMaxSpeedX)
