@@ -1,4 +1,5 @@
 import { ValidationPipe } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import * as cookieParser from "cookie-parser";
@@ -16,6 +17,11 @@ async function bootstrap() {
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"],
   });
+
+  // ConfigModule.forRoot({
+  //   envFilePath: "../.env",
+  // });
+  // console.log(process.env);
 
   // Use Cookie
   app.use(cookieParser());

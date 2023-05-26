@@ -1,17 +1,15 @@
 <template>
-
-  <div class="container">
+  <div class="flex-item">
+    <Log />
+  </div>
+  <div class="container" v-if="isLogged() && is2F()">
     <div class="flex-item">
       <MessagesDisplay />
     </div>
     <div class="flex-item">
       <PongGame />
     </div>
-	<div class="flex-item">
-      <User />
-    </div>
   </div>
-  
 </template>
 
 <style>
@@ -25,18 +23,46 @@
 }
 </style>
 
-
 <script lang="ts">
 import { defineComponent } from 'vue';
 import MessagesDisplay from './components/MessagesDisplay.vue';
 import PongGame from './components/PongGame.vue';
-import User from './user/User.vue';
+import Log from './components/Log.vue';
+// import router from '@/router';
+import store from '@/store';
+// import axios from 'axios';
+// import { sessionStorage, useSessionStorage } from "vue-composable";
+
 
 export default defineComponent({
   components: {
     MessagesDisplay,
     PongGame,
-	User
+    Log
   },
+
+  methods : {
+    isLogged : () => { 
+      return store.state.isLoggedIn
+    },
+    
+    is2F: () => {
+      return store.state.user.isTwoFactorAuthentificationEnabled === false ||
+      (store.state.user.isTwoFactorAuthentificationEnabled === true && store.state.isEnterCode === true);
+    }
+  },
+
+  created() {
+    const store_item = sessionStorage.getItem('store');
+    if (store_item) {
+      store.replaceState(Object.assign({}, store.state, JSON.parse(store_item)));
+    }
+    window.addEventListener('beforeunload', () => { sessionStorage.setItem('store', JSON.stringify(store.state)); });
+    console.log("CREATED");
+  },
+
+	mounted: function() {
+    console.log("MOUNTED");
+	}
 });
 </script>
