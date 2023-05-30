@@ -243,7 +243,7 @@ class BallClass {
     color: string;
     id: number;
     hp: number;
-    pong: Ref<PongGameClass>;
+    pong: PongGameClass;
   
     constructor(pong: PongGameClass, x: number, y: number, veloX:number, veloY:number, radius: number, color: string, hp?: number) {
       this.x = x;
@@ -252,7 +252,7 @@ class BallClass {
       this.veloY = veloY;
       this.radius = radius;
       this.color = color;
-      this.pong = ref(pong);
+      this.pong = pong;
       this.id = pong.ballId++;
       this.hp = -1;
       if (hp)
@@ -264,47 +264,47 @@ class BallClass {
       {
         this.veloY = Math.abs(this.veloY);
       }
-      else if (this.y >= this.pong.value.height)
+      else if (this.y >= this.pong.height)
       {
         this.veloY = -Math.abs(this.veloY);
       }
       if (this.x <= 1)
         {
           this.hp--;
-          this.pong.value.scoreB += 1;
-          this.x = this.pong.value.width/2;
-          this.y = this.pong.value.height/2;
-          this.veloX =  this.pong.value.randStartSpeedX();
-          this.veloY = this.pong.value.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+          this.pong.scoreB += 1;
+          this.x = this.pong.width/2;
+          this.y = this.pong.height/2;
+          this.veloX =  this.pong.randStartSpeedX();
+          this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
         }
-      else if (this.x >= this.pong.value.width - 1)
+      else if (this.x >= this.pong.width - 1)
       {
-        if (this.pong.value.wallIsUp)
+        if (this.pong.wallIsUp)
         {
           this.veloX = -this.veloX;
           return ;
         }
         this.hp--;
-        this.pong.value.scoreA += 1;
-        this.x = this.pong.value.width/2;
-        this.y = this.pong.value.height/2;
-        this.veloX =  -this.pong.value.randStartSpeedX();
-        this.veloY = this.pong.value.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+        this.pong.scoreA += 1;
+        this.x = this.pong.width/2;
+        this.y = this.pong.height/2;
+        this.veloX =  -this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
       }
     }
   
   ballPaddleColision =  (paddleX: number, paddleY: number, paddleHeight:number, paddleWidth:number, sign: number):boolean => {
-    const dist_center = Math.abs(this.x - (this.pong.value.width/2));
+    const dist_center = Math.abs(this.x - (this.pong.width/2));
 
     if (dist_center + this.radius >= paddleX && dist_center - this.radius <= paddleX + paddleWidth)
     {
       if (this.y - this.radius <= paddleY + paddleHeight && this.y + this.radius >= paddleY)
       {
           this.veloX = sign * (Math.abs(this.veloX) + Math.random() / 3);
-        if (this.veloX >= this.pong.value.ballMaxSpeedX || this.veloX <= -this.pong.value.ballMaxSpeedX)
-          this.veloX = this.pong.value.ballMaxSpeedX * sign;
-        if (this.pong.value.gameIsBlocks && Math.random() < 0.6)
-          this.pong.value.generateBlocks();
+        if (this.veloX >= this.pong.ballMaxSpeedX || this.veloX <= -this.pong.ballMaxSpeedX)
+          this.veloX = this.pong.ballMaxSpeedX * sign;
+        if (this.pong.gameIsBlocks && Math.random() < 0.6)
+          this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight/2 - this.y) / paddleHeight/2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         if (this.veloY > 0)
           console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight/2 - this.y)/ paddleHeight/2) + "\n");
@@ -316,14 +316,14 @@ class BallClass {
       
        ballBlockColision = () =>
       {
-        for (const block of this.pong.value.myBlocks)
+        for (const block of this.pong.myBlocks)
         {
           if (this.x + this.radius >= block.x && this.x - this.radius <= block.x + block.width)
           {
             if (this.y + this.radius >= block.y && this.y - this.radius <= block.y + block.height)
             {
               block.triggerEffect(this);
-              this.pong.value.removeBlock(block.id);
+              this.pong.removeBlock(block.id);
               return ;
             }
           }
@@ -337,23 +337,23 @@ class BallClass {
         const oldVeloY = this.veloY;
         console.log("precolisiont\n");
       
-        if (this.ballPaddleColision(Math.abs(this.pong.value.paddleOffset + this.pong.value.leftPaddleWidth - this.pong.value.width/2),
-                                        this.pong.value.leftPaddleY,this.pong.value.leftPaddleHeight,
-                                        this.pong.value.leftPaddleWidth, 1)
+        if (this.ballPaddleColision(Math.abs(this.pong.paddleOffset + this.pong.leftPaddleWidth - this.pong.width/2),
+                                        this.pong.leftPaddleY,this.pong.leftPaddleHeight,
+                                        this.pong.leftPaddleWidth, 1)
           ||
-            this.ballPaddleColision( this.pong.value.rightPaddleX - this.pong.value.width/2,
-                                        this.pong.value.rightPaddleY, this.pong.value.rightPaddleHeight,
-                                        this.pong.value.rightPaddleWidth, -1))
+            this.ballPaddleColision( this.pong.rightPaddleX - this.pong.width/2,
+                                        this.pong.rightPaddleY, this.pong.rightPaddleHeight,
+                                        this.pong.rightPaddleWidth, -1))
           {
             if (this.x < 200)
             {
-              this.pong.value.num_ping += 1;
-              this.x = this.pong.value.paddleOffset + this.pong.value.leftPaddleWidth + this.radius/2 + 1;
+              this.pong.num_ping += 1;
+              this.x = this.pong.paddleOffset + this.pong.leftPaddleWidth + this.radius/2 + 1;
             }
             else
             {
-              this.pong.value.num_pong += 1;
-              this.x = this.pong.value.width - (this.pong.value.paddleOffset + this.radius + this.pong.value.rightPaddleWidth + 1);
+              this.pong.num_pong += 1;
+              this.x = this.pong.width - (this.pong.paddleOffset + this.radius + this.pong.rightPaddleWidth + 1);
             }
             return true;
           }
@@ -365,9 +365,9 @@ class BallClass {
        ballColision = ():BallClass =>
       {
         
-        if (this.pong.value.alreadyComputed)
+        if (this.pong.alreadyComputed)
         {
-          this.pong.value.alreadyComputed = false;
+          this.pong.alreadyComputed = false;
           this.x += this.veloX;
           this.y += this.veloY;
       
@@ -375,29 +375,29 @@ class BallClass {
         }
         
         this.ballBlockColision();
-        const nbr = this.pong.value.num_ping + this.pong.value.num_pong;
+        const nbr = this.pong.num_ping + this.pong.num_pong;
         this.ballWallColision();
-        if (this.x < this.pong.value.width/3 &&
-            this.ballPaddleColision(Math.abs(this.pong.value.paddleOffset + this.pong.value.leftPaddleWidth - this.pong.value.width/2),
-            this.pong.value.leftPaddleY,this.pong.value.leftPaddleHeight,
-            this.pong.value.leftPaddleWidth, 1))
+        if (this.x < this.pong.width/3 &&
+            this.ballPaddleColision(Math.abs(this.pong.paddleOffset + this.pong.leftPaddleWidth - this.pong.width/2),
+            this.pong.leftPaddleY,this.pong.leftPaddleHeight,
+            this.pong.leftPaddleWidth, 1))
         {
-          this.pong.value.num_ping += 1;
+          this.pong.num_ping += 1;
         }
-        else if (this.x > this.pong.value.width/2/3 &&
-            this.ballPaddleColision(this.pong.value.rightPaddleX - this.pong.value.width/2,
-            this.pong.value.rightPaddleY, this.pong.value.rightPaddleHeight,
-            this.pong.value.rightPaddleWidth, -1))
+        else if (this.x > this.pong.width/2/3 &&
+            this.ballPaddleColision(this.pong.rightPaddleX - this.pong.width/2,
+            this.pong.rightPaddleY, this.pong.rightPaddleHeight,
+            this.pong.rightPaddleWidth, -1))
         {
-          this.pong.value.num_pong += 1;
+          this.pong.num_pong += 1;
         }
         if (this.hp == 0)
-          this.pong.value.myBalls.splice(this.pong.value.myBalls.indexOf(this), 1);
+          this.pong.myBalls.splice(this.pong.myBalls.indexOf(this), 1);
         this.x += this.veloX;
         this.y += this.veloY;
       
-        // if (nbr == this.pong.value.num_ping + this.pong.value.num_pong)
-        //  this.pong.value.alreadyComputed = this.preColision();
+        // if (nbr == this.pong.num_ping + this.pong.num_pong)
+        //  this.pong.alreadyComputed = this.preColision();
         return this;
       }
      
