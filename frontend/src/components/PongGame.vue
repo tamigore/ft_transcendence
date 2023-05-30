@@ -672,7 +672,7 @@ restartMatch(gameIsRunnig?:boolean, rightBot?:boolean, wallIsUp?:boolean, bothBo
 
   for (const ball of this.myBalls)
   {
-    if (Math.abs(ball.x- paddleX + ball.veloX) < Math.abs(ball.x - paddleX) && Math.abs(ball.x - paddleX) < ballX)
+    if (Math.abs(ball.x + ball.veloX - paddleX) < Math.abs(ball.x - paddleX) && Math.abs(ball.x - paddleX) < Math.abs(ballX - paddleX))
     {
       ballY = ball.y;
       ballX = ball.x;
