@@ -1,64 +1,60 @@
+
 <template>
-  <div class="game-container">
+  <div v-if="Pong"  class="game-container">
 
   <div class="info-container">
-    <p>{{ "veloBall x-y " + veloBallX + " " + veloBallY }}</p>
-    <p>{{ "Ping " + ping }}</p>
-    <p>{{ "Pong " + pong}}</p>
+    
+    <div>FPS: {{ fps.toFixed(2) }}</div>
+    <p>{{ "veloBall x-y " + Pong.theBall.veloX + " " + Pong.theBall.veloY }}</p>
+    <p>{{"posBall x-y " + Pong.theBall.x + " " + Pong.theBall.y }}</p>
+    <p>{{ "scoreA " + Pong.scoreA }}</p>
+    <p>{{ "scoreB " + Pong.scoreB}}</p>
   </div>
 
   <div class="button-container">
-    <button @click="startMatchSolo" :disabled="gameIsRunning">Solo</button>
-    <button @click="startMatchMultiLocal" :disabled="gameIsRunning">MultiplayerLocal</button>
-    <button @click="startNoPlayer" :disabled="gameIsRunning">NoPlayer</button>
-    <button @click="startWall" :disabled="gameIsRunning">WALL</button>
-    <button @click="restartMatch" :disabled="!gameIsRunning">Restart</button>
-    <button @click="setBlocks" :disabled="gameIsRunning">{{"BLOCKS "+blockStatus}}</button>
+    <button @click="Pong.startMatchSolo" :disabled="Pong.gameIsRunning">Solo</button>
+    <button @click="Pong.startMatchMultiLocal" :disabled="Pong.gameIsRunning">MultiplayerLocal</button>
+    <button @click="Pong.startNoPlayer" :disabled="Pong.gameIsRunning">NoPlayer</button>
+    <button @click="Pong.startWall" :disabled="Pong.gameIsRunning">WALL</button>
+    <button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</button>
+    <button @click="Pong.setBlocks" :disabled="Pong.gameIsRunning">{{"BLOCKS "+ Pong.blockStatus}}</button>
   </div>
   <div class="pong-container">
 
     <div class="input-container">
       <div class="left-input">
-        <p>{{ leftPlayerKeyUp }}</p>
-        <p>{{ leftPlayerKeyDown }}</p>
+        <p>{{ Pong.leftPlayerKeyUp }}</p>
+        <p>{{ Pong.leftPlayerKeyDown }}</p>
       </div>
     </div>
-
-  <div class="pong" :style="pongStyle">
-   <div class="scores">
-      <div class="scorePlayer">{{ "Score A : " + scoreA }}</div>
-      <div class="scorePlayer">{{ "Score B : " + scoreB }}</div>
-    </div>
-    <div
-      v-for="block in blocks"
-      :key="block.id"
-      class="block"
-      :style="{ top: block.y + 'px', left: block.x + 'px', width: block.width + 'px', height: block.height + 'px', backgroundColor: block.color}">
-      <p>{{ block.id }}</p>
-    </div>
-    <div class="paddle" :style="leftPaddleStyle"></div>
-    <div class="paddle" :style="rightPaddleStyle"></div>
-    <div class="ball" :style="ballStyle"></div>
-  </div>
-
-  <div class="input-container">
-    <div class="right-input">
-        <p>{{ rightPlayerKeyUp }}</p>
-        <p>{{ rightPlayerKeyDown }}</p>
+    <canvas ref = "myCanvas" class="gameCanvasStyle" :style="computedCanvasStyle"
+            :width="`${Pong.width}`" :height="`${Pong.height}`" >
+    </canvas>
+    <div class="input-container">
+      <div class="right-input">
+        <p>{{ Pong.rightPlayerKeyUp }}</p>
+        <p>{{ Pong.rightPlayerKeyDown }}</p>
       </div>
     </div>
+    </div>
 
-</div>
 </div>
 
 </template>
 
 <style>
 
-.block {
-  position: absolute;
-  z-index: 1; /* Ensure the block is positioned above the Pong game elements */
-}
+.gameCanvasStyle {
+    z-index: 1;
+    display: block;
+    position: relative;
+    width: var(--canvasWidth, 10px);
+    height: var(--canvasHeight, 10px);
+    border: 1px solid #000000;
+    background-color: #55415a;
+    margin: auto; 
+    
+  }
 
 .info-container {
   position: absolute;
@@ -124,47 +120,24 @@ text-align: left;
 
 .pong {
   position: relative;
-  width: var(--pongWidth, 10px);
-  height: var(--pongHeight, 10px);
+  width: var(--width, 10px);
+  height: var(--height, 10px);
   border: 1px solid #6b4d4d;
   background-color: #2b222e;
   overflow: hidden;
 }
 
-.scores {
-display: flex;
-justify-content: center;
-align-items: center;
-height: 40px;
-font-size: 24px;
-color: #e9ec33;
-text-align: center;
-}
-
-.scorePlayer {
-flex: 1;
-}
-
-.paddle {
-  position: absolute;
-  width: var(--paddle-width, 10px);
-  height: var(--paddle-height, 10px);
-  background-color: #147f83;
-}
-
-.ball {
-  position: absolute;
-  width: var(--ball-size, 10px);
-  height: var(--ball-size, 10px);
-  background-color: rgb(250, 250, 250);
-  border-radius: 50%;
-}
 
 </style>
 
-<script lang="ts">
 
-import { defineComponent,onMounted, ref, computed } from 'vue';
+
+
+<script lang="ts">
+import { defineComponent,onMounted,onUnmounted, ref, Ref, computed, watch, created } from 'vue';
+// import {EffectBlock} from './BlockClass';
+// import {BallClass} from './BallClass';
+import useFPS from './useFPS';
 import {
   SetPongWidth,
   SetPongHeight,
@@ -182,7 +155,7 @@ import {
   SetRightPaddleY,
   SetRightPaddleX,
   SetRightPaddleSpeed,
-  SetBallSize,
+  setBallRadius,
   SetPaddleOffset,
   ballMaxSpeedX,
   ballMaxSpeedY,
@@ -190,441 +163,17 @@ import {
   SetBounce,
   SetBlockWidth,
   SetBlockHeight,
-  veloDiv,
+  setVeloDiv,
+  setBlockSpace,
+  setBallStartSpeedX,
+  setBallStartSpeedY,
+  setRightPaddleColor,
+  setLeftPaddleColor,
+
 } from './PongSettings'; 
 
-export default defineComponent({
 
-
-
-
-    setup() {
-
-//GAME CONTAINER PARAMETERS
-const pongWidth = ref(SetPongWidth);
-const pongHeight = ref(SetPongHeight);
-
-//CONTROL PARAMETERS
-const rightPlayerKeyUp = ref(SetRightPlayerKeyUp);
-const rightPlayerKeyDown = ref(SetRightPlayerKeyDown);
-
-const leftPlayerKeyUp = ref(SetLeftPlayerKeyUp);
-const leftPlayerKeyDown = ref(SetLeftPlayerKeyDown);
-
-//LEFT PADDLE PARAMETERS
-const bounce = ref(SetBounce);
-
-const leftPaddleWidth = ref(SetLeftPaddleWidth);
-const leftPaddleHeight = ref(SetLeftPaddleHeight);
-
-const leftPaddleY = ref(SetLeftPaddleY);
-const leftPaddleX = ref(SetLeftPaddleX);
-const leftPaddleSpeed = ref(SetLeftPaddleSpeed);
-
-const leftPaddleJustHit = ref(false);
-
-//RIGHT PADDLE PARAMETERS
-const rightPaddleWidth = ref(SetRightPaddleWidth);
-const rightPaddleHeight = ref(SetRightPaddleHeight);
-
-const rightPaddleY = ref(SetRightPaddleY);
-const rightPaddleX = ref(SetRightPaddleX);
-const rightPaddleSpeed = ref(SetRightPaddleSpeed);
-
-const rightPaddleJustHit = ref(false);
-
-//BALL PARAMETERS
-const ballSize = ref(SetBallSize);
-const paddleOffset = ref(SetPaddleOffset);
-
-const ballX = ref(pongWidth.value/2 - ballSize.value/2);
-const ballY = ref(pongHeight.value/2 - ballSize.value/2);
-
-const ballStartSpeedX = -4;
-const ballStartSpeedY = 2;
-
-const veloBallX = ref(0);
-const veloBallY = ref(0);
-
-
-const ping = ref(0);
-const pong = ref(0);
-
-const scoreA = ref(0);
-const scoreB = ref(0);
-
-//BLOCKS PARAMETERS
-
-const myBlocks = ref<(EffectBlock)[]>([]);
-const blockWidth = ref(SetBlockWidth);
-const blockHeight = ref(SetBlockHeight);
-
-//VARIOUS PARAMETERS
-
-const whatId = ref(0);
-
-const gameIsRunning = ref(false);
-const gameIsBlocks = ref(false);
-const blockStatus = ref('DISABLED');
-
-const alreadyComputed = ref(false);
-
-const leftArrowUp = ref(0);
-const leftArrowDown = ref(0);
-
-const rightArrowUp = ref(0);
-const rightArrowDown = ref(0);
-
-const x = ref(1);
-const line = ref('');
-
-const inertie = ref([0, 0]);
-
-const wallIsUp = ref(false);
-
-/***********************GAME FUNCTIONS***********************/
-
-
-/***********************START GAME***********************/
-const startMatchSolo = () => {
-  if (!gameIsRunning.value)
-  {
-    const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
-    veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
-    veloBallY.value = Math.random() * 6 - 3;
-    veloBallX.value /= veloDiv;
-    veloBallY.value /= veloDiv;
-
-    ballX.value = pongWidth.value/2 - ballSize.value/2;
-    ballY.value = pongHeight.value/2 - ballSize.value/2;
-
-
-    rightPlayerKeyDown.value = '';
-    rightPlayerKeyUp.value = '';
-
-    gameIsRunning.value = true;
-  }
-}
-
-const startWall = () => {
-
-  const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
-    veloBallX.value = rand;
-    veloBallY.value = Math.random() * 6 - 3;
-    veloBallX.value /= veloDiv;
-    veloBallY.value /= veloDiv;
-
-    ballX.value = pongWidth.value/2 - ballSize.value/2;
-    ballY.value = pongHeight.value/2 - ballSize.value/2;
-
-
-    rightPlayerKeyDown.value = 'wawd';
-    rightPlayerKeyUp.value = 'awdawdwad';
-
-    rightPaddleY.value = pongHeight.value;
-    wallIsUp.value = true;
-    gameIsRunning.value = true;
-}
-
-const startNoPlayer = () => {
-    const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
-    veloBallX.value = rand;
-    veloBallY.value = Math.random() * 6 - 3;
-    veloBallX.value /= veloDiv;
-    veloBallY.value /= veloDiv;
-
-    ballX.value = pongWidth.value/2 - ballSize.value/2;
-    ballY.value = pongHeight.value/2 - ballSize.value/2;
-
-
-    rightPlayerKeyDown.value = '';
-    rightPlayerKeyUp.value = '';
-
-
-    leftPlayerKeyDown.value = '';
-    leftPlayerKeyUp.value = '';
-
-    gameIsRunning.value = true;
-}
-
-const startMatchMultiLocal = () => {
-  const rand = 6 + Math.random() * 2 * Math.sign(Math.random() - 0.5);
-  veloBallX.value = rand + (rand / Math.abs(rand)) * 2;
-  veloBallY.value = Math.random() * 6 - 3;
-  veloBallX.value /= veloDiv;
-  veloBallY.value /= veloDiv;
-
-  ballX.value = pongWidth.value/2 - ballSize.value/2;
-  ballY.value = pongHeight.value/2 - ballSize.value/2;
-
-  gameIsRunning.value = true;
-}
-
-const restartMatch = () => {
-  if (gameIsRunning.value) {
-    scoreA.value = 0;
-    scoreB.value = 0;
-
-    veloBallX.value = 0;
-    veloBallY.value = 0;
-
-    rightPaddleHeight.value = 80;
-    rightPaddleY.value = pongHeight.value/2 - rightPaddleHeight.value/2;
-
-    rightPlayerKeyDown.value = 'ArrowDown';
-    rightPlayerKeyUp.value = 'ArrowUp';
-
-    leftPaddleHeight.value = 80;
-    leftPaddleY.value = pongHeight.value/2 - leftPaddleHeight.value/2;
-
-    leftPlayerKeyDown.value = 's';
-    leftPlayerKeyUp.value = 'w';
-
-    ballX.value = pongWidth.value / 2 - ballSize.value / 2;
-    ballY.value = pongHeight.value / 2 - ballSize.value / 2;
-
-    ping.value = 0;
-    pong.value = 0;
-
-    gameIsRunning.value = false;
-
-    myBlocks.value = [];
-
-    inertie.value = [0,  0];
-
-    wallIsUp.value = false;
-  }
-}
-
-const setBlocks = () => {
-  if (!gameIsBlocks.value)
-  {
-    gameIsBlocks.value = true;
-    blockStatus.value = 'ENABLED';
-  }
-  else
-  {
-    gameIsBlocks.value = false;
-    blockStatus.value = 'DISABLED';
-  }
-}
-
-/***********************BALL COLISIONS***********************/
-
-const ballWallColision = () => {
-  if (ballY.value <= 0 )
-    veloBallY.value = Math.abs(veloBallY.value);
-  else if (ballY.value >= pongHeight.value - ballSize.value)
-    veloBallY.value = -Math.abs(veloBallY.value);
-
-  if (ballX.value <= 1)
-    {
-      scoreB.value += 1;
-      ballX.value = pongWidth.value/2 - ballSize.value/2;
-      ballY.value = pongHeight.value/2 - ballSize.value/2;
-      veloBallX.value = (2 + Math.random());
-      veloBallY.value = (Math.random() * 6) - 3;
-      veloBallX.value /= veloDiv;
-      veloBallY.value /= veloDiv;
-    }
-  if (ballX.value >= pongWidth.value - ballSize.value - 1)
-    {
-      if (wallIsUp.value)
-      {
-        veloBallX.value = -veloBallX.value;
-        return ;
-      }
-      scoreA.value += 1;
-      ballX.value = pongWidth.value/2 - ballSize.value/2;
-      ballY.value = pongHeight.value/2 - ballSize.value/2;
-      veloBallX.value = -(2 + Math.random());
-      veloBallY.value = (Math.random() * 6) - 3;
-      veloBallX.value /= veloDiv;
-      veloBallY.value /= veloDiv;
-    }
-}
-
-const ballPaddleColision =  (paddleX: number, paddleY: number, paddleHeight:number, sign: number):boolean => {
-if (sign * ballX.value  <= paddleX)
-{
-
-
-  if (ballY.value >= paddleY && ballY.value  <= paddleY + paddleHeight)
-  {
-    veloBallX.value = sign * (Math.abs(veloBallX.value) + ((ballY.value - paddleY) / (paddleHeight / 2))/10);
-    if (veloBallX.value >= ballMaxSpeedX || veloBallX.value <= -ballMaxSpeedX)
-      veloBallX.value = ballMaxSpeedX * sign;
-    veloBallY.value = (((ballY.value - (paddleY + paddleHeight/2)) / paddleHeight/2)  * bounce.value + Math.random());
-    if (gameIsBlocks.value && Math.random() < 0.6)
-      generateBlocks();
-    return true;
-  }
-}
-return false;
-}
-
-const ballBlockColision = () =>
-{
-  for (const block of myBlocks.value) {
-    if (ballX.value <= block.x + block.width && ballX.value + ballSize.value >= block.x)
-    {
-      if (ballY.value <= block.y + block.height && ballY.value + ballSize.value >= block.y)
-      {
-        block.triggerEffect();
-        removeBlock(block.id);
-      }
-    }
-}
-}
-
-const preColision = ():boolean =>
-{
-  const oldVeloX = veloBallX.value;
-  const oldVeloY = veloBallY.value;
-
-  if (ballPaddleColision(paddleOffset.value + leftPaddleWidth.value, leftPaddleY.value,leftPaddleHeight.value, 1)
-    || ballPaddleColision( (paddleOffset.value + rightPaddleWidth.value + ballSize.value) - pongWidth.value, rightPaddleY.value, rightPaddleHeight.value, -1))
-  {
-    if (ballX.value < 200)
-    {
-      ping.value += 1;
-      ballX.value = paddleOffset.value + leftPaddleWidth.value + ballSize.value/2 + 1;
-    }
-    else
-    {
-      pong.value += 1;
-      ballX.value = pongWidth.value - (paddleOffset.value + ballSize.value + rightPaddleWidth.value + 1);
-    }
-    return true;
-  }
-    veloBallX.value = oldVeloX;
-    veloBallY.value = oldVeloY;
-    return false;
-}
-
-const ballColision = () =>
-{
-  if (alreadyComputed.value)
-  {
-    alreadyComputed.value = false;
-    ballX.value += veloBallX.value;
-    ballY.value += veloBallY.value;
-
-    return;
-  }
-  ballWallColision();
-  ballBlockColision();
-  const nbr = ping.value + pong.value;
-  if (ballPaddleColision(paddleOffset.value + leftPaddleWidth.value, leftPaddleY.value,leftPaddleHeight.value, 1))
-    ping.value += 1;
-  else if (ballPaddleColision( (paddleOffset.value + rightPaddleWidth.value + ballSize.value) - pongWidth.value, rightPaddleY.value, rightPaddleHeight.value, -1))
-    pong.value += 1;
-
-  ballX.value += veloBallX.value;
-  ballY.value += veloBallY.value;
-
-  if (nbr == ping.value + pong.value)
-    alreadyComputed.value = preColision();
-  
-
-}
-
-const moovePaddles = () => {
-  if (leftArrowUp.value && leftPaddleY.value > 1 - leftPaddleHeight.value)
-    leftPaddleY.value -= leftPaddleSpeed.value * leftArrowUp.value;
-  else if (leftArrowDown.value && leftPaddleY.value < pongHeight.value - 1)
-    leftPaddleY.value += leftPaddleSpeed.value * leftArrowDown.value;
-
-  if (rightArrowUp.value && rightPaddleY.value > 1 - rightPaddleHeight.value)
-    rightPaddleY.value -= rightPaddleSpeed.value * rightArrowUp.value;
-  else if (rightArrowDown.value && rightPaddleY.value < pongHeight.value - 1)
-    rightPaddleY.value += rightPaddleSpeed.value * rightArrowDown.value;
-}
-
-const boting = (paddleY:number, paddleX:number, paddleHeight:number, player:number ):number => {
-
-  const diff = paddleY + paddleHeight/2 - ballY.value - ballSize.value/2;
-  console.log("inertie =  " + inertie.value[player]);
-
-  if (inertie.value[player] < -1)
-  {
-    paddleY = paddleY + leftPaddleSpeed.value;
-    inertie.value[player]++;
-  }
-  else if (inertie.value[player] > 1)
-  {
-    paddleY = paddleY - leftPaddleSpeed.value;
-    inertie.value[player]--;
-  }
-  else
-  {
-    console.log("diff =  " + diff);
-
-    // inertie.value[player] = diff / 20;
-    console.log("inertie after diff =  " + inertie.value[player]);
-    //inertie.value[player] = Math.floor((diff / leftPaddleSpeed.value) + 6*Math.random()*Math.sign(diff));
-    inertie.value[player] =  Math.floor( (diff/leftPaddleSpeed.value)*0.8 + (Math.random() * diff/leftPaddleSpeed.value)*0.4 + Math.sign(diff));
-  }
-
-  return paddleY;
-}
-
-const bot = () => {
-  if (leftPlayerKeyDown.value == '')
-  {
-    // if (veloBallX.value < 0 && inertie.value[1] - Math.sign(inertie.value[1])  == 0)
-    //   inertie.value[1] = (Math.random() + 0.5) * 50 * Math.sign(Math.random() - 0.5);
-    // else
-      leftPaddleY.value = boting(leftPaddleY.value, leftPaddleX.value, leftPaddleHeight.value, 0);
-  }
-  if (rightPlayerKeyDown.value == '')
-  {
-    // if (veloBallX.value > 0  && inertie.value[0] - Math.sign(inertie.value[0]) == 0)
-    //   inertie.value[0] = (Math.random() + 0.5) * 50 * Math.sign(Math.random() - 0.5);
-    // else
-      rightPaddleY.value = boting(rightPaddleY.value, rightPaddleX.value, rightPaddleHeight.value, 1);
-    }
-}
-
-const gameLoop = () => {
-  bot();
-  moovePaddles();
-  ballColision();
-  
-
-};
-
-/***********************KEYBOARD EVENTS***********************/
-
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === leftPlayerKeyUp.value) 
-    leftArrowUp.value = 1;
-  else if (event.key === leftPlayerKeyDown.value)
-    leftArrowDown.value = 1;
-
-  if (event.key === rightPlayerKeyUp.value)
-    rightArrowUp.value = 1;
-  else if (event.key === rightPlayerKeyDown.value)
-    rightArrowDown.value = 1;
-};
-
-const handleKeyUp = (event: KeyboardEvent) => {
-  if (event.key === leftPlayerKeyUp.value) {
-  leftArrowUp.value = 0;
-  } else if (event.key === leftPlayerKeyDown.value) {
-  leftArrowDown.value = 0;
-  }
-
-  if (event.key === rightPlayerKeyUp.value) {
-  rightArrowUp.value = 0;
-  } else if (event.key === rightPlayerKeyDown.value) {
-  rightArrowDown.value = 0;
-  }
-};
-
-/***********************BLOCKS***********************/
-
-
+/*******************EffectBlock*******************/
 
 class EffectBlock{
     effect: string;
@@ -634,201 +183,804 @@ class EffectBlock{
     height: number;
     color: string;
     id: number;
+    pong : Ref<PongGameClass>;
 
-    constructor(x: number, y: number, width: number, height: number, color: string, effect: string) {
+    constructor(Pong: PongGameClass, x: number, y: number, width: number, height: number, color: string, effect: string) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.effect = effect;
         this.color = color;
-        this.id = whatId.value++;
+        this.pong = ref(Pong);
+        this.id = this.pong.value.blockId;
     }
 
-    triggerEffect(): void {
-      if (this.effect === "PING")
+    triggerEffect(ball:BallClass): void {
+      if (this.effect === "R_SLOW")
       {
-        veloBallX.value /= -1.2;
-        if (veloBallX.value > ballMaxSpeedX)
-          veloBallX.value = ballMaxSpeedX;
+        ball.veloX /= -1.2;
       }
-      if (this.effect === "SLOWn")
+      else if (this.effect === "SLOWn")
       {
-        veloBallX.value /= 1.2;
-        veloBallY.value /= 1.2;
+        ball.veloX /= 1.2;
+        ball.veloY /= 1.2;
       }
-      if (this.effect === "SOLID")
+      else if (this.effect === "WALL")
       {
-        veloBallX.value *= -1;
-        veloBallY.value *= -1;
+        ball.veloX *= -1;
+        ball.veloY *= -1;
       }
-      if (this.effect === "TP")
+      else if (this.effect === "TP")
       {
-        for (const block of myBlocks.value) {
+        for (const block of ball.pong.value.myBlocks) {
           if (block.effect === "TP" && block.id != this.id)
           {
-            ballX.value = block.x + block.width / 2
-            ballY.value = block.y + block.height / 2;
-            removeBlock(block.id);
+            ball.x = block.x + block.width / 2
+            ball.y = block.y + block.height / 2;
+            ball.pong.value.removeBlock(block.id);
             return;
           }
         }
       }
+      else if (this.effect === "newBall")
+      {
+        ball.pong.value.newBall('blue', this.x + this.width/2, this.y + this.height/2, 1, ball.veloX/Math.abs(ball.veloX));
+      }
 
+      
+    }
+}
+
+
+/******************* BallClass *******************/
+class BallClass {
+    public x:number;
+    public y:number;
+    veloX: number;
+    veloY: number;
+    radius: number;
+    color: string;
+    id: number;
+    hp: number;
+    pong: Ref<PongGameClass>;
+  
+    constructor(pong: PongGameClass, x: number, y: number, veloX:number, veloY:number, radius: number, color: string, hp?: number) {
+      this.x = x;
+      this.y = y;
+      this.veloX = veloX;
+      this.veloY = veloY;
+      this.radius = radius;
+      this.color = color;
+      this.pong = ref(pong);
+      this.id = pong.ballId++;
+      this.hp = -1;
+      if (hp)
+        this.hp = hp;
+    }
+  
+    ballWallColision() {
+      if (this.y <= 0 )
+      {
+        this.veloY = Math.abs(this.veloY);
+      }
+      else if (this.y >= this.pong.value.height)
+      {
+        this.veloY = -Math.abs(this.veloY);
+      }
+      if (this.x <= 1)
+        {
+          this.hp--;
+          this.pong.value.scoreB += 1;
+          this.x = this.pong.value.width/2;
+          this.y = this.pong.value.height/2;
+          this.veloX =  this.pong.value.randStartSpeedX();
+          this.veloY = this.pong.value.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+        }
+      else if (this.x >= this.pong.value.width - 1)
+      {
+        if (this.pong.value.wallIsUp)
+        {
+          this.veloX = -this.veloX;
+          return ;
+        }
+        this.hp--;
+        this.pong.value.scoreA += 1;
+        this.x = this.pong.value.width/2;
+        this.y = this.pong.value.height/2;
+        this.veloX =  -this.pong.value.randStartSpeedX();
+        this.veloY = this.pong.value.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+      }
+    }
+  
+  ballPaddleColision =  (paddleX: number, paddleY: number, paddleHeight:number, paddleWidth:number, sign: number):boolean => {
+    const dist_center = Math.abs(this.x - (this.pong.value.width/2));
+
+    if (dist_center + this.radius >= paddleX && dist_center - this.radius <= paddleX + paddleWidth)
+    {
+      if (this.y - this.radius <= paddleY + paddleHeight && this.y + this.radius >= paddleY)
+      {
+          this.veloX = sign * (Math.abs(this.veloX) + Math.random() / 3);
+        if (this.veloX >= this.pong.value.ballMaxSpeedX || this.veloX <= -this.pong.value.ballMaxSpeedX)
+          this.veloX = this.pong.value.ballMaxSpeedX * sign;
+        if (this.pong.value.gameIsBlocks && Math.random() < 0.6)
+          this.pong.value.generateBlocks();
+        this.veloY = -((paddleY + paddleHeight/2 - this.y) / paddleHeight/2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
+        if (this.veloY > 0)
+          console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight/2 - this.y)/ paddleHeight/2) + "\n");
+        return true;
+      }
+    }
+    return false;
+  }
+      
+       ballBlockColision = () =>
+      {
+        for (const block of this.pong.value.myBlocks)
+        {
+          if (this.x + this.radius >= block.x && this.x - this.radius <= block.x + block.width)
+          {
+            if (this.y + this.radius >= block.y && this.y - this.radius <= block.y + block.height)
+            {
+              block.triggerEffect(this);
+              this.pong.value.removeBlock(block.id);
+              return ;
+            }
+          }
+        }
+        return ;
+      }
+      
+       preColision = ():boolean =>
+      {
+        const oldVeloX = this.veloX;
+        const oldVeloY = this.veloY;
+        console.log("precolisiont\n");
+      
+        if (this.ballPaddleColision(Math.abs(this.pong.value.paddleOffset + this.pong.value.leftPaddleWidth - this.pong.value.width/2),
+                                        this.pong.value.leftPaddleY,this.pong.value.leftPaddleHeight,
+                                        this.pong.value.leftPaddleWidth, 1)
+          ||
+            this.ballPaddleColision( this.pong.value.rightPaddleX - this.pong.value.width/2,
+                                        this.pong.value.rightPaddleY, this.pong.value.rightPaddleHeight,
+                                        this.pong.value.rightPaddleWidth, -1))
+          {
+            if (this.x < 200)
+            {
+              this.pong.value.num_ping += 1;
+              this.x = this.pong.value.paddleOffset + this.pong.value.leftPaddleWidth + this.radius/2 + 1;
+            }
+            else
+            {
+              this.pong.value.num_pong += 1;
+              this.x = this.pong.value.width - (this.pong.value.paddleOffset + this.radius + this.pong.value.rightPaddleWidth + 1);
+            }
+            return true;
+          }
+        this.veloX = oldVeloX;
+        this.veloY = oldVeloY;
+        return false;
+      }
+      
+       ballColision = ():BallClass =>
+      {
+        
+        if (this.pong.value.alreadyComputed)
+        {
+          this.pong.value.alreadyComputed = false;
+          this.x += this.veloX;
+          this.y += this.veloY;
+      
+          return this;
+        }
+        
+        this.ballBlockColision();
+        const nbr = this.pong.value.num_ping + this.pong.value.num_pong;
+        this.ballWallColision();
+        if (this.x < this.pong.value.width/3 &&
+            this.ballPaddleColision(Math.abs(this.pong.value.paddleOffset + this.pong.value.leftPaddleWidth - this.pong.value.width/2),
+            this.pong.value.leftPaddleY,this.pong.value.leftPaddleHeight,
+            this.pong.value.leftPaddleWidth, 1))
+        {
+          this.pong.value.num_ping += 1;
+        }
+        else if (this.x > this.pong.value.width/2/3 &&
+            this.ballPaddleColision(this.pong.value.rightPaddleX - this.pong.value.width/2,
+            this.pong.value.rightPaddleY, this.pong.value.rightPaddleHeight,
+            this.pong.value.rightPaddleWidth, -1))
+        {
+          this.pong.value.num_pong += 1;
+        }
+        if (this.hp == 0)
+          this.pong.value.myBalls.splice(this.pong.value.myBalls.indexOf(this), 1);
+        this.x += this.veloX;
+        this.y += this.veloY;
+      
+        // if (nbr == this.pong.value.num_ping + this.pong.value.num_pong)
+        //  this.pong.value.alreadyComputed = this.preColision();
+        return this;
+      }
+     
+    }
+    
+
+/*******************PongGameClass*******************/
+export class PongGameClass{
+width:number;
+height:number;
+//CONTROL PARAMETERS
+rightPlayerKeyUp:string;
+rightPlayerKeyDown:string;
+leftPlayerKeyUp:string;
+leftPlayerKeyDown:string;
+//LEFT PADDLE PARAMETERS
+bounce:number;
+leftPaddleWidth:number;
+leftPaddleHeight:number;
+leftPaddleY:number;
+leftPaddleX:number;
+leftPaddleSpeed:number;
+leftPaddleColor:string;
+leftPaddleJustHit:boolean;
+//RIGHT PADDLE PARAMETERS
+rightPaddleWidth:number;
+rightPaddleHeight:number;
+rightPaddleY:number;
+rightPaddleX:number;
+rightPaddleSpeed:number;
+rightPaddleColor:string;
+rightPaddleJustHit:boolean;
+//BALL PARAMETERS
+theBall:BallClass;
+myBalls:BallClass[];
+ballRadius:number;
+paddleOffset:number;
+ballStartSpeedX:number;
+ballStartSpeedY:number;
+//BLOCKS PARAMETERS
+myBlocks:EffectBlock[];
+blockWidth:number;
+blockHeight:number;
+blockSpace:number;
+//VARIOUS PARAMETERS
+num_ping:number;
+num_pong:number;
+scoreA:number;
+scoreB:number;
+blockId:number;
+ballId:number;
+gameIsRunning:boolean;
+gameIsBlocks:boolean;
+blockStatus:string ;
+alreadyComputed:boolean;
+leftArrowUp:number;
+leftArrowDown:number;
+rightArrowUp:number;
+rightArrowDown:number;
+x:number;
+inertie:number[];
+wallIsUp:boolean;
+veloDiv:number;
+
+constructor()
+{
+this.width = SetPongWidth;
+this.height = SetPongHeight;
+
+//CONTROL PARAMETERS
+this.rightPlayerKeyUp = SetRightPlayerKeyUp;
+this.rightPlayerKeyDown = SetRightPlayerKeyDown;
+
+this.leftPlayerKeyUp = SetLeftPlayerKeyUp;
+this.leftPlayerKeyDown = SetLeftPlayerKeyDown;
+
+//LEFT PADDLE PARAMETERS
+this.bounce = SetBounce;
+
+this.leftPaddleWidth = SetLeftPaddleWidth;
+this.leftPaddleHeight = SetLeftPaddleHeight;
+
+this.leftPaddleY = SetLeftPaddleY;
+this.leftPaddleX = SetLeftPaddleX;
+this.leftPaddleSpeed = SetLeftPaddleSpeed;
+
+this.leftPaddleColor = setLeftPaddleColor;
+
+this.leftPaddleJustHit = false;
+
+//RIGHT PADDLE PARAMETERS
+this.rightPaddleWidth = SetRightPaddleWidth;
+this.rightPaddleHeight = SetRightPaddleHeight;
+
+this.rightPaddleY = SetRightPaddleY;
+this.rightPaddleX = SetRightPaddleX;
+this.rightPaddleSpeed = SetRightPaddleSpeed;
+
+this.rightPaddleColor = setRightPaddleColor;
+this.rightPaddleJustHit = false;
+
+//BALL PARAMETERS
+
+this.myBalls = [];
+
+this.ballRadius = setBallRadius;
+this.paddleOffset = SetPaddleOffset;
+
+this.ballStartSpeedX = setBallStartSpeedX;
+this.ballStartSpeedY = setBallStartSpeedY;
+
+
+
+this.num_ping = 0;
+this.num_pong = 0;
+
+this.scoreA = 0;
+this.scoreB = 0;
+
+//BLOCKS PARAMETERS
+
+this.myBlocks = [];
+this.blockWidth = SetBlockWidth;
+this.blockHeight = SetBlockHeight;
+
+//VARIOUS PARAMETERS
+
+this.blockSpace = setBlockSpace;
+this.blockId = 0;
+this.ballId = 0;
+
+this.gameIsRunning = false;
+this.gameIsBlocks = false;
+this.blockStatus = 'DISABLED';
+
+this.alreadyComputed = false;
+
+this.leftArrowUp = 0;
+this.leftArrowDown = 0;
+
+this.rightArrowUp = 0;
+this.rightArrowDown = 0;
+
+
+this.inertie = [0, 0];
+
+this.wallIsUp = false;
+
+this.veloDiv = setVeloDiv;
+
+this.theBall = new BallClass(this, this.width/2, this.height/2, 0, 0, setBallRadius, 'white');
+}
+
+/***********************START GAME***********************/
+startMatchSolo(){
+  this.restartMatch(true, true);
+}
+ 
+startWall() {
+  this.restartMatch(true, false, true);
+}
+
+ startNoPlayer() {
+    this.restartMatch(true,false,false,true);
    
 }
+
+ startMatchMultiLocal() {
+  this.restartMatch(true);
+  
 }
 
-const checkBlockColi = (genX:number, genY:number, block: EffectBlock):boolean => {
-if (Math.abs(genX - block.x) < (blockWidth.value) && Math.abs(genY - block.y) < (blockHeight.value))
-        return true;
-    return false;
+randStartSpeedX():number {
+  return (1 + Math.random());
 }
 
-const isValidGen = (genX:number, genY:number):boolean => {
-  for (const block of myBlocks.value)
+randStartSpeedY():number {
+  return (1 - Math.random()*2);
+}
+
+newBall(color?:string, x?:number, y?:number, hp?:number,  direction?:number)
+{
+  let veloX = this.randStartSpeedX() * Math.sign(Math.random() - 0.5)
+  let var_color = 'white';
+  let var_hp = -1;
+  if (hp)
+    var_hp = hp;
+  if (color)
+    var_color = color;
+  if (direction)
+    veloX = Math.abs(veloX) * direction; 
+  if (x && y)
+    this.myBalls.push(  new BallClass(this, x, y, veloX,
+                                this.randStartSpeedY() * Math.sign(Math.random() - 0.5),
+                                this.ballRadius, var_color, var_hp)  );
+  else
+    this.myBalls.push(  new BallClass(this, this.width/2, this.height/2, veloX,
+                                this.randStartSpeedY() * Math.sign(Math.random() - 0.5),
+                                this.ballRadius, var_color, var_hp)  );
+}
+
+restartMatch(gameIsRunnig?:boolean, rightBot?:boolean, wallIsUp?:boolean, bothBot?:boolean) {
+  this.scoreA = 0;
+  this.scoreB = 0;
+
+  this.num_ping = 0;
+  this.num_pong = 0;
+
+
+  this.ballId = 0;
+  this.myBalls = [];
+
+  this.theBall.x = this.width/2;
+  this.theBall.y = this.height/2;
+
+  this.theBall.veloX = 0;
+  this.theBall.veloY = 0;
+
+  this.myBlocks = [];
+  
+  this.inertie = [0,  0];
+  
+  this.rightPaddleHeight = 80;
+  this.rightPaddleY = this.height/2 - this.rightPaddleHeight/2;
+  
+  this.rightPlayerKeyDown = 'ArrowDown';
+  this.rightPlayerKeyUp = 'ArrowUp';
+  
+  this.leftPaddleHeight = 80;
+  this.leftPaddleY = this.height/2 - this.leftPaddleHeight/2;
+
+  this.leftPlayerKeyDown = 's';
+  this.leftPlayerKeyUp = 'w';
+  
+  this.gameIsRunning = false;
+
+  this.wallIsUp = false;
+  if (gameIsRunnig != undefined && gameIsRunnig)
+  {
+      this.gameIsRunning = true;
+      this.theBall.veloX = this.randStartSpeedX() * Math.sign(Math.random() - 0.5);
+      this.theBall.veloY = this.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+    if (rightBot != undefined && rightBot)
     {
-      if (checkBlockColi(genX, genY, block))  
+      this.rightPlayerKeyDown = '';
+      this.rightPlayerKeyUp = '';
+    }
+    else if (wallIsUp != undefined && wallIsUp)
+    {
+      this.rightPlayerKeyDown = 'smthing';
+      this.rightPlayerKeyUp = 'smthing';
+      this.wallIsUp = true;
+      this.rightPaddleY = this.height + 1000;
+    }
+    if (bothBot != undefined && bothBot)
+    {
+      this.rightPlayerKeyDown = '';
+      this.rightPlayerKeyUp = '';
+      this.leftPlayerKeyDown = '';
+      this.leftPlayerKeyUp = '';
+    }
+  }
+}
+
+/*******************Bots*******************/
+
+ boting = (paddleY:number, paddleX:number, paddleHeight:number, player:number ):number => {
+
+  let ballY = this.theBall.y;
+  let ballX = this.theBall.x;
+
+
+  for (const ball of this.myBalls)
+  {
+    if (Math.abs(ball.x- paddleX + ball.veloX) < Math.abs(ball.x - paddleX) && Math.abs(ball.x - paddleX) < ballX)
+    {
+      ballY = ball.y;
+      ballX = ball.x;
+    }
+  }
+  const diff = paddleY + paddleHeight/2 - ballY - this.ballRadius/2;
+
+  if (this.inertie[player] < -1)
+  {
+    paddleY = paddleY + this.leftPaddleSpeed;
+    this.inertie[player]++;
+  }
+  else if (this.inertie[player] > 1)
+  {
+    paddleY = paddleY - this.leftPaddleSpeed;
+    this.inertie[player]--;
+  }
+  else
+  {
+    let inertie = (diff/this.leftPaddleSpeed) + (Math.random() * diff/this.leftPaddleSpeed)*0.6 - (Math.random() * diff/this.leftPaddleSpeed)*0.6
+    this.inertie[player] += 2;
+    if (inertie % 1 > 0.5)
+      inertie += 1 - inertie % 1;
+    else
+      inertie -= inertie % 1;
+    this.inertie[player] =  inertie;
+    
+    if ( (this.inertie[player] > 0 && paddleY <= 1 )
+        || (this.inertie[player] < 0 && paddleY > this.height - paddleHeight - 1 ))
+      this.inertie[player] = 0;
+  }
+  console.log("paleyr : " + player + " inerites : " + this.inertie[player]);
+
+  return paddleY;
+}
+
+ bot() {
+  if (this.leftPlayerKeyDown == '')
+      this.leftPaddleY = this.boting(this.leftPaddleY, this.leftPaddleX + this.leftPaddleWidth, this.leftPaddleHeight, 0);
+
+  if (this.rightPlayerKeyDown == '')
+      this.rightPaddleY = this.boting(this.rightPaddleY, this.rightPaddleX, this.rightPaddleHeight, 1);
+}
+
+/*******************Keys handelers*******************/
+
+moovePaddles() {
+  if (this.leftArrowUp && this.leftPaddleY > 1 - this.leftPaddleHeight)
+    this.leftPaddleY -= this.leftPaddleSpeed * this.leftArrowUp;
+  else if (this.leftArrowDown && this.leftPaddleY < this.height - 1)
+    this.leftPaddleY += this.leftPaddleSpeed * this.leftArrowDown;
+
+  if (this.rightArrowUp && this.rightPaddleY > 1 - this.rightPaddleHeight)
+    this.rightPaddleY -= this.rightPaddleSpeed * this.rightArrowUp;
+  else if (this.rightArrowDown && this.rightPaddleY < this.height - 1)
+    this.rightPaddleY += this.rightPaddleSpeed * this.rightArrowDown;
+}
+
+ handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === this.leftPlayerKeyUp) 
+    this.leftArrowUp = 1;
+  else if (event.key === this.leftPlayerKeyDown)
+    this.leftArrowDown = 1;
+
+  if (event.key === this.rightPlayerKeyUp)
+    this.rightArrowUp = 1;
+  else if (event.key === this.rightPlayerKeyDown)
+    this.rightArrowDown = 1;
+};
+
+ handleKeyUp = (event: KeyboardEvent) => {
+  if (event.key === this.leftPlayerKeyUp)
+    this.leftArrowUp = 0;
+  else if (event.key === this.leftPlayerKeyDown)
+    this.leftArrowDown = 0;
+
+  if (event.key === this.rightPlayerKeyUp)
+    this.rightArrowUp = 0;
+  else if (event.key === this.rightPlayerKeyDown)
+    this.rightArrowDown = 0;
+};
+
+
+/*******************Blocks*******************/
+
+  checkBlockColi = (genX:number, genY:number, block: EffectBlock):boolean => {
+  if (Math.abs(genX - block.x) < (this.blockWidth) && Math.abs(genY - block.y) < (this.blockHeight))
+          return true;
+      return false;
+  }
+
+  isValidGen = (genX:number, genY:number):boolean => {
+  for (const block of this.myBlocks)
+    {
+      if (this.checkBlockColi(genX, genY, block))  
         return (false);
     }
     return (true);
   }
 
-const generateBlocks = () => {
-
-  const genX = ref(0);
-  const genY = ref(0);
-  const j = ref(0);
-  while ( j.value < 25)
+  setBlocks() {
+  if (!this.gameIsBlocks)
   {
-    genX.value = pongWidth.value*2/3 - pongWidth.value/3 * Math.random();
-    genY.value = (pongHeight.value - 2*blockHeight.value)  - ((pongHeight.value - 4 * blockHeight.value) * Math.random());
-
-    if (genX.value > pongWidth.value/2)
-      genX.value -= genX.value % (blockWidth.value * 1.5);
-    else
-      genX.value += (blockWidth.value * 1.5) - genX.value % (blockWidth.value * 1.5);
-    if (genX.value > pongHeight.value/2)
-      genY.value -= genY.value % (blockHeight.value * 1.5 );
-    else
-      genY.value += (blockWidth.value * 1.5) - genY.value % (blockHeight.value * 1.5 );
-
-    if (isValidGen(genX.value, genY.value))
-      break ;
-    j.value++;
+    this.gameIsBlocks = true;
+    this.blockStatus = 'ENABLED';
   }
-  if (j.value == 25)
+  else
+  {
+    this.gameIsBlocks = false;
+    this.blockStatus = 'DISABLED';
+  }
+}
+
+
+ generateBlocks() {
+
+  let genX = 0;
+  let genY = 0;
+  let j = 0;
+  while ( j < 25)
+  {
+    genX = this.width*2/3 - this.width/3 * Math.random();
+    genY = (this.height - 1*this.blockHeight)  - ((this.height - 2 * this.blockHeight) * Math.random()) + 5;
+
+    if (genX > this.width/2)
+      genX -= genX % (this.blockWidth * this.blockSpace);
+    else
+      genX += (this.blockWidth * this.blockSpace) - genX % (this.blockWidth * this.blockSpace);
+    if (genX > this.height/2)
+      genY -= genY % (this.blockHeight * this.blockSpace );
+    else
+      genY += (this.blockWidth * this.blockSpace) - genY % (this.blockHeight * this.blockSpace );
+
+    if (this.isValidGen(genX, genY))
+      break ;
+    j++;
+  }
+  if (j == 25)
     return ;
-  switch ((Math.floor(100 * Math.random())) % 4)
+  this.blockId++;
+  switch ((Math.floor(100 * Math.random())) % 5)
   {
     case 0:
     {
-      myBlocks.value.push(new EffectBlock(genX.value,
-                            genY.value,
-                            blockWidth.value, blockHeight.value, '#deec1c' , "PING"));
+      this.myBlocks.push(new EffectBlock(this, genX,
+                            genY,
+                            this.blockWidth, this.blockHeight, '#deec1c' , "R_SLOW"));
       break ;
     }
     case 1:
     {
-      myBlocks.value.push(new EffectBlock(genX.value,
-                            genY.value,
-                            blockWidth.value, blockHeight.value, '#d24dff' , "SLOW"));
+      this.myBlocks.push(new EffectBlock(this, genX,
+                            genY,
+                            this.blockWidth, this.blockHeight, '#d24dff' , "SLOW"));
       break ;
     }
     case 2:
     {
-      myBlocks.value.push(new EffectBlock(genX.value,
-                            genY.value,
-                            blockWidth.value, blockHeight.value, '#000000' , "SOLID"));
+      this.myBlocks.push(new EffectBlock(this, genX,
+                            genY,
+                            this.blockWidth, this.blockHeight, '#c7911c' , "WALL"));
       break ;
     }
     case 3: {
-      myBlocks.value.push(new EffectBlock(genX.value, genY.value, blockWidth.value, blockHeight.value, '#5a0899', "TP"));
+      this.myBlocks.push(new EffectBlock(this, genX,
+      genY,
+      this.blockWidth, this.blockHeight, '#5a0899', "TP"));
+      break;
+    }
+    case 4: {
+      this.myBlocks.push(new EffectBlock(this, genX,
+      genY,
+      this.blockWidth, this.blockHeight, '#3fe6f2', "newBall"));
       break;
     }
   }
+}
 
+ removeBlock = (blockId: number) => {
+    this.myBlocks = this.myBlocks.filter(block => block.id !== blockId);
+}
+}
 
+/*******************End PongGameClass*******************/
+
+export default defineComponent({
+  name: 'FpsComponent',
+
+setup()
+  {
+    const   myCanvas = ref<(HTMLCanvasElement | null)>(null);
+    let     ctx :CanvasRenderingContext2D | null = null;
+    const Pong = ref(new PongGameClass());
+
+    const { fps } = useFPS();
+  
+const drawBall = () => {
+  if (!ctx)
+    return ;
+  ctx.beginPath();
+  ctx.arc(Pong.value.theBall.x, Pong.value.theBall.y, Pong.value.theBall.radius, 0, Math.PI * 2);
+  
+  ctx.fillStyle = Pong.value.theBall.color; 
+  ctx.fill();
+  ctx.closePath();
+  for (const ball of Pong.value.myBalls)
+  {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = ball.color; 
+    ctx.fill();
+    ctx.closePath();
+  }
   
 }
 
-const removeBlock = (blockId: number) => {
-    myBlocks.value = myBlocks.value.filter(block => block.id !== blockId);
+const drawPaddle = (x:number, y:number, width:number, height:number, color:string) => {
+  if (!ctx)
+    return ;
+  ctx.beginPath();
+  ctx.rect(x, y, width, height);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.closePath();
 }
- 
 
-/***********************COMPUTED***********************/
+const drawBlocks = () => {
+  if (!ctx)
+    return ;
+  for (const block of Pong.value.myBlocks)
+  {
+    ctx.beginPath();
+    ctx.rect(block.x, block.y, block.width, block.height);
+    ctx.fillStyle = block.color;
+    ctx.fill();
+    ctx.closePath();
+  }
+}
 
-const leftPaddleStyle = computed(() => ({
-  top: `${leftPaddleY.value}px`,
-  left: `${paddleOffset.value}px`,
-  '--paddle-width': `${leftPaddleWidth.value}px`,
-  '--paddle-height': `${leftPaddleHeight.value}px`,
-}));
 
-const rightPaddleStyle = computed(() => ({
-  top: `${rightPaddleY.value}px`,
-  right: `${paddleOffset.value}px`,
-  '--paddle-width': `${rightPaddleWidth.value}px`,
-  '--paddle-height': `${rightPaddleHeight.value}px`,
-}));
+const gameLoop = () => {
+  if (!ctx)
+    return ;
+  ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
+  // Pong.value.generateBlocks();
+  Pong.value.bot();
+  Pong.value.moovePaddles();
+  Pong.value.theBall.ballColision();
+  for (const ball of Pong.value.myBalls)
+  {
+    ball.ballColision();
+  }
+  drawBlocks();
+  drawBall();
+  drawPaddle(Pong.value.paddleOffset, Pong.value.leftPaddleY, Pong.value.leftPaddleWidth, Pong.value.leftPaddleHeight, Pong.value.leftPaddleColor);
+  drawPaddle(Pong.value.width - Pong.value.paddleOffset - Pong.value.rightPaddleWidth, Pong.value.rightPaddleY, Pong.value.rightPaddleWidth, Pong.value.rightPaddleHeight, Pong.value.rightPaddleColor);
+  for (const ball of Pong.value.myBalls)
+  {
+    ball.ballColision();
+  }
+}
 
-const pongStyle = computed(() => ({
-  '--pongWidth': `${pongWidth.value}px`,
-  '--pongHeight': `${pongHeight.value}px`,
-}));
-
-const ballStyle = computed(() => ({
-  top: `${ballY.value}px`,
-  left: `${ballX.value}px`,
-  '--ball-size': `${ballSize.value}px`,
-}));
-
-const blocks = computed(() => myBlocks.value);
 
 onMounted(() => {
-  setInterval(gameLoop, gameTick);
-  window.addEventListener('keydown', handleKeyDown);
-  window.addEventListener('keyup', handleKeyUp);
-})
+  if (myCanvas.value) {
+        ctx = myCanvas.value.getContext('2d');
+        if (ctx)
+        {
+            window.addEventListener('keydown', Pong.value.handleKeyDown);
+            window.addEventListener('keyup', Pong.value.handleKeyUp);
+            setInterval(gameLoop, gameTick);
+        }
+      }
+    });
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', Pong.value.handleKeyDown);
+  window.removeEventListener('keyup', Pong.value.handleKeyUp);
+});
+
+
+const pongStyle = computed(() => ({
+'--width': `${Pong.value.width*3}px`,
+'--height': `${Pong.value.height*3}px`,
+}));
+
+
+const computedCanvasStyle = computed(() => ({
+'--canvasWidth': `${Pong.value.width}px`,
+'--canvasHeight': `${Pong.value.height}px`, 
+
+}));
+
 
 
 return {
-  ballStyle,
-  leftPaddleStyle,
-  rightPaddleStyle,
-  scoreA,
-  scoreB,
-  line,
-  veloBallX,
-  veloBallY,
-  startMatchSolo,
-  restartMatch,
-  startMatchMultiLocal,
-  startNoPlayer,
-  startWall,
-  gameIsRunning,
-  leftPlayerKeyUp,
-  leftPlayerKeyDown,
-  rightPlayerKeyUp,
-  rightPlayerKeyDown,
-  pongStyle,
-  ping,
-  pong,
-  blocks,
-  setBlocks,
-  blockStatus,
+Pong,
+pongStyle,
+myCanvas,
+computedCanvasStyle,
+fps,
 };
+
 }
-
-},
-
+});
 
 
 
-);
+
 </script>
-
-
-
 
