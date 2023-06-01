@@ -17,15 +17,13 @@
             <!-- <button @click="RefreshPost" class="btn-users">Refresh</button> -->
         </div>
     </section>
-    <div class="popup" @click="PopUp()">Click me!
-        <span class="popuptext" id="myPopup">Popup text...</span>
-    </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import axios from 'axios';
 import store from '@/store';
+import { server } from "@/helper"
 
 declare interface User {
     id: string,
@@ -60,16 +58,10 @@ export default defineComponent ({
   },
 
   methods: {
-    PopUp() {
-        const popup = document.getElementById("myPopup");
-        if (popup)
-            popup.classList.toggle("show");
-        else
-            console.log("popup is null");
-    },
 
     async SignUpPost() {
-        const result = await axios.post('http://localhost:3000/api/auth/local/signup', {
+        axios.defaults.baseURL = server.baseUrl;
+        const result = await axios.post('/api/auth/local/signup', {
             email: this.email,
             password: this.email,
         }, {
@@ -89,7 +81,6 @@ export default defineComponent ({
         })
         this.email = '';
         this.password = '';
-        console.log(result);
     },
 
     isLogged : () => { 
@@ -97,7 +88,8 @@ export default defineComponent ({
     },
 
     async SignInPost() {
-        const result = await axios.post('http://localhost:3000/api/auth/local/signin', {
+        axios.defaults.baseURL = server.baseUrl;
+        const result = await axios.post('/api/auth/local/signin', {
             email: this.email,
             password: this.email,
         }, {
@@ -121,7 +113,8 @@ export default defineComponent ({
     },
 
     async LogoutPost() {
-        await axios.post('http://localhost:3000/api/auth/logout', {}, {
+        axios.defaults.baseURL = server.baseUrl;
+        await axios.post('api/auth/logout', {}, {
             timeout: 1000,
             headers: {'Authorization': `Bearer ${this.AccessToken}`}
         })
@@ -139,7 +132,8 @@ export default defineComponent ({
     },
 
     async RefreshPost() {
-        await axios.post('http://localhost:3000/api/auth/refresh', {}, {
+        axios.defaults.baseURL = server.baseUrl;
+        await axios.post('/api/auth/refresh', {}, {
             timeout: 1000,
             headers: {'Authorization': `Bearer ${this.AccessToken}`}
         })

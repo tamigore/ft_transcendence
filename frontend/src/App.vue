@@ -11,14 +11,14 @@
   <div class="flex-item">
     <InputChat />
   </div>
-  <!-- <div class="container" v-if="isLogged() && is2F()">
+  <div class="container" v-if="isLogged()">
     <div class="flex-item">
       <MessagesDisplay />
     </div>
     <div class="flex-item">
       <PongGame />
     </div>
-  </div> -->
+  </div>
 </template>
 
 <style>

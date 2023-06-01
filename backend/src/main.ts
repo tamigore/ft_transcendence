@@ -12,7 +12,7 @@ async function bootstrap() {
 
   // Is it important ?
   app.enableCors({
-    origin: ["http://localhost:8080", "http://localhost:8080/"],
+    origin: ["*:*"],
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"],
@@ -21,7 +21,7 @@ async function bootstrap() {
   ConfigModule.forRoot({
     envFilePath: "../../.env",
   });
-  console.log(process.env);
+  // console.log(process.env);
 
   // Use Cookie
   app.use(cookieParser());
