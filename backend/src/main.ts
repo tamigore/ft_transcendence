@@ -18,10 +18,10 @@ async function bootstrap() {
     allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"],
   });
 
-  // ConfigModule.forRoot({
-  //   envFilePath: "../.env",
-  // });
-  // console.log(process.env);
+  ConfigModule.forRoot({
+    envFilePath: "../../.env",
+  });
+  console.log(process.env);
 
   // Use Cookie
   app.use(cookieParser());

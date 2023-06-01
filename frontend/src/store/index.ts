@@ -1,9 +1,11 @@
-import { createStore } from 'vuex'
-import { ref } from 'vue'
+import { ref } from 'vue';
+import { createStore } from 'vuex';
 
 const store = createStore({
     state: {
+        socketMessage: '',
         status: '',
+        isConnected: false,
         isLoggedIn: false,
         guest: false, 
         isEnterCode: false,
@@ -38,6 +40,15 @@ const store = createStore({
         avatarProfile: ref(null),
     },
     mutations: {
+        SOCKET_CONNECT(state) {
+            state.isConnected = true;
+        },
+        SOCKET_DISCONNECT(state) {
+            state.isConnected = false;
+        },
+        SOCKET_MESSAGECHANNEL(state, message) {
+            state.socketMessage = message
+        },
         updateWatchGame: function (state, game) {
             state.user.watchGame = game;
         },

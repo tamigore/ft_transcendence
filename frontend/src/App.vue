@@ -2,14 +2,23 @@
   <div class="flex-item">
     <Log />
   </div>
-  <div class="container" v-if="isLogged() && is2F()">
+  <div class="flex-item">
+    <ConnectionState />
+  </div>
+  <div class="flex-item">
+    <ConnectionManager />
+  </div>
+  <div class="flex-item">
+    <InputChat />
+  </div>
+  <!-- <div class="container" v-if="isLogged() && is2F()">
     <div class="flex-item">
       <MessagesDisplay />
     </div>
     <div class="flex-item">
       <PongGame />
     </div>
-  </div>
+  </div> -->
 </template>
 
 <style>
@@ -25,9 +34,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import MessagesDisplay from './components/MessagesDisplay.vue';
-import PongGame from './components/PongGame.vue';
+// import MessagesDisplay from './components/MessagesDisplay.vue';
+// import PongGame from './components/PongGame.vue';
 import Log from './components/Log.vue';
+import ConnectionState from './components/ConnectionState.vue';
+import ConnectionManager from './components/ConnectionManager.vue';
+import InputChat from './components/Chat.vue';
 // import router from '@/router';
 import store from '@/store';
 // import axios from 'axios';
@@ -36,9 +48,12 @@ import store from '@/store';
 
 export default defineComponent({
   components: {
-    MessagesDisplay,
-    PongGame,
-    Log
+    // MessagesDisplay,
+    // PongGame,
+    Log,
+    ConnectionState,
+    ConnectionManager,
+    InputChat
   },
 
   methods : {

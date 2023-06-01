@@ -22,4 +22,14 @@ export class UserService {
   // }
 
   // async getUser(dto: User): Promise<User> {}
+  // async socketOffline(socketId: string) {
+  //   const user = await this.prisma.user.update({
+  //     where: {
+  //       socketId : socketId,
+  //     },
+  //     data: {
+  //       socketId: "",
+  //     },
+  //   });
+  //   return user;
 }

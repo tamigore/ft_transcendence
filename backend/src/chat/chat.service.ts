@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { Chat } from "./chat.entity";
 import { PrismaService } from "../prisma/prisma.service";
@@ -5,13 +6,12 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
 
 @Injectable()
 export class ChatService {
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async createMessage(chat: Chat)//: Promise<Chat>
-  {
-    const res = await this.prisma.chat
+  async createMessage(
+    chat: Chat //: Promise<Chat>
+  ) {
+    const res = await this.prisma.message
       .create({
         data: {
           username: chat.username,
@@ -27,11 +27,9 @@ export class ChatService {
         }
         throw error;
       });
-    // return res;
   }
 
-  async getMessages()//: Promise<Chat[]>
-  {
+  async getMessages() { //: Promise<Chat[]>
     // return await this.prisma.chat.findMany();
   }
 }
