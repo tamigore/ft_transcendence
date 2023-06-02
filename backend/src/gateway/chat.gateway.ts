@@ -5,9 +5,20 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
+import { createServer } from "http";
 import { Server } from "socket.io";
 
-@WebSocketGateway()
+const httpServer = createServer();
+const io = new Server(httpServer, {
+  // options
+});
+io.on("connection", (socket) => {
+  console.log("CONNECT ???");
+});
+
+
+
+@WebSocketGateway(8082)
 export class ChatGateway implements OnModuleInit {
   @WebSocketServer()
   server: Server;

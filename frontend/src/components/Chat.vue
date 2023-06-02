@@ -40,6 +40,7 @@ export default defineComponent({
     },
     methods: {
         onSubmit() {
+            console.log("test : " + state.hostname);
             this.isLoading = true;
             socket.timeout(1000).emit("newMessage", this.value, () => {
                 this.isLoading = false;

@@ -4,7 +4,7 @@ import { server } from "@/helper";
 
 export const state = reactive({
   connected: false,
-  // hostname: new URL(location.href),
+  hostname: server.baseUrl,
   logEvents: [],
   msgEvents: [],
   gameEvents: [],
@@ -14,8 +14,8 @@ export const state = reactive({
 // "undefined" means the URL will be computed from the `window.location` object
 // const URL = process.env.NODE_ENV === "production" ? undefined : "http://:3000";
 const URL = server.baseUrl;
-
-export const socket = io(URL, { transports : ['websocket', 'polling', 'flashsocket'] });
+console.log("test : " + URL);
+export const socket = io(URL, { transports : ['websocket', 'polling', 'flashsocket']});
 
 socket.on("connect", () => {
   state.connected = true;
