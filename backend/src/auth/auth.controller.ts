@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Post,
   UseGuards,
+  Header
 } from "@nestjs/common";
 
 import { Public, GetCurrentUserId, GetCurrentUser } from "../common/decorators";
@@ -32,6 +33,7 @@ export class AuthController {
   }
 
   @Post("logout")
+  @Header("Access-Control-Allow-Origin", "*")// Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   logout(@GetCurrentUserId() userId: number): Promise<boolean> {
     return this.authService.logout(userId);

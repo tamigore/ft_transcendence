@@ -116,8 +116,6 @@ text-align: right;
 text-align: left;
 }
 
-
-
 .pong {
   position: relative;
   width: var(--width, 10px);
@@ -127,16 +125,10 @@ text-align: left;
   overflow: hidden;
 }
 
-
 </style>
 
-
-
-
 <script lang="ts">
-import { defineComponent,onMounted,onUnmounted, ref, Ref, computed, watch, created } from 'vue';
-// import {EffectBlock} from './BlockClass';
-// import {BallClass} from './BallClass';
+import { defineComponent,onMounted,onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import {
   SetPongWidth,
@@ -183,7 +175,7 @@ class EffectBlock{
     height: number;
     color: string;
     id: number;
-    pong : Ref<PongGameClass>;
+    pong : PongGameClass;
 
     constructor(Pong: PongGameClass, x: number, y: number, width: number, height: number, color: string, effect: string) {
         this.x = x;
@@ -192,8 +184,8 @@ class EffectBlock{
         this.height = height;
         this.effect = effect;
         this.color = color;
-        this.pong = ref(Pong);
-        this.id = this.pong.value.blockId;
+        this.pong = Pong;
+        this.id = this.pong.blockId;
     }
 
     triggerEffect(ball:BallClass): void {
@@ -213,19 +205,19 @@ class EffectBlock{
       }
       else if (this.effect === "TP")
       {
-        for (const block of ball.pong.value.myBlocks) {
+        for (const block of ball.pong.myBlocks) {
           if (block.effect === "TP" && block.id != this.id)
           {
             ball.x = block.x + block.width / 2
             ball.y = block.y + block.height / 2;
-            ball.pong.value.removeBlock(block.id);
+            ball.pong.removeBlock(block.id);
             return;
           }
         }
       }
       else if (this.effect === "newBall")
       {
-        ball.pong.value.newBall('blue', this.x + this.width/2, this.y + this.height/2, 1, ball.veloX/Math.abs(ball.veloX));
+        ball.pong.newBall('blue', this.x + this.width/2, this.y + this.height/2, 1, ball.veloX/Math.abs(ball.veloX));
       }
 
       
@@ -301,8 +293,8 @@ class BallClass {
       if (this.y - this.radius <= paddleY + paddleHeight && this.y + this.radius >= paddleY)
       {
           this.veloX = sign * (Math.abs(this.veloX) + Math.random() / 3);
-        if (this.veloX >= this.pong.ballMaxSpeedX || this.veloX <= -this.pong.ballMaxSpeedX)
-          this.veloX = this.pong.ballMaxSpeedX * sign;
+        if (this.veloX >= ballMaxSpeedX || this.veloX <= - ballMaxSpeedX)
+          this.veloX = ballMaxSpeedX * sign;
         if (this.pong.gameIsBlocks && Math.random() < 0.6)
           this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight/2 - this.y) / paddleHeight/2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
@@ -375,7 +367,7 @@ class BallClass {
         }
         
         this.ballBlockColision();
-        const nbr = this.pong.num_ping + this.pong.num_pong;
+        // const nbr = this.pong.num_ping + this.pong.num_pong;
         this.ballWallColision();
         if (this.x < this.pong.width/3 &&
             this.ballPaddleColision(Math.abs(this.pong.paddleOffset + this.pong.leftPaddleWidth - this.pong.width/2),
@@ -508,8 +500,6 @@ this.paddleOffset = SetPaddleOffset;
 
 this.ballStartSpeedX = setBallStartSpeedX;
 this.ballStartSpeedY = setBallStartSpeedY;
-
-
 
 this.num_ping = 0;
 this.num_pong = 0;

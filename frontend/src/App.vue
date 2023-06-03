@@ -13,9 +13,6 @@
   </div>
   <div class="container" v-if="isLogged()">
     <div class="flex-item">
-      <MessagesDisplay />
-    </div>
-    <div class="flex-item">
       <PongGame />
     </div>
   </div>
@@ -24,7 +21,7 @@
 <style>
 .container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-between;
 }
 .flex-item {
@@ -34,22 +31,18 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-// import MessagesDisplay from './components/MessagesDisplay.vue';
-// import PongGame from './components/PongGame.vue';
+import PongGame from './components/PongGame.vue';
 import Log from './components/Log.vue';
 import ConnectionState from './components/ConnectionState.vue';
 import ConnectionManager from './components/ConnectionManager.vue';
 import InputChat from './components/Chat.vue';
 // import router from '@/router';
 import store from '@/store';
-// import axios from 'axios';
-// import { sessionStorage, useSessionStorage } from "vue-composable";
 
 
 export default defineComponent({
   components: {
-    // MessagesDisplay,
-    // PongGame,
+    PongGame,
     Log,
     ConnectionState,
     ConnectionManager,

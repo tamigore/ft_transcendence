@@ -10,7 +10,45 @@
 
 <script lang="ts">
 import { socket, state } from "@/socket";
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
+
+// declare interface Message {
+//     user: string;
+//     text: string;
+//     object: string;
+//     channel: string;
+// }
+
+// function createMessageStack()
+// {
+//     const message = {} as Message;
+//     const messageStack = [] as Message[];
+//     console.log(state.msgEvents);
+//     for (const msg of state.msgEvents) {
+//         message.user = JSON.parse(JSON.stringify(msg)).user;
+//         message.text = JSON.parse(JSON.stringify(msg)).text;
+//         message.object = JSON.parse(JSON.stringify(msg)).object;
+//         message.channel = JSON.parse(JSON.stringify(msg)).channel;
+//         console.log(message);
+//         messageStack.push(message);
+//     }
+//     console.log("end of createMessageStack");
+//     return messageStack;
+// }
+
+// function add2MessageStack(messageStack: Message[], msg: string)
+// {
+//     const message = {} as Message;
+//     console.log(msg);
+//     message.user = JSON.parse(JSON.stringify(msg)).user;
+//     message.text = JSON.parse(JSON.stringify(msg)).text;
+//     message.object = JSON.parse(JSON.stringify(msg)).object;
+//     message.channel = JSON.parse(JSON.stringify(msg)).channel;
+//     console.log(message);
+//     messageStack.push(message);
+//     console.log("end of add2MessageStack");
+//     return messageStack;
+// }
 
 export default defineComponent({
     name: "InputChat",
@@ -19,28 +57,20 @@ export default defineComponent({
         return {
             isLoading: false,
             value: "",
-            user: "",
-            inputString: '',
-            messageStack: state.msgEvents,
+            // messageStack: [] as Message[],
+            messageStack: state.msgEvents as string[],
         }
     },
-
-    socket: {
-        onMessage(data: any) {
-            console.log(data.content);
-            this.messageStack.push(data.content);
-        },
-
-        SOCKET_onMessage(data: any) {
-            console.log(data.content);
-            this.messageStack.push(data.content);
-        }
-    },
-    activate: {
-    },
+    // mounted () {
+    //     this.messageStack = createMessageStack();
+    //     console.log("Chat Mounted");
+    // },
+    // updated() {
+    //     this.messageStack = add2MessageStack(this.messageStack, state.msgEvents[state.msgEvents.length - 1]);
+    //     console.log("Chat Updated");
+    // },
     methods: {
         onSubmit() {
-            console.log("test : " + state.hostname);
             this.isLoading = true;
             socket.timeout(1000).emit("newMessage", this.value, () => {
                 this.isLoading = false;

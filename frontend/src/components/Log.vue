@@ -25,30 +25,30 @@ import axios from 'axios';
 import store from '@/store';
 import { server } from "@/helper"
 
-declare interface User {
-    id: string,
-    login42: string,
-    avatar42: string,
-    wins: number,
-    losses: number,
-    total_games: number,
-    score: number,
-    ladderpos: number,
-    status: string,
-    isTwoFactorAuthentificationEnabled: false,
-    access_token: string,
-    refresh_token: string,
-    username: string,
-    avatarId: string,
-    watchGame: string,
-}
+
+// declare interface User {
+//     id: string,
+//     login42: string,
+//     avatar42: string,
+//     wins: number,
+//     losses: number,
+//     total_games: number,
+//     score: number,
+//     ladderpos: number,
+//     status: string,
+//     isTwoFactorAuthentificationEnabled: false,
+//     access_token: string,
+//     refresh_token: string,
+//     username: string,
+//     avatarId: string,
+//     watchGame: string,
+// }
 
 export default defineComponent ({
   name: "GetPage",
   
   data() {
     return {
-      users: new Array<User>(),
       loading: false,
       email: '',
       password: '',
@@ -60,8 +60,8 @@ export default defineComponent ({
   methods: {
 
     async SignUpPost() {
-        axios.defaults.baseURL = server.baseUrl;
-        const result = await axios.post('/api/auth/local/signup', {
+        axios.defaults.baseURL = server.nestUrl;
+        await axios.post('/api/auth/local/signup', {
             email: this.email,
             password: this.email,
         }, {
@@ -69,15 +69,16 @@ export default defineComponent ({
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         })
-        .then((response) => {
+        .then((response: any) => {
             console.log(response);
             this.AccessToken = response.data.access_token;
             this.RefreshToken = response.data.refresh_token;
             store.commit('isLogged', true);
             console.log(store.state.isLoggedIn) // -> 1   
         })
-        .catch((error) => {
+        .catch((error: any) => {
             console.log(error)
+            throw new Error("Signup failed: " + error);
         })
         this.email = '';
         this.password = '';
@@ -88,8 +89,8 @@ export default defineComponent ({
     },
 
     async SignInPost() {
-        axios.defaults.baseURL = server.baseUrl;
-        const result = await axios.post('/api/auth/local/signin', {
+        axios.defaults.baseURL = server.nestUrl;
+        await axios.post('/api/auth/local/signin', {
             email: this.email,
             password: this.email,
         }, {
@@ -97,23 +98,23 @@ export default defineComponent ({
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         })
-        .then((response) => {
+        .then((response: any) => {
             console.log(response);
             this.AccessToken = response.data.access_token;
             this.RefreshToken = response.data.refresh_token;
             store.commit('isLogged', true);
             console.log(store.state.isLoggedIn) // -> 1
         })
-        .catch((error) => {
+        .catch((error: any) => {
             console.log(error)
+            throw new Error("SignIn failed: " + error);
         })
         this.email = '';
         this.password = '';
-        console.log(result);
     },
 
     async LogoutPost() {
-        axios.defaults.baseURL = server.baseUrl;
+        axios.defaults.baseURL = server.nestUrl;
         await axios.post('api/auth/logout', {}, {
             timeout: 1000,
             headers: {'Authorization': `Bearer ${this.AccessToken}`}
@@ -128,11 +129,12 @@ export default defineComponent ({
         .catch((error) => {
             console.log(error)
             console.log(store.state.isLoggedIn) // -> 0
+            throw new Error("Logout failed: " + error);
         })
     },
 
     async RefreshPost() {
-        axios.defaults.baseURL = server.baseUrl;
+        axios.defaults.baseURL = server.nestUrl;
         await axios.post('/api/auth/refresh', {}, {
             timeout: 1000,
             headers: {'Authorization': `Bearer ${this.AccessToken}`}
@@ -144,6 +146,7 @@ export default defineComponent ({
         })
         .catch((error) => {
             console.log(error)
+            throw new Error("RefreshPost failed: " + error);
         })
     }
   },
