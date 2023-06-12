@@ -3,16 +3,16 @@
 </template>
 
 <script lang="ts">
-import { state } from "@/socket";
+import SocketioChat from "@/socket";
 import { defineComponent } from "vue";
 
 export default defineComponent ({
-name: "ConnectionState",
+    name: "ConnectionState",
 
-computed: {
-    connected() {
-        return state.connected;
+    computed: {
+        connected() {
+            return SocketioChat.state.connected;
+        }
     }
-}
 });
 </script>

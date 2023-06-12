@@ -5,17 +5,17 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { socket } from "@/socket";
+import SocketioChat from "@/socket";
 
 export default defineComponent ({
     name: "ConnectionManager",
 
     methods: {
         connect() {
-            socket.connect();
+            SocketioChat.socket.connect();
         },
         disconnect() {
-            socket.disconnect();
+            SocketioChat.socket.disconnect();
         }
     }
 });

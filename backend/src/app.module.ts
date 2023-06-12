@@ -4,14 +4,16 @@ import { APP_GUARD } from "@nestjs/core";
 import { AuthModule } from "./auth/auth.module";
 import { AtGuard } from "./common/guards";
 import { PrismaModule } from "./prisma/prisma.module";
-import { GatewayModule } from "./gateway/gateway.module";
+import { ChatModule } from "./chat/chat.module";
+import { UserModule } from "./user/user.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     PrismaModule,
-    GatewayModule,
+    ChatModule,
+    UserModule,
   ],
   providers: [
     {

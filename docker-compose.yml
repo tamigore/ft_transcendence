@@ -33,7 +33,7 @@ services:
       - db_net
     restart: unless-stopped
 
-  nestjs:
+  backend:
     container_name: nestjs_container
     build:
       context: ./backend
@@ -54,10 +54,6 @@ services:
       - AT_SECRET
       - RT_SECRET
       - SECRET
-      # - CLIEND_ID_42
-      # - CLIENT_SECRET_42
-      # - CLIENT_REDIRECT_42
-      # - CLIENT_STATE
     ports:
       - '3000:3000'
       - '8081:8081'
@@ -85,7 +81,7 @@ services:
       - ./frontend:/app
       - /app/node_modules/
     depends_on:
-      - nestjs
+      - backend
     networks:
       - front_net
       - back_net

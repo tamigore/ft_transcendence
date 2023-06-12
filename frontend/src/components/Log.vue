@@ -21,32 +21,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import axios from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 import store from '@/store';
-import { server } from "@/helper"
-
-
-// declare interface User {
-//     id: string,
-//     login42: string,
-//     avatar42: string,
-//     wins: number,
-//     losses: number,
-//     total_games: number,
-//     score: number,
-//     ladderpos: number,
-//     status: string,
-//     isTwoFactorAuthentificationEnabled: false,
-//     access_token: string,
-//     refresh_token: string,
-//     username: string,
-//     avatarId: string,
-//     watchGame: string,
-// }
+import { server } from "@/helper";
 
 export default defineComponent ({
   name: "GetPage",
-  
   data() {
     return {
       loading: false,
@@ -56,95 +36,93 @@ export default defineComponent ({
       RefreshToken: ''
     };
   },
-
   methods: {
-
     async SignUpPost() {
         axios.defaults.baseURL = server.nestUrl;
         await axios.post('/api/auth/local/signup', {
             email: this.email,
-            password: this.email,
+            password: this.password,
         }, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         })
-        .then((response: any) => {
+        .then((response: AxiosResponse) => {
             console.log(response);
             this.AccessToken = response.data.access_token;
             this.RefreshToken = response.data.refresh_token;
-            store.commit('isLogged', true);
-            console.log(store.state.isLoggedIn) // -> 1   
+            store.commit("setLogged", true);
+            console.log(store.state.user.logged) // -> 1   
         })
-        .catch((error: any) => {
-            console.log(error)
-            throw new Error("Signup failed: " + error);
+        .catch((error: AxiosError) => {
+            console.log(error);
+            // throw new Error("Signup failed :" + error);
+            if (error.response && error.response.status == 403)
+                window.alert("Signup failed : Email already exists");
+            else
+                window.alert("Signup failed :" + error);
         })
         this.email = '';
         this.password = '';
+        store.commit("setUsername", "username");
     },
-
     isLogged : () => { 
-      return store.state.isLoggedIn
+      return store.state.user.logged;
     },
-
     async SignInPost() {
         axios.defaults.baseURL = server.nestUrl;
         await axios.post('/api/auth/local/signin', {
             email: this.email,
-            password: this.email,
+            password: this.password,
         }, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         })
-        .then((response: any) => {
+        .then((response: AxiosResponse) => {
             console.log(response);
             this.AccessToken = response.data.access_token;
             this.RefreshToken = response.data.refresh_token;
-            store.commit('isLogged', true);
-            console.log(store.state.isLoggedIn) // -> 1
+            store.commit("setLogged", true);
+            console.log(store.state.user.logged) // -> 1
         })
-        .catch((error: any) => {
-            console.log(error)
-            throw new Error("SignIn failed: " + error);
+        .catch((error: AxiosError) => {
+            console.log(error);
+            window.alert("Signin failed : Email or password is incorrect");
         })
         this.email = '';
         this.password = '';
     },
-
     async LogoutPost() {
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('api/auth/logout', {}, {
+        await axios.post("api/auth/logout", {}, {
             timeout: 1000,
-            headers: {'Authorization': `Bearer ${this.AccessToken}`}
+            headers: {"Authorization": `Bearer ${this.AccessToken}`}
         })
-        .then((response) => {
+        .then((response: AxiosResponse) => {
             console.log(response)
             this.AccessToken = '';
             this.RefreshToken = '';
-            store.commit('isLogged', false);
-            console.log(store.state.isLoggedIn) // -> 0
+            store.commit("setLogged", false);
+            console.log(store.state.user.logged) // -> 0
         })
-        .catch((error) => {
+        .catch((error: AxiosError) => {
             console.log(error)
-            console.log(store.state.isLoggedIn) // -> 0
             throw new Error("Logout failed: " + error);
         })
     },
-
     async RefreshPost() {
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/auth/refresh', {}, {
+        await axios.post("/api/auth/refresh", {}, {
             timeout: 1000,
-            headers: {'Authorization': `Bearer ${this.AccessToken}`}
+            headers: {"Authorization": `Bearer ${this.AccessToken}`}
         })
-        .then((response) => {
+        .then((response: AxiosResponse) => {
             console.log(response)
             this.AccessToken = response.data.access_token;
             this.RefreshToken = response.data.refresh_token;
         })
-        .catch((error) => {
+        .catch((error: AxiosError) => {
             console.log(error)
             throw new Error("RefreshPost failed: " + error);
         })
@@ -236,7 +214,3 @@ export default defineComponent ({
   to {opacity:1 ;}
 }
 </style>
-
-
-
-

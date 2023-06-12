@@ -16,7 +16,7 @@ export default defineComponent ({
         }
     },
     mounted() { 
-        if (store.state.isLoggedIn == true) {
+        if (store.state.user.logged == true) {
             router.push("/profile");
         return ;
         }

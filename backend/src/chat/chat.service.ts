@@ -1,35 +1,51 @@
 /* eslint-disable prettier/prettier */
 import { ForbiddenException, Injectable } from "@nestjs/common";
-import { Chat } from "./chat.entity";
 import { PrismaService } from "../prisma/prisma.service";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
+import { Message } from "@prisma/client";
 
 @Injectable()
 export class ChatService {
   constructor(private prisma: PrismaService) {}
 
-  async createMessage(
-    chat: Chat //: Promise<Chat>
-  ) {
-    const res = await this.prisma.message
+  async createMessage(message: Message) {
+    await this.prisma.message
       .create({
         data: {
-          username: chat.username,
-          object: chat.object,
-          text: chat.text,
+          username: message.username,
+          object: message.object,
+          text: message.text,
+          channel: message.channel,
         },
       })
       .catch((error: any) => {
-        if (error instanceof PrismaClientKnownRequestError) {
-          if (error.code === "P2002") {
-            throw new ForbiddenException("Credentials incorrect");
-          }
-        }
-        throw error;
+        console.log(error);
+        throw new Error(error);
       });
   }
 
-  async getMessages() { //: Promise<Chat[]>
-    // return await this.prisma.chat.findMany();
+  async getMessages() : Promise<Message[]> {
+    const messages = await this.prisma.message.findMany({});
+    if (!messages) throw new ForbiddenException("Access Denied");
+    return messages;
+  }
+
+  async getUserMessages(user: string) : Promise<Message[]> {
+    const messages = await this.prisma.message.findMany({
+      where: {
+        username: user
+      }
+    });
+    if (!messages) throw new ForbiddenException("Access Denied");
+    return messages;
+  }
+
+  async getMessageID(id: any) : Promise<Message[]> {
+    const message = await this.prisma.message.findMany({
+      where: {
+        id: id
+      }
+    });
+    if (!message) throw new ForbiddenException("Access Denied");
+    return message;
   }
 }
