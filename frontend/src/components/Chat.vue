@@ -1,4 +1,7 @@
 <template>
+    <p>State: {{ connected() }}</p>
+    <button @click="connect()">Connect</button>
+    <button @click="disconnect()">Disconnect</button>
     <form @submit.prevent="onSubmit">
         <input v-model="value" />
         <button type="submit" :disabled="isLoading">Submit</button>
@@ -13,24 +16,21 @@ import SocketioChat from "@/socket";
 import { defineComponent } from "vue";
 import store from "@/store";
 
-class message {
-    username: string;
-    text: string;
-    object: string;
-    channel: string;
-}
-
 export default defineComponent({
     name: "InputChat",
     created() {
         SocketioChat.setupSocketConnection();
+        SocketioChat.socketMessage();
     },
     data() {
         return {
-            isLoading: false,
-            value: "",
+            isLoading: false as boolean,
+            value: "" as string,
             messageStack: SocketioChat.state.msgEvents as string[],
         }
+    },
+    beforeUnmount() {
+        SocketioChat.socket.disconnect();
     },
     methods: {
         onSubmit() {
@@ -44,6 +44,15 @@ export default defineComponent({
             SocketioChat.socket.timeout(1000).emit("cliMessage", message);
             this.isLoading = false;
         },
+        connected () {
+            return (SocketioChat.state.connected ? "Connected" : "Disconnected");
+        },
+        connect() {
+            SocketioChat.socket.connect();
+        },
+        disconnect() {
+            SocketioChat.socket.disconnect();
+        }
     }
 });
 </script>

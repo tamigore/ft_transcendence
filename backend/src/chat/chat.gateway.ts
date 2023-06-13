@@ -30,12 +30,12 @@ export class ChatGateway implements OnModuleInit {
     // const obj = JSON.parse(body);
     this.chatService.createMessage(body);
     this.server.emit("servMessage", {
-      user: body.user,
+      username: body.username,
       text: body.text,
       object: body.object,
       channel: body.channel,
     });
-    this.server.to(body.channel).emit("servMessage", body);
+    // this.server.to(body.channel).emit("servMessage", body);
     console.log("OK ?");
   }
 

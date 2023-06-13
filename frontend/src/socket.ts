@@ -17,15 +17,6 @@ interface ClientToServerEvents {
   cliMessage: (message: message) => void;
 }
 
-// interface InterServerEvents {
-//   ping: () => void;
-// }
-
-// interface SocketData {
-//   name: string;
-//   age: number;
-// }
-
 class SocketioChat {
   socket: Socket<ServerToClientEvents, ClientToServerEvents>;
   state = reactive({

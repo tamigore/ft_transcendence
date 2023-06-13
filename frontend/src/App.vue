@@ -4,12 +4,6 @@
   </div>
   <div class="container" v-if="isLogged()">
     <div class="flex-item">
-      <ConnectionState />
-    </div>
-    <div class="flex-item">
-      <ConnectionManager />
-    </div>
-    <div class="flex-item">
       <InputChat />
     </div>
     <div>
@@ -36,8 +30,6 @@
 import { defineComponent } from 'vue';
 import PongGame from './components/PongGame.vue';
 import Log from './components/Log.vue';
-import ConnectionState from './components/ConnectionState.vue';
-import ConnectionManager from './components/ConnectionManager.vue';
 import InputChat from './components/Chat.vue';
 import BubbleChat from './components/MessagesDisplay.vue';
 // import router from '@/router';
@@ -48,8 +40,6 @@ export default defineComponent({
   components: {
     PongGame,
     Log,
-    ConnectionState,
-    ConnectionManager,
     InputChat,
     BubbleChat,
   },

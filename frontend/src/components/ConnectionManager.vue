@@ -9,7 +9,6 @@ import SocketioChat from "@/socket";
 
 export default defineComponent ({
     name: "ConnectionManager",
-
     methods: {
         connect() {
             SocketioChat.socket.connect();
