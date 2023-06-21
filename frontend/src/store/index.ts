@@ -10,9 +10,13 @@ const store = createStore({
             hash: "" as string,
             hashRT: "" as string,
             chatSocket: "" as string,
+            gameSocket: "" as string,
+            avatar: "" as string,
         },
         chat: {
-            messages: [] as string[],
+            connected: false as boolean,
+            socket: "" as string,
+            messages: [] as {username: string, text: string, object: string, channel: string}[],
             channels: [] as string[],
             channel: "general" as string,
         }
@@ -20,9 +24,6 @@ const store = createStore({
     mutations: {
         setLogged: function (state, islog: boolean) {
             state.user.logged = islog;
-        },
-        setChatSocket: function (state, socket: string) {
-            state.user.chatSocket = socket;
         },
         setUsername: function (state, username: string) {
             state.user.username = username;
@@ -32,6 +33,22 @@ const store = createStore({
         },
         setHashRT: function (state, hashRT: string) {
             state.user.hashRT = hashRT;
+        },
+        setChatConnect : function (state, chatConnect: boolean) {
+            state.chat.connected = chatConnect;
+        },
+        setChatSocket : function (state, chatSocket: string) {
+            state.chat.socket = chatSocket;
+            state.user.chatSocket = chatSocket;
+        },
+        setChatMessages : function (state, chatMessage: {username: string, text: string, object: string, channel: string}) {
+            state.chat.messages.push(chatMessage);
+        },
+        setChatChannels : function (state, chatChannel: string) {
+            state.chat.channels.push(chatChannel);
+        },
+        setChatChannel : function (state, chatChannel: string) {
+            state.chat.channel = chatChannel;
         },
     },
 })

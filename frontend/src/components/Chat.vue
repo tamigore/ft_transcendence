@@ -7,7 +7,7 @@
         <button type="submit" :disabled="isLoading">Submit</button>
     </form>
     <div class="messageStack">
-      <p v-for="message in messageStack" :key="message">{{ message }}</p>
+      <p v-for="message in messageStack" :key="message.text">{{ message }}</p>
     </div>
 </template>
 
@@ -19,18 +19,18 @@ import store from "@/store";
 export default defineComponent({
     name: "InputChat",
     created() {
-        SocketioChat.setupSocketConnection();
-        SocketioChat.socketMessage();
+        this.socketio.setupSocketConnection();
     },
     data() {
         return {
+            socketio: SocketioChat as typeof SocketioChat,
             isLoading: false as boolean,
             value: "" as string,
-            messageStack: SocketioChat.state.msgEvents as string[],
+            messageStack: store.state.chat.messages as {username: string, text: string, object: string, channel: string}[],
         }
     },
     beforeUnmount() {
-        SocketioChat.socket.disconnect();
+        this.socketio.socket.disconnect();
     },
     methods: {
         onSubmit() {
@@ -41,17 +41,17 @@ export default defineComponent({
                 object: "message",
                 channel: "general"
             }
-            SocketioChat.socket.timeout(1000).emit("cliMessage", message);
+            this.socketio.socket.timeout(1000).emit("cliMessage", message);
             this.isLoading = false;
         },
         connected () {
-            return (SocketioChat.state.connected ? "Connected" : "Disconnected");
+            return (store.state.chat.connected ? "Connected" : "Disconnected");
         },
         connect() {
-            SocketioChat.socket.connect();
+            this.socketio.socket.connect();
         },
         disconnect() {
-            SocketioChat.socket.disconnect();
+            this.socketio.socket.disconnect();
         }
     }
 });

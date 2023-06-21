@@ -14,7 +14,7 @@
             <div class="fetch-profile" v-else>
                 <button @click="LogoutPost" class="btn-users">Logout</button>
             </div>
-            <!-- <button @click="RefreshPost" class="btn-users">Refresh</button> -->
+            <button @click="RefreshPost" class="btn-users">Refresh</button>
         </div>
     </section>
 </template>
@@ -26,15 +26,16 @@ import store from '@/store';
 import { server } from "@/helper";
 
 export default defineComponent ({
-  name: "GetPage",
+  name: "LogCompon",
   data() {
     return {
       loading: false,
-      email: '',
-      password: '',
-      AccessToken: '',
-      RefreshToken: ''
+      email: "",
+      password: "",
     };
+  },
+  async beforeUnmount() {
+    await this.LogoutPost();
   },
   methods: {
     async SignUpPost() {
@@ -49,10 +50,12 @@ export default defineComponent ({
         })
         .then((response: AxiosResponse) => {
             console.log(response);
-            this.AccessToken = response.data.access_token;
-            this.RefreshToken = response.data.refresh_token;
+            store.commit("setHash", response.data.access_token);
+            store.commit("setHashRT", response.data.refresh_token);
             store.commit("setLogged", true);
-            console.log(store.state.user.logged) // -> 1   
+            // console.log("user logged ? ", store.state.user.logged ? "yes" : "no") // -> 1   
+            store.commit("setUsername", this.email);
+            this.email = "";
         })
         .catch((error: AxiosError) => {
             console.log(error);
@@ -62,9 +65,7 @@ export default defineComponent ({
             else
                 window.alert("Signup failed :" + error);
         })
-        this.email = '';
         this.password = '';
-        store.commit("setUsername", "username");
     },
     isLogged : () => { 
       return store.state.user.logged;
@@ -81,28 +82,29 @@ export default defineComponent ({
         })
         .then((response: AxiosResponse) => {
             console.log(response);
-            this.AccessToken = response.data.access_token;
-            this.RefreshToken = response.data.refresh_token;
+            store.commit("setHash", response.data.access_token);
+            store.commit("setHashRT", response.data.refresh_token);
             store.commit("setLogged", true);
-            console.log(store.state.user.logged) // -> 1
+            store.commit("setUsername", this.email);
+            this.email = "";
+            // console.log("user logged ? ", store.state.user.logged ? "yes" : "no") // -> 1   
         })
         .catch((error: AxiosError) => {
             console.log(error);
             window.alert("Signin failed : Email or password is incorrect");
         })
-        this.email = '';
         this.password = '';
     },
     async LogoutPost() {
         axios.defaults.baseURL = server.nestUrl;
         await axios.post("api/auth/logout", {}, {
             timeout: 1000,
-            headers: {"Authorization": `Bearer ${this.AccessToken}`}
+            headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
         .then((response: AxiosResponse) => {
             console.log(response)
-            this.AccessToken = '';
-            this.RefreshToken = '';
+            store.commit("setHash", "");
+            store.commit("setHashRT", "");
             store.commit("setLogged", false);
             console.log(store.state.user.logged) // -> 0
         })
@@ -110,17 +112,20 @@ export default defineComponent ({
             console.log(error)
             throw new Error("Logout failed: " + error);
         })
+        store.commit("setUsername", "");
+        this.email = "";
+        this.password = "";
     },
     async RefreshPost() {
         axios.defaults.baseURL = server.nestUrl;
         await axios.post("/api/auth/refresh", {}, {
             timeout: 1000,
-            headers: {"Authorization": `Bearer ${this.AccessToken}`}
+            headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
         .then((response: AxiosResponse) => {
             console.log(response)
-            this.AccessToken = response.data.access_token;
-            this.RefreshToken = response.data.refresh_token;
+            store.commit("setHash", response.data.access_token);
+            store.commit("setHashRT", response.data.refresh_token);
         })
         .catch((error: AxiosError) => {
             console.log(error)

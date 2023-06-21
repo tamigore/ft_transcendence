@@ -10,7 +10,6 @@ async function bootstrap() {
   // Protecting endpoints from receiving incorrect data
   app.useGlobalPipes(new ValidationPipe());
 
-  // Is it important ?
   app.enableCors({
     origin: ["http://localhost:8080/", "http://localhost:8080"],
     credentials: true,

@@ -1,12 +1,6 @@
 <template>
   <div class="msger">
     
-    <!-- <header class="msger-header">   
-      <div class="msger-header-title">
-        <i class="fas fa-comment-alt"></i> PongChat
-      </div>    
-    </header> -->
-
     <main class="msger-chat"></main>
 
     <form class="msger-inputarea" @submit="onSubmit">
@@ -83,33 +77,9 @@ export default defineComponent ({
 
 <style>
 :root {
-  /* --body-bg: linear-gradient(135deg, #f5f7fa 0%, black 100%); */
-  /* --border: 2px solid black; */
   --left-msg-bg: red;
   --right-msg-bg: red;
 }
-
-/* html {
-  box-sizing: border-box;
-}
-
-*,
-*:before,
-*:after {
-  margin: 0;
-  padding: 0;
-  box-sizing: inherit;
-} */
-  
-/* 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-image: var(--body-bg);
-  font-family: Helvetica, sans-serif;
-} */
 
 .msger {
   display: flex;
@@ -139,7 +109,6 @@ body {
   justify-content: space-between;
   padding: 10px;
   border-bottom: var(--border);
-  /* background: ; */
   color: green;
 }
 
@@ -203,7 +172,7 @@ body {
 .right-msg {
   flex-direction: row-reverse;
 }
-  
+
 .right-msg .msg-bubble {
   background: var(--right-msg-bg);
   color: black;

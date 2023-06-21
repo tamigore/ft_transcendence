@@ -5,7 +5,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 // import { Message } from "@prisma/client";
 import { ChatService } from "./chat.service";
 
@@ -17,31 +17,40 @@ export class ChatGateway implements OnModuleInit {
   server: Server;
 
   onModuleInit() {
-    this.server.on("connection", (socket) => {
+    this.server.on("connection", (socket: Socket) => {
       console.log("Connected to: ", socket.id);
+      socket.join(socket.id);
       // console.log(socket);
     });
   }
 
   @SubscribeMessage("cliMessage")
   onMessage(@MessageBody() body: any) {
-    console.log("onMessage in chat gateway: body = ");
-    console.log(body);
-    // const obj = JSON.parse(body);
+    console.log("onMessage in chat gateway: body = ", body);
     this.chatService.createMessage(body);
-    this.server.emit("servMessage", {
-      username: body.username,
-      text: body.text,
-      object: body.object,
-      channel: body.channel,
-    });
-    // this.server.to(body.channel).emit("servMessage", body);
-    console.log("OK ?");
+    if (body.channel === "general") {
+      this.server.emit("servMessage", {
+        username: body.username,
+        text: body.text,
+        object: body.object,
+        channel: body.channel,
+      });
+    } else {
+      this.server.to(body.channel).emit("servMessage", {
+        username: body.username,
+        text: body.text,
+        object: body.object,
+        channel: body.channel,
+      });
+    }
   }
 
-  @SubscribeMessage("create")
-  create(@MessageBody() body: any) {
-    console.log("create in chat gateway: body = ");
-    console.log(body);
-  }
+  // @SubscribeMessage("cliChannel")
+  // onChannel(@MessageBody() body: any) {
+  //   console.log("onChannel in chat gateway: body = ", body);
+  //   this.chatService.createMessage(body);
+  //   if (body.channel != "general") {
+  //     this.server.socketsJoin(body.channel);
+  //   }
+  // }
 }

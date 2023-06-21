@@ -30,20 +30,20 @@ model Message {
   created_at DateTime @default(now())
 
   username String
-  object   String?
+  object   String
   text     String
   channel  String
 
   @@map("Messages")
 }
 
-enum Role {
-  USER
-  ADMIN
-}
+// enum Role {
+//   USER
+//   ADMIN
+// }
 
-enum Invite {
-  SPEC
-  PLAY
-  FREND
-}
+// enum Invite {
+//   SPEC
+//   PLAY
+//   FREND
+// }

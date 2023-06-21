@@ -25,7 +25,7 @@ export class ChatService {
 
   async getMessages() : Promise<Message[]> {
     const messages = await this.prisma.message.findMany({});
-    if (!messages) throw new ForbiddenException("Access Denied");
+    if (!messages) throw new ForbiddenException("No messages found");
     return messages;
   }
 
@@ -35,17 +35,17 @@ export class ChatService {
         username: user
       }
     });
-    if (!messages) throw new ForbiddenException("Access Denied");
+    if (!messages) throw new ForbiddenException("No messages found");
     return messages;
   }
 
-  async getMessageID(id: any) : Promise<Message[]> {
-    const message = await this.prisma.message.findMany({
+  async getChannelMessages(channel: string) : Promise<Message[]> {
+    const messages = await this.prisma.message.findMany({
       where: {
-        id: id
+        channel: channel
       }
     });
-    if (!message) throw new ForbiddenException("Access Denied");
-    return message;
+    if (!messages) throw new ForbiddenException("No messages found");
+    return messages;
   }
 }
