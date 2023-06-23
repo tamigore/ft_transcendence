@@ -32,7 +32,7 @@ import { server } from "@/helper";
 import router from '@/router';
 
 export default defineComponent ({
-  name: "LogCompon",
+  name: "SignInCompon",
   data() {
     return {
       email: "",
@@ -59,7 +59,8 @@ export default defineComponent ({
         store.commit("setHash", response.data.access_token);
         store.commit("setHashRT", response.data.refresh_token);
         store.commit("setLogged", true);
-        router.push("/profile");
+        store.commit("setUsername", this.email);
+        router.push({path: '/profile'});
       })
       .catch((error: AxiosError) => {
         console.log(error);
