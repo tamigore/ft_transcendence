@@ -4,7 +4,7 @@
       <div id="menuU" class="user-menu">
         <Menubar :model="items" class="p-menubar">
           <template #start>
-            <img alt="logo" src="./assets/pong.png" height="40" class="mr-2" />
+            <img alt="logo" :src="require(`@/assets/pong.png`)" height="40" class="mr-2" />
           </template>
           <template #itemicon>
             <i class="pi pi-fw pi-user"></i>
@@ -14,9 +14,15 @@
           </template>
         </Menubar>
       </div>
-      <InputChat />
     </nav>
-    <router-view />
+    <div>
+      <Slide>
+        <InputChat />
+      </Slide>
+    </div>
+    <div>
+      <router-view />
+    </div>
   </div>
 </template>
 
@@ -56,9 +62,11 @@ import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { server } from "@/helper";
 import router from './router';
+import { Slide } from "vue3-burger-menu"
 
 export default defineComponent({
   components: {
+    Slide,
     InputChat,
   },
   data() {

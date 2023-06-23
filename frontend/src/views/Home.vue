@@ -16,7 +16,8 @@
         </section>
       </div>
       <div class="h-screen col-12 md:col-6 overflow-hidden myReverseBackground">
-        <img src="./assets/neon-SignUp-ping-pong.jpg" alt="Image" class="md:ml-auto block md:h-full" style="clip-path: polygon(8% 0, 100% 0%, 100% 100%, 0 100%)">
+        <img :src="require(`@/assets/neon-SignUp-ping-pong.jpg`)" alt="Image" class="md:ml-auto block md:h-full" style="clip-path: polygon(8% 0, 100% 0%, 100% 100%, 0 100%)">
+        <!-- src="./assets/neon-SignUp-ping-pong.jpg" -->
       </div>
     </div>
   </div>

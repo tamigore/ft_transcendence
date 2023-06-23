@@ -53,7 +53,6 @@ export default defineComponent ({
             store.commit("setHash", response.data.access_token);
             store.commit("setHashRT", response.data.refresh_token);
             store.commit("setLogged", true);
-            // console.log("user logged ? ", store.state.user.logged ? "yes" : "no") // -> 1   
             store.commit("setUsername", this.email);
             this.email = "";
         })

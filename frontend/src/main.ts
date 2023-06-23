@@ -6,13 +6,7 @@ import router from './router'
 import store from './store'
 
 import "primeflex/primeflex.css";
-// import "primevue/resources/themes/viva-dark/theme.css";
 import "primevue/resources/themes/mdc-dark-deeppurple/theme.css";
-// primevue/resources/themes/soho-dark/theme.css
-// primevue/resources/themes/viva-light/theme.css
-// primevue/resources/themes/lara-dark-indigo/theme.css
-// primevue/resources/themes/lara-dark-purple/theme.css
-// primevue/resources/themes/lara-dark-teal/theme.css
 import "primevue/resources/primevue.min.css";
 import "primeicons/primeicons.css";
 
