@@ -1,7 +1,7 @@
 <template>
   <div class="surface-section">
     <div class="font-medium text-3xl text-900 mb-3">Profile</div>
-    <div class="text-500 mb-5">{{ username }}</div>
+    <div class="text-500 mb-5" style="">{{ username }}</div>
     <ul class="list-none p-0 m-0">
       <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
         <div class="text-500 w-6 md:w-2 font-medium">Email</div>
@@ -26,7 +26,7 @@
         <div class="text-500 w-6 md:w-2 font-medium">Avatar</div>
         <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">{{ avatar }}</div>
         <div class="w-6 md:w-2 flex justify-content-end">
-          <Button label="Edit" icon="pi pi-pencil" class="p-button-text"></Button>
+          <Button @click="ModifUser" label="Edit" icon="pi pi-pencil" class="p-button-text"></Button>
         </div>
       </li>
       <li class="flex align-items-center py-3 px-2 border-top-1 border-bottom-1 surface-border flex-wrap">
@@ -56,6 +56,8 @@
 <script lang="ts">
 import store from '@/store';
 import { defineComponent } from 'vue';
+import { server } from "@/helper"
+import axios, { AxiosResponse, AxiosError } from 'axios';
 
 export default defineComponent ({
   name: 'ProfileView',
@@ -69,6 +71,24 @@ export default defineComponent ({
     }
   },
   methods: {
+    async ModifUser() {
+        axios.defaults.baseURL = server.nestUrl;
+        await axios.post('/api/user/modify', {
+            email: this.email,
+            cmd : "",
+            value : "",
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then((response: AxiosResponse) => {
+            console.log(response);
+        })
+        .catch((error: AxiosError) => {
+            console.log(error);
+        })
+    },
   }
 })
 </script>
