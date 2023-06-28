@@ -6,21 +6,13 @@
           <template #start>
             <img alt="logo" :src="require(`@/assets/pong.png`)" height="40" class="mr-2" />
           </template>
-          <template #itemicon>
-            <i class="pi pi-fw pi-user"></i>
-          </template>
-          <template #end>
-            <InputText placeholder="Search" type="text" />
-          </template>
         </Menubar>
+        <BurgerMenu right>
+          <InputChat />
+        </BurgerMenu>
       </div>
     </nav>
-    <Slide>
-      <InputChat />
-    </Slide>
-    <div>
-      <router-view />
-    </div>
+    <router-view class="border-round box-shadow"/>
   </div>
 </template>
 
@@ -34,12 +26,11 @@
   background-blend-mode: screen;
 }
 
+/* menu bar for navigation */
 .menu-utilisateur {
-  /* background-color: lightgrey; */
   height: 6rem;
 }
 .p-menubar {
-  /* background-color: lightgrey; */
   padding: 1rem;
   height: 6rem;
 }
@@ -50,6 +41,7 @@
   padding: 0.5rem 0.5rem !important;
 }
 
+/* burger menu for chat */
 .bm-burger-button {
   position: fixed;
   width: 36px;
@@ -81,7 +73,7 @@
   width: 24px;
 }
 .bm-menu {
-  height: 100%; /* 100% Full-height */
+  height: 100vh; /* 100% Full-height */
   width: 0; /* 0 width - change this with JavaScript */
   position: fixed; /* Stay in place */
   z-index: 1000; /* Stay on top */
@@ -92,7 +84,6 @@
   padding-top: 60px; /* Place content 60px from the top */
   transition: 0.5s; /*0.5 second transition effect to slide in the sidenav*/
 }
-
 .bm-overlay {
   background: rgba(0, 0, 0, 0.3);
 }
@@ -118,68 +109,35 @@ import { defineComponent, ref } from 'vue';
 import InputChat from './components/Chat.vue';
 import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { server } from "@/helper";
+import { server } from "@/utils/helper";
 import router from './router';
-import { Slide } from "vue3-burger-menu"
+import BurgerMenu from '@/components/BurgerMenu.vue';
 
 export default defineComponent({
   components: {
-    Slide,
     InputChat,
+    BurgerMenu,
   },
   data() {
     return {
       items : ref([
         {
-          label: 'Users',
-          icon: 'pi pi-fw pi-user',
-          items: [
-            {
-              label: 'Logout',
-              icon: 'pi pi-fw pi-user-plus',
-              command: () => {
-                this.LogoutPost();
-              },
-            },
-            {
-              label: 'Search',
-              icon: 'pi pi-fw pi-users',
-              items: [
-                {
-                  label: 'Filter',
-                  icon: 'pi pi-fw pi-filter',
-                  items: [
-                    {
-                      label: 'Print',
-                      icon: 'pi pi-fw pi-print'
-                    }
-                  ]
-                },
-                {
-                  icon: 'pi pi-fw pi-bars',
-                  label: 'List'
-                }
-              ]
-            }
-          ]
-        },
-        {
             label: 'Pong',
-            icon: 'https://primefaces.org/cdn/primevue/images/dock/finder.svg',
+            icon: 'pi pi-circle-fill',
             command: () => {
               router.push("/pong");
             },
         },
         {
             label: 'History',
-            icon: 'https://primefaces.org/cdn/primevue/images/dock/appstore.svg',
+            icon: 'pi pi-history',
             command: () => {
               router.push("/history");// same as router.push({ name: history })
             },
         },
         {
             label: 'Profile',
-            icon: 'https://primefaces.org/cdn/primevue/images/dock/photos.svg',
+            icon: 'pi pi-file',
             command: () => {
               router.push('/profile');
             },

@@ -2,7 +2,8 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import Home from '@/views/Home.vue';
 import Profile from '@/views/Profile.vue';
 import Pong from '@/views/Pong.vue';
-import NotFound from '@/views/404notFound.vue';
+// import NotFound from '@/views/404notFound.vue';
+import Chat from '@/views/ChatView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -23,7 +24,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/history',
     name: 'history',
-    component: NotFound
+    component: Chat
   }
 ]
 

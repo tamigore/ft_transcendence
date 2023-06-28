@@ -3,7 +3,6 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 import { User } from "@prisma/client";
 import { ModifyUserDto } from "./dto";
-// import * as argon from "argon2/argon2";
 
 @Injectable()
 export class UserService {
@@ -16,7 +15,7 @@ export class UserService {
       },
     });
     if (!user) throw new ForbiddenException("Access Denied");
-    if (dto.cmd === "socketId") this.setSocket(user, dto.value);
+    // if (dto.cmd === "socketId") this.setSocket(user, dto.value);
     if (dto.cmd === "description") this.setDescription(user, dto.value);
     if (dto.cmd === "hash") this.setHash(user, dto.value);
     if (dto.cmd === "hashRT") this.setHashRT(user, dto.value);
@@ -24,7 +23,9 @@ export class UserService {
     console.log("User modified: ", user);
   }
 
-  async getUser(dto: User): Promise<User> {
+  async getUser(dto): Promise<User> {
+    console.log("dto: ", dto);
+    if (dto === undefined) throw new ForbiddenException("Access Denied");
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -32,6 +33,31 @@ export class UserService {
     });
     if (!user) throw new ForbiddenException("Access Denied");
     return user;
+  }
+
+  async getUsers(dto): Promise<User[]> {
+    console.log("dto: ", dto);
+    if (dto === undefined) throw new ForbiddenException("Access Denied");
+    const users = await this.prisma.user.findMany({
+      where: {
+        OR: [
+          { id: dto.id },
+          { created_at: dto.created_at },
+          { updated_at: dto.updated_at },
+          { email: dto.email },
+          { username: dto.username },
+          { description: dto.description },
+          { hash: dto.hash },
+          { hashedRt: dto.hashedRt },
+          { chatSocket: dto.chatSocket },
+          { gameSocket: dto.gameSocket },
+          { role: dto.role },
+          { loggedIn: dto.loggedIn },
+        ],
+      },
+    });
+    if (!users) throw new ForbiddenException("Access Denied");
+    return users;
   }
 
   async setDescription(dto: User, newDescription: string) {
@@ -51,7 +77,7 @@ export class UserService {
         email: dto.email,
       },
       data: {
-        socketId: newUsername,
+        username: newUsername,
       },
     });
   }
@@ -78,14 +104,14 @@ export class UserService {
     });
   }
 
-  async setSocket(dto: User, newSocketId: string) {
-    await this.prisma.user.update({
-      where: {
-        email: dto.email,
-      },
-      data: {
-        socketId: newSocketId,
-      },
-    });
-  }
+  // async setSocket(dto: User, newSocketId: string) {
+  //   await this.prisma.user.update({
+  //     where: {
+  //       email: dto.email,
+  //     },
+  //     data: {
+  //       socketId: newSocketId,
+  //     },
+  //   });
+  // }
 }

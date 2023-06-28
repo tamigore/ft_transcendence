@@ -3,15 +3,16 @@ import { createStore } from 'vuex';
 const store = createStore({
     state: {
         user: {
-            logged: false as boolean,
-            username: "" as string,
+            id: 0 as number,
             email: "" as string,
+            username: "" as string,
             description: "" as string,
             hash: "" as string,
             hashRT: "" as string,
             chatSocket: "" as string,
             gameSocket: "" as string,
             avatar: "" as string,
+            logged: false as boolean,
         },
         chat: {
             connected: false as boolean,
@@ -19,9 +20,21 @@ const store = createStore({
             messages: [] as {username: string, text: string, object: string, channel: string}[],
             channels: [] as string[],
             channel: "general" as string,
-        }
+        },
     },
     mutations: {
+        setUser: function (state, user){
+            state.user.id = user.id;
+            state.user.email = user.email;
+            state.user.username = user.username;
+            state.user.description = user.description;
+            state.user.hash = user.hash;
+            state.user.hashRT = user.hashRT;
+            state.user.chatSocket = user.chatSocket;
+            state.user.gameSocket = user.gameSocket;
+            state.user.avatar = user.avatar;
+            state.user.logged = user.logged;
+        },
         setLogged: function (state, islog: boolean) {
             state.user.logged = islog;
         },

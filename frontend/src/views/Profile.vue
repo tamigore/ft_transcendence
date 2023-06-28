@@ -131,7 +131,7 @@ export default defineComponent ({
 <script lang="ts">
 import store from '@/store';
 import { defineComponent } from 'vue';
-import { server } from "@/helper"
+import { server } from "@/utils/helper"
 import axios, { AxiosResponse, AxiosError } from 'axios';
 
 export default defineComponent ({

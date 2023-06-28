@@ -5,14 +5,15 @@
     <form @submit.prevent="onSubmit">
         <input v-model="value" />
         <button type="submit" :disabled="isLoading">Submit</button>
+        <button type="submit" @click="setChannel" :disabled="isLoading">Submit to chan</button>
     </form>
     <div class="messageStack">
-      <p v-for="message in messageStack" :key="message.text">{{ message }}</p>
+        <p v-for="message in messageStack" :key="message.text">{{ message }}</p>
     </div>
 </template>
 
 <script lang="ts">
-import SocketioChat from "@/socket";
+import SocketioChat from "@/utils/socket";
 import { defineComponent } from "vue";
 import store from "@/store";
 
@@ -23,6 +24,7 @@ export default defineComponent({
     },
     data() {
         return {
+            channel: "general" as string,
             socketio: SocketioChat as typeof SocketioChat,
             isLoading: false as boolean,
             value: "" as string,
@@ -39,12 +41,12 @@ export default defineComponent({
                 username: store.state.user.username,
                 text: this.value,
                 object: "message",
-                channel: "general"
+                channel: this.channel,
             }
             this.socketio.socket.timeout(1000).emit("cliMessage", message);
             this.isLoading = false;
         },
-        connected () {
+        connected() {
             return (store.state.chat.connected ? "Connected" : "Disconnected");
         },
         connect() {
@@ -52,6 +54,9 @@ export default defineComponent({
         },
         disconnect() {
             this.socketio.socket.disconnect();
+        },
+        setChannel() {
+            this.channel = "test";
         }
     }
 });

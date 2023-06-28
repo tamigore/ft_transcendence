@@ -1,5 +1,5 @@
 import { io, Socket  } from "socket.io-client";
-import { server } from "@/helper";
+import { server } from "@/utils/helper";
 import store from "@/store";
 
 interface ServerToClientEvents {

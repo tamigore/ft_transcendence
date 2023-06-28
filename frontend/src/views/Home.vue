@@ -17,7 +17,6 @@
       </div>
       <div class="h-screen col-12 md:col-6 overflow-hidden myReverseBackground">
         <img :src="require(`@/assets/neon-SignUp-ping-pong.jpg`)" alt="Image" class="md:ml-auto block md:h-full" style="clip-path: polygon(8% 0, 100% 0%, 100% 100%, 0 100%)">
-        <!-- src="./assets/neon-SignUp-ping-pong.jpg" -->
       </div>
     </div>
   </div>
@@ -60,13 +59,6 @@
               0 0 0.8rem #bc13fe,
               0 0 2.8rem #bc13fe,
               inset 0 0 1.3rem #bc13fe;
-}
-
-.highlight {
-  background-image: linear-gradient(to right, #F27121cc, #E94057cc, #8A2387cc);
-  border-radius: 6px;
-  padding: 3px 6px;
-  box-shadow: 8em;
 }
 </style>
 

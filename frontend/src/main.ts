@@ -109,7 +109,42 @@ import TreeTable from 'primevue/treetable';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import VirtualScroller from 'primevue/virtualscroller';
 
-const app = createApp(App);
+// import axios, { AxiosResponse, AxiosError } from 'axios';
+// import { server } from "@/utils/helper";
+
+const app = createApp({
+  extends: App,
+  // created() {
+  //   window.addEventListener("beforeunload", this.leaving);
+  // },  
+  // methods: {
+  //   async leaving() {
+  //     if (!store.state.user.logged) {
+  //       axios.defaults.baseURL = server.nestUrl;
+  //       await axios.post("api/auth/logout", {}, {
+  //         timeout: 1000,
+  //         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+  //       })
+  //       .then((response: AxiosResponse) => {
+  //         console.log(response)
+  //         store.commit("setHash", "");
+  //         store.commit("setHashRT", "");
+  //         store.commit("setLogged", false);
+  //       })
+  //       .catch((error: AxiosError) => {
+  //         console.log(error)
+  //         throw new Error("Logout failed: " + error);
+  //       })
+  //       store.commit("setUsername", "");
+  //     }
+  //   },
+  // },
+});
+
+// VUE-ADVANCED-CHAT
+app.config.compilerOptions.isCustomElement = (tag) => {
+  return tag === 'vue-advanced-chat' || tag === 'emoji-picker'
+}
 
 // PRIMEVUE
 app.use(PrimeVue, { ripple: true });

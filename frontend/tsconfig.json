@@ -39,7 +39,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-, "src/store/index.js"  ],
+, "src/store/index.js", "src/utils/dates.js"  ],
   "exclude": [
     "node_modules"
   ]

@@ -1,6 +1,6 @@
 <template>
   <div class="msger">
-    
+
     <main class="msger-chat"></main>
 
     <form class="msger-inputarea" @submit="onSubmit">
@@ -21,7 +21,6 @@ export default defineComponent ({
       msgerInput: null as HTMLInputElement | null,
       msgerChat: null as Element | null,
       PERSON_NAME: "Elodie"
-      // PERSON_IMG: avatar
     };
   },
   mounted() {

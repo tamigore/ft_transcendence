@@ -4,12 +4,16 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Header,
   Get,
+  Query,
+  UseGuards,
 } from "@nestjs/common";
 import { Public } from "../common/decorators";
 import { UserService } from "./user.service";
 import { User } from "@prisma/client";
 import { ModifyUserDto } from "./dto";
+import { RtGuard } from "../common/guards";
 
 @Controller("user")
 export class UserController {
@@ -17,15 +21,24 @@ export class UserController {
 
   @Public()
   @Post("modify")
+  @UseGuards(RtGuard)
   @HttpCode(HttpStatus.OK)
   modifyUser(@Body() dto: ModifyUserDto) {
     this.userService.modifyUser(dto);
   }
 
   @Public()
-  @Get()
+  @Get("findone")
   @HttpCode(HttpStatus.OK)
-  getUser(@Body() dto: User): Promise<User> {
-    return this.userService.getUser(dto);
+  getUser(@Query() query: string): Promise<User> {
+    return this.userService.getUser(query);
+  }
+
+  @Public()
+  @Get("findmany")
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  getUsers(@Query() query: string): Promise<User[]> {
+    return this.userService.getUsers(query);
   }
 }

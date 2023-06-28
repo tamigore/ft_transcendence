@@ -14,7 +14,7 @@
 import { defineComponent } from "vue";
 import store from "@/store";
 import axios, { AxiosError } from 'axios';
-import { server } from "@/helper";
+import { server } from "@/utils/helper";
 
 interface message {
     username: string,
