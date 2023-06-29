@@ -20,8 +20,9 @@ export class ChatGateway implements OnModuleInit {
     this.server.on("connection", (socket: Socket) => {
       console.log("Connected to: ", socket.id);
       socket.join(socket.id);
-      console.log(socket.nsp.name);
-      // console.log(socket);
+      socket.on("disconnecting", () => {
+        console.log(socket.rooms); // the Set contains at least the socket ID
+      });
     });
   }
 
@@ -46,12 +47,10 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  // @SubscribeMessage("cliChannel")
-  // onChannel(@MessageBody() body: any) {
-  //   console.log("onChannel in chat gateway: body = ", body);
-  //   this.chatService.createMessage(body);
-  //   if (body.channel != "general") {
-  //     this.server.socketsJoin(body.channel);
-  //   }
-  // }
+  @SubscribeMessage("joinChan")
+  onChannel(@MessageBody() body: any) {
+    console.log("joinChan : body = ", body);
+    this.server.socketsJoin(body.channel);
+    // this.server.socketsJoin(socket.id);
+  }
 }

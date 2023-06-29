@@ -3,9 +3,9 @@
     <button @click="connect()">Connect</button>
     <button @click="disconnect()">Disconnect</button>
     <form @submit.prevent="onSubmit">
+        <input v-model="channel" />
         <input v-model="value" />
         <button type="submit" :disabled="isLoading">Submit</button>
-        <button type="submit" @click="setChannel" :disabled="isLoading">Submit to chan</button>
     </form>
     <div class="messageStack">
         <p v-for="message in messageStack" :key="message.text">{{ message }}</p>
@@ -43,8 +43,11 @@ export default defineComponent({
                 object: "message",
                 channel: this.channel,
             }
+            if (this.channel != "general")
+                this.socketio.socket.emit("joinChan", {chan : this.channel});
             this.socketio.socket.timeout(1000).emit("cliMessage", message);
             this.isLoading = false;
+            this.value = "";
         },
         connected() {
             return (store.state.chat.connected ? "Connected" : "Disconnected");
@@ -55,9 +58,6 @@ export default defineComponent({
         disconnect() {
             this.socketio.socket.disconnect();
         },
-        setChannel() {
-            this.channel = "test";
-        }
     }
 });
 </script>

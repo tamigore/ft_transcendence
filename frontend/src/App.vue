@@ -12,7 +12,9 @@
         </BurgerMenu>
       </div>
     </nav>
-    <router-view class="border-round box-shadow"/>
+    <div class="flex justify-content-center">
+      <router-view class="border-round box-shadow"/>
+    </div>
   </div>
 </template>
 

@@ -30,7 +30,7 @@ export class UserController {
   @Public()
   @Get("findone")
   @HttpCode(HttpStatus.OK)
-  getUser(@Query() query: string): Promise<User> {
+  getUser(@Body() query: string): Promise<User> {
     return this.userService.getUser(query);
   }
 
@@ -38,7 +38,7 @@ export class UserController {
   @Get("findmany")
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  getUsers(@Query() query: string): Promise<User[]> {
+  getUsers(@Body() query: string): Promise<User[]> {
     return this.userService.getUsers(query);
   }
 }

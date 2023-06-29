@@ -8,6 +8,7 @@ interface ServerToClientEvents {
 
 interface ClientToServerEvents {
   cliMessage: (message: {username: string, text: string, object: string, channel: string}) => void;
+  joinChan: (message: {chan: string}) => void;
 }
 
 class SocketioChat {
