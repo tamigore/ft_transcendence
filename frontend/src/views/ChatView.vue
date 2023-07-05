@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div
+		<!-- <div
 			class="chat-container"
 			:class="{ 'chat-mobile': isSmallDevice, 'chat-mobile-dark': theme === 'dark' }"
 		>
@@ -24,11 +24,11 @@
 				<button class="button-dark" @click="theme = 'dark'">
 					Dark
 				</button>
-			</div>
+			</div> -->
 
-			<MessagesDisplay />
+			<Chat />
 
-		</div>
+		<!-- </div> -->
 	</div>
 </template>
 
@@ -37,11 +37,11 @@ import { defineComponent } from 'vue'
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { server } from "@/utils/helper";
 import store from '@/store';
-import MessagesDisplay from '@/components/MessagesDisplay.vue';
+import Chat from '@/components/Chat.vue';
 
 export default defineComponent ({
 	components: {
-		MessagesDisplay
+		Chat
 	},
 
 	data() {
@@ -83,17 +83,19 @@ export default defineComponent ({
 	methods: {
         async fetchUsers() {
             this.updatingData = true;
+			const author = "Bearer " + store.state.user.hashRT;
             axios.defaults.baseURL = server.nestUrl;
-            await axios.get('/api/user', {
-                // headers: {'access-control-allow-origin': '*'},
-                params: { loggedIn: true },
+            await axios.get('/api/user/findmany', {
+				headers: { 'Authorization': + author },
+                data: { loggedIn: true },
             })
             .then((response: AxiosResponse) => {
                 this.updatingData = false;
                 this.users = response.data;
+                console.log("fetchUsers response users: ", this.users);
             })
             .catch((error: AxiosError) => {
-                console.log(error);
+                console.log("fetchUsers error: ", error);
                 window.alert("No users registered");
             })
         },

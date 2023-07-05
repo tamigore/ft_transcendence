@@ -9,13 +9,16 @@ export class UserService {
   constructor(private prisma: PrismaService, private config: ConfigService) {}
 
   async modifyUser(dto: ModifyUserDto) {
+    console.log("modifyUser dto: ", dto);
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
       },
     });
     if (!user) throw new ForbiddenException("Access Denied");
-    // if (dto.cmd === "socketId") this.setSocket(user, dto.value);
+    // if (dto.cmd === "chatSocket") this.setChatSocket(user, dto.value);
+    // if (dto.cmd === "gameSocket") this.setGameSocket(user, dto.value);
+    // if (dto.cmd === "rooms") this.setRooms(user, dto.value);
     if (dto.cmd === "description") this.setDescription(user, dto.value);
     if (dto.cmd === "hash") this.setHash(user, dto.value);
     if (dto.cmd === "hashRT") this.setHashRT(user, dto.value);
@@ -24,7 +27,7 @@ export class UserService {
   }
 
   async getUser(dto): Promise<User> {
-    console.log("dto: ", dto);
+    console.log("getUser dto: ", dto);
     if (dto === undefined) throw new ForbiddenException("Access Denied");
     const user = await this.prisma.user.findUnique({
       where: {
@@ -36,7 +39,7 @@ export class UserService {
   }
 
   async getUsers(dto): Promise<User[]> {
-    console.log("dto: ", dto);
+    console.log("getUsers dto: ", dto);
     if (dto === undefined) throw new ForbiddenException("Access Denied");
     const users = await this.prisma.user.findMany({
       where: {
@@ -49,9 +52,9 @@ export class UserService {
           { description: dto.description },
           { hash: dto.hash },
           { hashedRt: dto.hashedRt },
-          { chatSocket: dto.chatSocket },
-          { gameSocket: dto.gameSocket },
-          { role: dto.role },
+          // { chatSocket: dto.chatSocket },
+          // { gameSocket: dto.gameSocket },
+          // { role: dto.role },
           { loggedIn: dto.loggedIn },
         ],
       },
@@ -69,6 +72,18 @@ export class UserService {
         description: newDescription,
       },
     });
+  }
+
+  async getHash(reqHash: string): Promise<User> {
+    console.log("getHash: ", reqHash);
+    if (reqHash === undefined) throw new ForbiddenException("Access Denied with no request");
+    const user = await this.prisma.user.findUnique({
+      where: {
+        hash: reqHash,
+      },
+    });
+    if (!user) throw new ForbiddenException("Access Denied with no user found");
+    return user;
   }
 
   async setUsername(dto: User, newUsername: string) {
@@ -104,13 +119,37 @@ export class UserService {
     });
   }
 
-  // async setSocket(dto: User, newSocketId: string) {
+  // async setRooms(socketId: string, newRoom: string) {
+  //   await this.prisma.user.update({
+  //     where: {
+  //       chatSocket: socketId,
+  //     },
+  //     data: {
+  //       rooms: {
+  //         push: newRoom,
+  //       },
+  //     },
+  //   });
+  // }
+
+  // async setChatSocket(dto: User, newchatSocket: string) {
   //   await this.prisma.user.update({
   //     where: {
   //       email: dto.email,
   //     },
   //     data: {
-  //       socketId: newSocketId,
+  //       chatSocket: newchatSocket,
+  //     },
+  //   });
+  // }
+
+  // async setGameSocket(dto: User, newGameSocket: string) {
+  //   await this.prisma.user.update({
+  //     where: {
+  //       email: dto.email,
+  //     },
+  //     data: {
+  //       gameSocket: newGameSocket,
   //     },
   //   });
   // }

@@ -13,9 +13,18 @@ interface ClientToServerEvents {
 
 class SocketioChat {
   socket: Socket<ServerToClientEvents, ClientToServerEvents>;
-  
+
   setupSocketConnection() {
-    this.socket = io(server.chatUrl, { transports : ['websocket', 'polling', 'flashsocket']});
+    const auth = "Bearer " + store.state.user.hashRT;
+    this.socket = io(server.chatUrl,
+      {
+        transports : ['websocket'],
+        autoConnect: false,
+        auth: {
+          token: auth,
+        },
+      }
+    );
     store.commit("setChatConnect", true);
     this.socketConnect();
     this.socketDisconnect();

@@ -1,5 +1,5 @@
 <template>
-    <p>State: {{ connected() }}</p>
+    <p style="color: blueviolet;">State: {{ connected() }}</p>
     <button @click="connect()">Connect</button>
     <button @click="disconnect()">Disconnect</button>
     <form @submit.prevent="onSubmit">
@@ -10,15 +10,22 @@
     <div class="messageStack">
         <p v-for="message in messageStack" :key="message.text">{{ message }}</p>
     </div>
+    <!-- <div>
+        <GetMessages />
+    </div> -->
 </template>
 
 <script lang="ts">
 import SocketioChat from "@/utils/socket";
 import { defineComponent } from "vue";
 import store from "@/store";
+// import GetMessages from "./GetMessages.vue";
 
 export default defineComponent({
     name: "InputChat",
+    components: {
+        // GetMessages
+    },
     created() {
         this.socketio.setupSocketConnection();
     },
@@ -43,8 +50,8 @@ export default defineComponent({
                 object: "message",
                 channel: this.channel,
             }
-            if (this.channel != "general")
-                this.socketio.socket.emit("joinChan", {chan : this.channel});
+            // if (this.channel !== "general")
+            //     this.socketio.socket.emit("joinChan", {chan : this.channel});
             this.socketio.socket.timeout(1000).emit("cliMessage", message);
             this.isLoading = false;
             this.value = "";
@@ -69,5 +76,6 @@ export default defineComponent({
   height: 600px;
   width: 380px;
   overflow-y: auto;
+  color: aliceblue;
 }
 </style>

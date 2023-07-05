@@ -13,7 +13,7 @@
       </div>
     </nav>
     <div class="flex justify-content-center">
-      <router-view class="border-round box-shadow"/>
+      <router-view />
     </div>
   </div>
 </template>
@@ -162,13 +162,13 @@ export default defineComponent({
           headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
         .then((response: AxiosResponse) => {
-          console.log(response)
+          console.log("App LogoutPost response: ", response);
           store.commit("setHash", "");
           store.commit("setHashRT", "");
           store.commit("setLogged", false);
         })
         .catch((error: AxiosError) => {
-          console.log(error)
+          console.log("App LogoutPost error: ", error);
           throw new Error("Logout failed: " + error);
         })
         store.commit("setUsername", "");
@@ -185,6 +185,9 @@ export default defineComponent({
     }
     window.addEventListener('beforeunload', () => { sessionStorage.setItem('store', JSON.stringify(store.state)); });
     console.log("APP CREATED");
+  },
+  unmounted() {
+    console.log("App unmounted, user is log ? ", store.state.user.logged);
   },
 });
 </script>

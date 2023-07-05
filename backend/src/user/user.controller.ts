@@ -6,7 +6,6 @@ import {
   Post,
   Header,
   Get,
-  Query,
   UseGuards,
 } from "@nestjs/common";
 import { Public } from "../common/decorators";

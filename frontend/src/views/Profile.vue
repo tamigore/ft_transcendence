@@ -1,5 +1,5 @@
 <template>
-  <div class="surface-section">
+  <div class="surface-section border-round box-shadow">
     <div class="font-medium text-3xl text-900 mb-3">Profile</div>
     <div class="text-500 mb-5">{{ username }}</div>
     <ul class="list-none p-0 m-0">
