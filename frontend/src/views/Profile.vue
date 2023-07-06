@@ -88,7 +88,7 @@ export default defineComponent({
   data() {
     return {
       login42: "",
-      avatar: require('@/assets/pong2.gif'),
+      avatar: require(store.state.user.email),
       username: store.state.user.username,
       email: store.state.user.email,
       description: store.state.user.description,

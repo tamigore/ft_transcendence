@@ -11,7 +11,7 @@ const store = createStore({
             hashRT: "" as string,
             chatSocket: "" as string,
             gameSocket: "" as string,
-            avatar: "" as string,
+            avatar: '@/assets/pong2.gif' as string,
             logged: false as boolean,
         },
         chat: {
