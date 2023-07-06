@@ -26,7 +26,8 @@ model User {
   loggedIn    Boolean   @default(false)
   profile     Profile?
   rooms       String[]  @default(["general"])
-  avatar      Bytes     @db.ByteA //Native database type attribute
+  avatar      Bytes?     @db.ByteA //Native database type attribute to stock full img (not optimized)
+  img         String?              //Path to img src
   @@map("users")
 }
 

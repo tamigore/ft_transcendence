@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 import { User } from "@prisma/client";
@@ -6,10 +6,11 @@ import { ModifyUserDto } from "./dto";
 
 @Injectable()
 export class UserService {
+  private logger: Logger = new Logger("UserService");
   constructor(private prisma: PrismaService, private config: ConfigService) {}
 
   async modifyUser(dto: ModifyUserDto) {
-    console.log("modifyUser dto: ", dto);
+    this.logger.log("modifyUser dto: ", dto);
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -23,11 +24,11 @@ export class UserService {
     if (dto.cmd === "hash") this.setHash(user, dto.value);
     if (dto.cmd === "hashRT") this.setHashRT(user, dto.value);
     if (dto.cmd === "username") this.setUsername(user, dto.value);
-    console.log("User modified: ", user);
+    this.logger.log("User modified: ", user);
   }
 
   async getUser(dto): Promise<User> {
-    console.log("getUser dto: ", dto);
+    this.logger.log("getUser dto: ", dto);
     if (dto === undefined) throw new ForbiddenException("Access Denied");
     const user = await this.prisma.user.findUnique({
       where: {
@@ -39,7 +40,7 @@ export class UserService {
   }
 
   async getUsers(dto): Promise<User[]> {
-    console.log("getUsers dto: ", dto);
+    this.logger.log("getUsers dto: ", dto);
     if (dto === undefined) throw new ForbiddenException("Access Denied");
     const users = await this.prisma.user.findMany({
       where: {
@@ -74,12 +75,22 @@ export class UserService {
     });
   }
 
-  async getHash(reqHash: string): Promise<User> {
-    console.log("getHash: ", reqHash);
-    if (reqHash === undefined) throw new ForbiddenException("Access Denied with no request");
+  async findByUsername(username: string): Promise<User> {
+    this.logger.log("findByUsername: ", username);
     const user = await this.prisma.user.findUnique({
       where: {
-        hash: reqHash,
+        username: username,
+      },
+    });
+    if (!user) throw new ForbiddenException("Access Denied with no user found");
+    return user;
+  }
+
+  async findByID(id: number): Promise<User> {
+    this.logger.log("findByID: ", id);
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
       },
     });
     if (!user) throw new ForbiddenException("Access Denied with no user found");
@@ -116,6 +127,52 @@ export class UserService {
       data: {
         hashedRt: newHashRT,
       },
+    });
+  }
+
+  async findAll(): Promise<User[]> {
+    return await this.prisma.user.findMany();
+  }
+
+  async findById(userId: number, id: number): Promise<User> {
+    this.logger.log(`user id : ${userId} wants to findById: ${id}`);
+    return await this.prisma.user.findUnique({
+      where: { id: id },
+    });
+  }
+
+  async update(userId: number, id: number, updateUserDto: any) {
+    this.logger.log(`user id : ${userId} wants to updateById: ${id}`);
+    return await this.prisma.user
+      .update({
+        where: { id: id },
+        data: {
+          email: updateUserDto.email,
+          username: updateUserDto.username,
+          description: updateUserDto.description,
+          hash: updateUserDto.hash,
+          hashedRt: updateUserDto.hashedRt,
+          chatSocket: updateUserDto.chatSocket,
+          gameSocket: updateUserDto.gameSocket,
+          role: updateUserDto.role,
+          loggedIn: updateUserDto.loggedIn,
+          profile: updateUserDto.profile,
+          rooms: updateUserDto.rooms,
+          img: updateUserDto.img,
+        },
+      })
+      .then((user) => {
+        this.logger.log("User update success: ", user);
+      })
+      .catch((error) => {
+        this.logger.error("User update error: ", error);
+      });
+  }
+
+  async remove(userId: number, id: number): Promise<User> {
+    this.logger.log(`user id : ${userId} wants to removeById: ${id}`);
+    return await this.prisma.user.delete({
+      where: { id: id },
     });
   }
 

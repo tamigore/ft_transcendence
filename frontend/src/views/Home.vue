@@ -82,7 +82,7 @@ export default defineComponent ({
     }
   },
   mounted() { 
-    if (store.state.user.logged == true) {
+    if (store.state.user.loggedIn == true) {
       router.push("/profile");
     return ;
     }

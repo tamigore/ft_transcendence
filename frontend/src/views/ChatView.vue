@@ -83,11 +83,10 @@ export default defineComponent ({
 	methods: {
         async fetchUsers() {
             this.updatingData = true;
-			const author = "Bearer " + store.state.user.hashRT;
+			const author = "Bearer " + store.state.user.hash;
             axios.defaults.baseURL = server.nestUrl;
-            await axios.get('/api/user/findmany', {
+            await axios.get('/api/user/', {
 				headers: { 'Authorization': + author },
-                data: { loggedIn: true },
             })
             .then((response: AxiosResponse) => {
                 this.updatingData = false;

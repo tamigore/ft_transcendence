@@ -175,7 +175,7 @@ export default defineComponent({
         router.push("/");
     },
     isLogged : () => { 
-      return store.state.user.logged;
+      return store.state.user.loggedIn;
     },
   },
   created() {
@@ -187,7 +187,7 @@ export default defineComponent({
     console.log("APP CREATED");
   },
   unmounted() {
-    console.log("App unmounted, user is log ? ", store.state.user.logged);
+    console.log("App unmounted, user is log ? ", store.state.user.loggedIn);
   },
 });
 </script>

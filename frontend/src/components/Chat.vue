@@ -10,24 +10,21 @@
     <div class="messageStack">
         <p v-for="message in messageStack" :key="message.text">{{ message }}</p>
     </div>
-    <!-- <div>
+    <div>
         <GetMessages />
-    </div> -->
+    </div>
 </template>
 
 <script lang="ts">
 import SocketioChat from "@/utils/socket";
 import { defineComponent } from "vue";
 import store from "@/store";
-// import GetMessages from "./GetMessages.vue";
+import GetMessages from "./GetMessages.vue";
 
 export default defineComponent({
     name: "InputChat",
     components: {
-        // GetMessages
-    },
-    created() {
-        this.socketio.setupSocketConnection();
+        GetMessages
     },
     data() {
         return {
@@ -38,8 +35,8 @@ export default defineComponent({
             messageStack: store.state.chat.messages as {username: string, text: string, object: string, channel: string}[],
         }
     },
-    beforeUnmount() {
-        this.socketio.socket.disconnect();
+    created() {
+        this.socketio.setupSocketConnection();
     },
     methods: {
         onSubmit() {

@@ -1,4 +1,3 @@
-// import { OnModuleInit } from "@nestjs/common";
 import {
   MessageBody,
   OnGatewayConnection,
@@ -11,8 +10,12 @@ import {
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 // import { Message } from "@prisma/client";
-import { ChatService } from "./chat.service";
-// import { RtGuard } from "../common/guards";
+// import { ChatService } from "./chats.service";
+import { Logger, UseGuards } from "@nestjs/common";
+import { AtGuard } from "src/common/guards";
+import { GetCurrentUserId } from "src/common/decorators";
+// import { UserService } from "src/user/user.service";
+// import { WsGuard } from "src/common/guards/ws.guard";
 
 // import {
 //   getUserDeviceRoom,
@@ -25,23 +28,37 @@ import { ChatService } from "./chat.service";
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private chatService: ChatService) {}
+  private logger: Logger = new Logger("ChatGateway");
+  constructor(
+    // private chatService: ChatService,
+    // private userService: UserService
+  ) {}
 
   @WebSocketServer()
   server: Server;
 
   afterInit() {
-    console.log("ChatGateway afterInit");
+    this.logger.log("ChatGateway afterInit");
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
-    console.log("ChatGateway handleConnection args: ", args);
-    console.log(`user with socket ${client.id}`);
+  @UseGuards(AtGuard)
+  async handleConnection(
+    // @GetCurrentUserId() userId: number,
+    client: Socket,
+    ...args: any[]
+  ) {
+    this.logger.log("ChatGateway handleConnection args: ", args);
+    this.logger.log(`user with socket ${client.id} connected`);
+    // const user = await this.userService.findByID(args.pop());
+    // if (!user) {
+    //   client.disconnect();
+    // } else {
     client.join(client.id);
+    // }
   }
 
   handleDisconnect(client: Socket) {
-    console.log("ChatGateway handleDisconnect clientid: ", client.id);
+    this.logger.log("ChatGateway handleDisconnect clientid: ", client.id);
     client.disconnect();
   }
 
@@ -73,11 +90,9 @@ export class ChatGateway
 
   @SubscribeMessage("cliMessage")
   async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
-    console.log("onMessage in chat gateway: body = ", body);
-    console.log("Socket ID: ", client.id);
-    console.log("User hash: ", client.handshake.auth.token);
-    // const user = await this.userService.getHash(client.handshake.auth.token);
-    // if (!user) console.log("No user find onMessage");
+    this.logger.log("onMessage in chat gateway: body = ", body);
+    this.logger.log("Socket ID: ", client.id);
+    this.logger.log("User hash: ", client.handshake.auth.token);
     // this.chatService.createMessage(body);
     if (body.channel === "general") {
       this.server.emit("servMessage", {
@@ -88,9 +103,9 @@ export class ChatGateway
       });
     } else {
       // if (user.rooms.indexOf(body.channel)) {
-      //   console.log("Room was find");
+      //   this.logger.log("Room was find");
       // } else {
-      //   console.log("Room wasn't find");
+      //   this.logger.log("Room wasn't find");
       // }
       this.server.to(body.channel).emit("servMessage", {
         username: body.username,
@@ -103,12 +118,9 @@ export class ChatGateway
 
   @SubscribeMessage("joinChan")
   async onChannel(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
-    console.log("joinChan : body = ", body);
+    this.logger.log("joinChan : body = ", body);
     client.join(body.chan);
     // this.server.socketsJoin(body.channel);
     client.to(body.chan).emit("roomCreated", { room: body.channel });
-    // const user = await this.userService.getHash(client.handshake.auth.token);
-    // if (!user) console.log("No user find onMessage");
-    // user.rooms.push(body.channel);
   }
 }

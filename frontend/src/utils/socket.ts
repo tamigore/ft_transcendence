@@ -19,13 +19,13 @@ class SocketioChat {
     this.socket = io(server.chatUrl,
       {
         transports : ['websocket'],
-        autoConnect: false,
+        autoConnect: true,
         auth: {
           token: auth,
         },
       }
     );
-    store.commit("setChatConnect", true);
+    store.commit("setChatConnect", false);
     this.socketConnect();
     this.socketDisconnect();
     this.socketMessage();

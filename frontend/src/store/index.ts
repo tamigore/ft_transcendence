@@ -11,8 +11,10 @@ const store = createStore({
             hashRT: "" as string,
             chatSocket: "" as string,
             gameSocket: "" as string,
+            room: ["general"] as string[],
+            img: "" as string,
             avatar: "" as string,
-            logged: false as boolean,
+            loggedIn: false as boolean,
         },
         chat: {
             connected: false as boolean,
@@ -33,10 +35,10 @@ const store = createStore({
             state.user.chatSocket = user.chatSocket;
             state.user.gameSocket = user.gameSocket;
             state.user.avatar = user.avatar;
-            state.user.logged = user.logged;
+            state.user.loggedIn = user.logged;
         },
         setLogged: function (state, islog: boolean) {
-            state.user.logged = islog;
+            state.user.loggedIn = islog;
         },
         setUsername: function (state, username: string) {
             state.user.username = username;

@@ -42,7 +42,7 @@
     },
     methods: {
       isLogged : () => { 
-        return store.state.user.logged;
+        return store.state.user.loggedIn;
       },
       async SignInPost() {
         axios.defaults.baseURL = server.nestUrl;

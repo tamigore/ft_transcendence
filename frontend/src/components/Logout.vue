@@ -19,7 +19,7 @@ export default defineComponent ({
             store.commit("setHash", "");
             store.commit("setHashRT", "");
             store.commit("setLogged", false);
-            console.log(store.state.user.logged) // -> 0
+            console.log(store.state.user.loggedIn) // -> 0
             router.push("/");
         })
         .catch((error: AxiosError) => {

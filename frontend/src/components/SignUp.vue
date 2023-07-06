@@ -42,7 +42,7 @@ export default defineComponent ({
   },
   methods: {
     isLogged : () => { 
-      return store.state.user.logged;
+      return store.state.user.loggedIn;
     },
     async SignUpPost() {
       axios.defaults.baseURL = server.nestUrl;
