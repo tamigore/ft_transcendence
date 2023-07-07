@@ -23,30 +23,30 @@ export class ChatService {
       });
   }
 
-  async getMessages() : Promise<Message[]> {
+  async getMessages(): Promise<Message[]> {
     console.log("getMessages");
     const messages = await this.prisma.message.findMany({});
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;
   }
 
-  async getUserMessages(user: string) : Promise<Message[]> {
+  async getUserMessages(user: string): Promise<Message[]> {
     console.log("getUserMessages");
     const messages = await this.prisma.message.findMany({
       where: {
-        username: user
-      }
+        username: user,
+      },
     });
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;
   }
 
-  async getChannelMessages(channel: string) : Promise<Message[]> {
+  async getChannelMessages(channel: string): Promise<Message[]> {
     console.log("getChannelMessages");
     const messages = await this.prisma.message.findMany({
       where: {
-        channel: channel
-      }
+        channel: channel,
+      },
     });
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;

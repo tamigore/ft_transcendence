@@ -15,21 +15,53 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  email       String   @unique
-  username    String?  @unique
-  description String?
-  hash        String   @unique
-  hashedRt    String?
-  chatSocket  String?
-  gameSocket  String?
-  role        Role?     @default(USER)
-  loggedIn    Boolean   @default(false)
-  profile     Profile?
-  rooms       String[]  @default(["general"])
-  avatar      Bytes?     @db.ByteA //Native database type attribute to stock full img (not optimized)
-  img         String?              //Path to img src
-  @@map("users")
+  email         String   @unique
+  username      String?  @unique
+  description   String?
+  hash          String   @unique
+  hashedRt      String?
+  chatSocket    String?
+  gameSocket    String?
+  role          Role?     @default(USER)
+  loggedIn      Boolean   @default(false)
+  profile       Profile?
+  rooms         String[]  @default(["general"])
+  avatar        Bytes?    @db.ByteA //Native database type attribute to stock full img (not optimized)
+  img           String?              //Path to img src
+  // connectedUser ConnectedUser[]
+  // joinedRoom    JoinedRoom[]
+  // room          Room[]
+  // messages      Message[]
+  @@map("Users")
 }
+
+// model ConnectedUser {
+//   id        Int     @id @default(autoincrement())
+//   socketId  String
+//   user      User    @relation(fields: [userId], references: [id])
+//   userId    Int     @unique
+// }
+
+// model JoinedRoom {
+//   id        Int     @id @default(autoincrement())
+//   socketId  String
+//   user      User    @relation(fields: [userId], references: [id])
+//   room      Room    @relation(fields: [roomId], references: [id])
+//   userId    Int     @unique
+//   roomId    Int     @unique
+// }
+
+// model Room {
+//   id          Int       @id @default(autoincrement())
+//   created_at  DateTime  @default(now())
+//   updated_at  DateTime  @updatedAt
+//   name        String
+//   description String?
+//   users       User[]
+//   joinedUsers JoinedRoom[]
+//   messages    Message[]
+//   @@map("Rooms")
+// }
 
 model Profile {
   id     Int     @default(autoincrement()) @id
@@ -42,11 +74,14 @@ model Message {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  username String
-  object   String
-  text     String
-  channel  String
-
+  username  String
+  object    String
+  text      String
+  channel   String
+  // room      Room    @relation(fields: [roomId], references: [id])
+  // roomId    Int     @unique
+  // user      User    @relation(fields: [userId], references: [id])
+  // userId    Int     @unique
   @@map("Messages")
 }
 

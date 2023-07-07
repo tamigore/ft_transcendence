@@ -142,9 +142,9 @@ const app = createApp({
 });
 
 // VUE-ADVANCED-CHAT
-app.config.compilerOptions.isCustomElement = (tag) => {
-  return tag === 'vue-advanced-chat' || tag === 'emoji-picker'
-}
+// app.config.compilerOptions.isCustomElement = (tag) => {
+//   return tag === 'vue-advanced-chat' || tag === 'emoji-picker'
+// }
 
 // PRIMEVUE
 app.use(PrimeVue, { ripple: true });

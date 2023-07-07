@@ -1,18 +1,18 @@
 <template>
-    <p style="color: blueviolet;">State: {{ connected() }}</p>
-    <button @click="connect()">Connect</button>
-    <button @click="disconnect()">Disconnect</button>
-    <form @submit.prevent="onSubmit">
-        <input v-model="channel" />
-        <input v-model="value" />
-        <button type="submit" :disabled="isLoading">Submit</button>
-    </form>
-    <div class="messageStack">
-        <p v-for="message in messageStack" :key="message.text">{{ message }}</p>
-    </div>
-    <div>
-        <GetMessages />
-    </div>
+  <p style="color: blueviolet;">State: {{ connected() }}</p>
+  <button @click="connect()">Connect</button>
+  <button @click="disconnect()">Disconnect</button>
+  <form @submit.prevent="onSubmit">
+    <input v-model="channel" />
+    <input v-model="value" />
+    <button type="submit" :disabled="isLoading">Submit</button>
+  </form>
+  <div class="messageStack">
+    <p v-for="message in messageStack" :key="message.text">{{ message }}</p>
+  </div>
+  <div>
+    <GetMessages />
+  </div>
 </template>
 
 <script lang="ts">
@@ -22,47 +22,47 @@ import store from "@/store";
 import GetMessages from "./GetMessages.vue";
 
 export default defineComponent({
-    name: "InputChat",
-    components: {
-        GetMessages
-    },
-    data() {
-        return {
-            channel: "general" as string,
-            socketio: SocketioChat as typeof SocketioChat,
-            isLoading: false as boolean,
-            value: "" as string,
-            messageStack: store.state.chat.messages as {username: string, text: string, object: string, channel: string}[],
-        }
-    },
-    created() {
-        this.socketio.setupSocketConnection();
-    },
-    methods: {
-        onSubmit() {
-            this.isLoading = true;
-            const message = {
-                username: store.state.user.username,
-                text: this.value,
-                object: "message",
-                channel: this.channel,
-            }
-            // if (this.channel !== "general")
-            //     this.socketio.socket.emit("joinChan", {chan : this.channel});
-            this.socketio.socket.timeout(1000).emit("cliMessage", message);
-            this.isLoading = false;
-            this.value = "";
-        },
-        connected() {
-            return (store.state.chat.connected ? "Connected" : "Disconnected");
-        },
-        connect() {
-            this.socketio.socket.connect();
-        },
-        disconnect() {
-            this.socketio.socket.disconnect();
-        },
+  name: "InputChat",
+  components: {
+    GetMessages
+  },
+  data() {
+    return {
+      channel: "general" as string,
+      socketio: SocketioChat as typeof SocketioChat,
+      isLoading: false as boolean,
+      value: "" as string,
+      messageStack: store.state.chat.messages as {username: string, text: string, object: string, channel: string}[],
     }
+  },
+  created() {
+    this.socketio.setupSocketConnection();
+  },
+  methods: {
+    onSubmit() {
+      this.isLoading = true;
+      const message = {
+          username: store.state.user.username,
+          text: this.value,
+          object: "message",
+          channel: this.channel,
+      }
+      // if (this.channel !== "general")
+      //     this.socketio.socket.emit("joinChan", {chan : this.channel});
+      this.socketio.socket.emit("cliMessage", message);
+      this.isLoading = false;
+      this.value = "";
+    },
+    connected() {
+      return (store.state.chat.connected ? "Connected" : "Disconnected");
+    },
+    connect() {
+      this.socketio.socket.connect();
+    },
+    disconnect() {
+      this.socketio.socket.disconnect();
+    },
+  }
 });
 </script>
 

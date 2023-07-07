@@ -9,12 +9,14 @@ import {
   OnGatewayInit,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-// import { Message } from "@prisma/client";
-// import { ChatService } from "./chats.service";
+import { UserService } from "src/user/user.service";
+import { ChatService } from "./chat.service";
 import { Logger, UseGuards } from "@nestjs/common";
+// import { AtGuard } from "src/common/guards";
+// import { Message } from "@prisma/client";
+// import { GetCurrentUserId } from "src/common/decorators";
+// import { WsGuard } from "src/common/guards/ws.guard";
 import { AtGuard } from "src/common/guards";
-import { GetCurrentUserId } from "src/common/decorators";
-// import { UserService } from "src/user/user.service";
 // import { WsGuard } from "src/common/guards/ws.guard";
 
 // import {
@@ -30,8 +32,8 @@ export class ChatGateway
 {
   private logger: Logger = new Logger("ChatGateway");
   constructor(
-    // private chatService: ChatService,
-    // private userService: UserService
+    private chatService: ChatService,
+    private userService: UserService
   ) {}
 
   @WebSocketServer()
@@ -42,14 +44,12 @@ export class ChatGateway
   }
 
   @UseGuards(AtGuard)
-  async handleConnection(
-    // @GetCurrentUserId() userId: number,
-    client: Socket,
-    ...args: any[]
-  ) {
-    this.logger.log("ChatGateway handleConnection args: ", args);
-    this.logger.log(`user with socket ${client.id} connected`);
-    // const user = await this.userService.findByID(args.pop());
+  async handleConnection(client: Socket, ...args: any[]) {
+    // this.logger.log("ChatGateway handleConnection args: ", args);
+    this.logger.log(
+      `userId with socket ${client.id} connected with args: ${args}`
+    );
+    // const user = await this.userService.findByID(userId);
     // if (!user) {
     //   client.disconnect();
     // } else {
@@ -94,26 +94,26 @@ export class ChatGateway
     this.logger.log("Socket ID: ", client.id);
     this.logger.log("User hash: ", client.handshake.auth.token);
     // this.chatService.createMessage(body);
-    if (body.channel === "general") {
-      this.server.emit("servMessage", {
-        username: body.username,
-        text: body.text,
-        object: body.object,
-        channel: body.channel,
-      });
-    } else {
-      // if (user.rooms.indexOf(body.channel)) {
-      //   this.logger.log("Room was find");
-      // } else {
-      //   this.logger.log("Room wasn't find");
-      // }
-      this.server.to(body.channel).emit("servMessage", {
-        username: body.username,
-        text: body.text,
-        object: body.object,
-        channel: body.channel,
-      });
-    }
+    // if (body.channel === "general") {
+    this.server.emit("servMessage", {
+      username: body.username,
+      text: body.text,
+      object: body.object,
+      channel: body.channel,
+    });
+    // } else {
+    //   // if (user.rooms.indexOf(body.channel)) {
+    //   //   this.logger.log("Room was find");
+    //   // } else {
+    //   //   this.logger.log("Room wasn't find");
+    //   // }
+    //   this.server.to(body.channel).emit("servMessage", {
+    //     username: body.username,
+    //     text: body.text,
+    //     object: body.object,
+    //     channel: body.channel,
+    //   });
+    // }
   }
 
   @SubscribeMessage("joinChan")

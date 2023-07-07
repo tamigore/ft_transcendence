@@ -15,7 +15,7 @@ class SocketioChat {
   socket: Socket<ServerToClientEvents, ClientToServerEvents>;
 
   setupSocketConnection() {
-    const auth = "Bearer " + store.state.user.hashRT;
+    const auth = "Bearer " + store.state.user.hash;
     this.socket = io(server.chatUrl,
       {
         transports : ['websocket'],
@@ -25,8 +25,8 @@ class SocketioChat {
         },
       }
     );
-    store.commit("setChatConnect", false);
-    this.socketConnect();
+    store.commit("setChatConnect", true);
+    // this.socketConnect();
     this.socketDisconnect();
     this.socketMessage();
   }

@@ -1,34 +1,6 @@
 <template>
 	<div>
-		<!-- <div
-			class="chat-container"
-			:class="{ 'chat-mobile': isSmallDevice, 'chat-mobile-dark': theme === 'dark' }"
-		>
-			<span
-				v-if="showOptions"
-				class="user-logged"
-				:class="{ 'user-logged-dark': theme === 'dark' }"
-			>
-				Logged as
-			</span>
-			<select v-if="showOptions" v-model="currentUserId">
-				<option v-for="user in users" :key="user.id" :value="user.id">
-					{{ user.username }}
-				</option>
-			</select>
-
-			<div v-if="showOptions" class="button-theme">
-				<button class="button-light" @click="theme = 'light'">
-					Light
-				</button>
-				<button class="button-dark" @click="theme = 'dark'">
-					Dark
-				</button>
-			</div> -->
-
-			<Chat />
-
-		<!-- </div> -->
+		<Chat />
 	</div>
 </template>
 
@@ -43,7 +15,6 @@ export default defineComponent ({
 	components: {
 		Chat
 	},
-
 	data() {
 		return {
 			theme: 'dark',
@@ -54,51 +25,28 @@ export default defineComponent ({
 			updatingData: false
 		}
 	},
-
-    created() {
-        this.fetchUsers()
-    },
-
-	computed: {
-		showOptions() {
-			return !this.isSmallDevice
-		}
+	created() {
+		this.fetchUsers()
 	},
-
-	watch: {
-		currentUserId() {
-			this.showChat = false
-			setTimeout(() => (this.showChat = true), 150)
-		}
-	},
-
-	mounted() {
-		this.isSmallDevice = window.innerWidth < 500
-		window.addEventListener('resize', ev => {
-			if (ev.isTrusted)
-                this.isSmallDevice = window.innerWidth < 500
-		})
-	},
-
 	methods: {
-        async fetchUsers() {
-            this.updatingData = true;
+		async fetchUsers() {
+			this.updatingData = true;
 			const author = "Bearer " + store.state.user.hash;
-            axios.defaults.baseURL = server.nestUrl;
-            await axios.get('/api/user/', {
+			axios.defaults.baseURL = server.nestUrl;
+			await axios.get('/api/user/', {
 				headers: { 'Authorization': + author },
-            })
-            .then((response: AxiosResponse) => {
-                this.updatingData = false;
-                this.users = response.data;
-                console.log("fetchUsers response users: ", this.users);
-            })
-            .catch((error: AxiosError) => {
-                console.log("fetchUsers error: ", error);
-                window.alert("No users registered");
-            })
-        },
-    },
+			})
+			.then((response: AxiosResponse) => {
+				this.updatingData = false;
+				this.users = response.data;
+				console.log("fetchUsers response users: ", this.users);
+			})
+			.catch((error: AxiosError) => {
+				console.log("fetchUsers error: ", error);
+				window.alert("No users registered");
+			})
+		},
+	},
 });
 </script>
 
