@@ -13,7 +13,7 @@ const store = createStore({
             gameSocket: "" as string,
             room: ["general"] as string[],
             img: "" as string,
-            avatar: "" as string,
+            avatar: `neon-SignUp-ping-pong.jpg` as string,
             loggedIn: false as boolean,
         },
         chat: {
@@ -24,6 +24,7 @@ const store = createStore({
             channel: "general" as string,
         },
     },
+
     mutations: {
         setUser: function (state, user){
             state.user.id = user.id;
@@ -42,6 +43,15 @@ const store = createStore({
         },
         setUsername: function (state, username: string) {
             state.user.username = username;
+        },
+        setEmail: function (state, email: string) {
+            state.user.email = email;
+        },
+        setAvatarPath: function (state, avatar: string) {
+            state.user.avatar = avatar;
+        },
+        setDescription: function (state, description: string) {
+            state.user.description = description;
         },
         setHash: function (state, hash: string) {
             state.user.hash = hash;

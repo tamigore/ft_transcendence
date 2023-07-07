@@ -12,7 +12,7 @@
         </BurgerMenu>
       </div>
     </nav>
-    <div class="flex justify-content-center">
+    <div>
       <router-view />
     </div>
   </div>

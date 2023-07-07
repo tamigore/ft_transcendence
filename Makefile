@@ -2,7 +2,7 @@ NAME = transcendance
 
 all:
 	@printf "Execution de la configuration ${NAME}...\n"
-	@docker compose up -d --build
+	@docker compose up --build
 
 down:
 	@printf "Arrêt de la configuration ${NAME}...\n"
