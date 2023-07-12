@@ -6,6 +6,7 @@ import { AtGuard } from "./common/guards";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ChatModule } from "./chat/chat.module";
 import { UserModule } from "./user/user.module";
+import { GameModule } from "./game/game.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserModule } from "./user/user.module";
     PrismaModule,
     ChatModule,
     UserModule,
+    GameModule,
   ],
   providers: [
     {

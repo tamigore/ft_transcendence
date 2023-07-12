@@ -37,6 +37,14 @@ model Profile {
   user   User    @relation(fields: [userId], references: [id])
   userId Int     @unique
 }
+model GameHistoric {
+  gameId         Int      @id @default(autoincrement())
+  date DateTime @default(now())
+  winnerID Int
+  looserID Int
+  score String
+  @@map("gamesHistoric")
+}
 
 model Message {
   id         Int      @id @default(autoincrement())

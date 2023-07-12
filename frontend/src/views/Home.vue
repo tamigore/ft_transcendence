@@ -60,6 +60,18 @@
               0 0 2.8rem #bc13fe,
               inset 0 0 1.3rem #bc13fe;
 }
+
+.box-shadow-dark {
+  border: 0.2rem solid #07004b;
+  border-radius: 2rem;
+  padding: 5em;
+  box-shadow: 0 0 .2rem #07004b,
+              0 0 .2rem #07004b,
+              0 0 2rem #8442ff,
+              0 0 0.8rem #8442ff,
+              0 0 2.8rem #8442ff,
+              inset 0 0 1.3rem #8442ff;
+}
 </style>
 
 <script lang="ts">
