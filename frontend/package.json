@@ -8,15 +8,18 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@casl/ability": "^6.5.0",
+    "@casl/vue": "^2.2.1",
+    "@tanstack/vue-query": "^4.29.20",
     "@vue/compat": "^3.3.4",
     "axios": "^1.4.0",
     "core-js": "^3.31.1",
     "i": "^0.3.7",
     "npm": "^9.8.0",
-    "npm-check-updates": "^16.10.13",
+    "npm-check-updates": "^16.10.15",
     "primeflex": "^3.3.1",
     "primeicons": "^6.0.1",
-    "primevue": "^3.29.2",
+    "primevue": "^3.30.0",
     "socket.io": "^4.7.1",
     "socket.io-client": "^4.7.1",
     "vue": "^3.3.4",
@@ -27,12 +30,13 @@
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^4.2.4",
     "vue-socket.io": "^3.0.10",
-    "vuex": "^4.1.0"
+    "vuex": "^4.1.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/node": "^20.4.0",
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
-    "@typescript-eslint/parser": "^5.61.0",
+    "@types/node": "^20.4.1",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-eslint": "~5.0.8",
     "@vue/cli-plugin-router": "~5.0.8",

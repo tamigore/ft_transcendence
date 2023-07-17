@@ -6,5 +6,5 @@ export const GetCurrentUserId = createParamDecorator(
     const request = context.switchToHttp().getRequest();
     const user = request.user as JwtPayload;
     return user.sub;
-  }
+  },
 );

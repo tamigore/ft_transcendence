@@ -1,17 +1,14 @@
-import { ValidationPipe } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-// import { AuthenticatedSocketAdapter } from "./chat/socket.adapter";
-import * as cookieParser from "cookie-parser";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { ConfigModule } from "@nestjs/config";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    cors: true,
+  });
 
-  // Protecting endpoints from receiving incorrect data
-  app.useGlobalPipes(new ValidationPipe());
-
-  // app.useWebSocketAdapter(new AuthenticatedSocketAdapter(app)); // Add our custom socket adapter.
+  // app.useGlobalPipes(new ValidationPipe());
 
   app.enableCors({
     origin: ["http://localhost:8080/", "http://localhost:8080"],
@@ -23,11 +20,13 @@ async function bootstrap() {
   ConfigModule.forRoot({
     envFilePath: "../../.env",
   });
-  // console.log(process.env);
 
-  // Use Cookie
-  app.use(cookieParser());
+  // app.use(cookieParser());
   app.setGlobalPrefix("api");
+
   await app.listen(3000);
+
+  // Gracefully shutdown the server.
+  app.enableShutdownHooks();
 }
 bootstrap();

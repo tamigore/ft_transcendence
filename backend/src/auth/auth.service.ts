@@ -12,7 +12,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private config: ConfigService
+    private config: ConfigService,
   ) {}
 
   async signupLocal(dto: AuthDto): Promise<Tokens> {

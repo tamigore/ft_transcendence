@@ -8,6 +8,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  relationMode = "foreignKeys"
 }
 
 model User {
@@ -18,56 +19,42 @@ model User {
   email         String   @unique
   username      String?  @unique
   description   String?
-  hash          String   @unique
+  hash          String?
   hashedRt      String?
   chatSocket    String?
   gameSocket    String?
-  role          Role?     @default(USER)
   loggedIn      Boolean   @default(false)
+  avatar        String?
+  role          Role?     @default(USER)
   profile       Profile?
-  rooms         String[]  @default(["general"])
-  avatar        Bytes?    @db.ByteA //Native database type attribute to stock full img (not optimized)
-  img           String?              //Path to img src
-  // connectedUser ConnectedUser[]
-  // joinedRoom    JoinedRoom[]
-  // room          Room[]
-  // messages      Message[]
+  creator       Room[]    @relation("creator")
+  room          Room[]    @relation("usersInRoom")
+  messages      Message[]
   @@map("Users")
 }
 
-// model ConnectedUser {
-//   id        Int     @id @default(autoincrement())
-//   socketId  String
-//   user      User    @relation(fields: [userId], references: [id])
-//   userId    Int     @unique
-// }
-
-// model JoinedRoom {
-//   id        Int     @id @default(autoincrement())
-//   socketId  String
-//   user      User    @relation(fields: [userId], references: [id])
-//   room      Room    @relation(fields: [roomId], references: [id])
-//   userId    Int     @unique
-//   roomId    Int     @unique
-// }
-
-// model Room {
-//   id          Int       @id @default(autoincrement())
-//   created_at  DateTime  @default(now())
-//   updated_at  DateTime  @updatedAt
-//   name        String
-//   description String?
-//   users       User[]
-//   joinedUsers JoinedRoom[]
-//   messages    Message[]
-//   @@map("Rooms")
-// }
+model Room {
+  id          Int       @id @default(autoincrement())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  name        String    @unique
+  description String?
+  creatorId   Int?
+  creator     User?   @relation("creator", fields: [creatorId], references: [id])
+  users       User[]  @relation("usersInRoom")
+  messages    Message[]
+  @@map("Rooms")
+}
 
 model Profile {
-  id     Int     @default(autoincrement()) @id
-  bio    String?
-  user   User    @relation(fields: [userId], references: [id])
-  userId Int     @unique
+  id      Int     @default(autoincrement()) @id
+  bio     String?
+  ranking Int     @default(autoincrement())
+  win     Int     @default(0)
+  lose    Int     @default(0)
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int     @unique
+  @@map("Profiles")
 }
 
 model Message {
@@ -75,13 +62,12 @@ model Message {
   created_at DateTime @default(now())
 
   username  String
-  object    String
+  object    String?
   text      String
-  channel   String
-  // room      Room    @relation(fields: [roomId], references: [id])
-  // roomId    Int     @unique
-  // user      User    @relation(fields: [userId], references: [id])
-  // userId    Int     @unique
+  room      Room    @relation(fields: [roomId], references: [id])
+  roomId    Int     @unique
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int     @unique
   @@map("Messages")
 }
 

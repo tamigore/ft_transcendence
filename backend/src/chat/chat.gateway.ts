@@ -1,126 +1,113 @@
 import {
   MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  ConnectedSocket,
-  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from "@nestjs/websockets";
+import { Logger, UseGuards, UsePipes } from "@nestjs/common";
+import {
+  ServerToClientEvents,
+  ClientToServerEvents,
+  Message,
+  JoinRoom,
+  KickUser,
+} from "../shared/interfaces/chat.interface";
 import { Server, Socket } from "socket.io";
-import { UserService } from "src/user/user.service";
-import { ChatService } from "./chat.service";
-import { Logger, UseGuards } from "@nestjs/common";
-// import { AtGuard } from "src/common/guards";
-// import { Message } from "@prisma/client";
-// import { GetCurrentUserId } from "src/common/decorators";
-// import { WsGuard } from "src/common/guards/ws.guard";
-import { AtGuard } from "src/common/guards";
-// import { WsGuard } from "src/common/guards/ws.guard";
+import { RoomService } from "../room/room.service";
+import { ZodValidationPipe } from "../pipes/zod.pipe";
+import {
+  ChatMessageSchema,
+  JoinRoomSchema,
+  KickUserSchema,
+} from "../shared/schemas/chat.schema";
+import { UserService } from "../user/user.service";
+import { WsThrottlerGuard } from "./guards/throttler.guard";
+import { Throttle } from "@nestjs/throttler";
 
-// import {
-//   getUserDeviceRoom,
-//   stopTimerForUserDevice,
-//   startTimerForUserDevice,
-// } from "./socket/room";
-// import { TimerEvents } from "./socket/events";
-
-@WebSocketGateway(8082)
-export class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
-  private logger: Logger = new Logger("ChatGateway");
+@WebSocketGateway({})
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
-    private chatService: ChatService,
-    private userService: UserService
+    private roomService: RoomService,
+    private userService: UserService,
   ) {}
 
-  @WebSocketServer()
-  server: Server;
+  @WebSocketServer() server: Server = new Server<
+    ServerToClientEvents,
+    ClientToServerEvents
+  >();
 
-  afterInit() {
-    this.logger.log("ChatGateway afterInit");
+  private logger = new Logger("ChatGateway");
+
+  @Throttle(10, 30)
+  @UseGuards(WsThrottlerGuard)
+  @UsePipes(new ZodValidationPipe(ChatMessageSchema))
+  @SubscribeMessage("chat")
+  async handleChatEvent(
+    @MessageBody()
+    payload: Message,
+  ): Promise<boolean> {
+    this.logger.log(payload);
+    this.server.to(payload.roomName).emit("chat", payload);
+    return true;
   }
 
-  @UseGuards(AtGuard)
-  async handleConnection(client: Socket, ...args: any[]) {
-    // this.logger.log("ChatGateway handleConnection args: ", args);
+  @UseGuards(WsThrottlerGuard)
+  @UsePipes(new ZodValidationPipe(JoinRoomSchema))
+  @SubscribeMessage("join_room")
+  async handleSetClientDataEvent(
+    @MessageBody()
+    payload: JoinRoom,
+  ): Promise<boolean> {
+    this.logger.log(`${payload.user.socketId} is joining ${payload.roomName}`);
+    const user = {
+      userId: payload.user.userId,
+      userName: payload.user.userName,
+      socketId: payload.user.socketId,
+    };
+    await this.userService.addUser(user);
+    this.server.in(payload.user.socketId).socketsJoin(payload.roomName);
+    await this.roomService.addUserToRoom(payload.roomName, payload.user.userId);
+    return true;
+  }
+
+  // @UseGuards(WsThrottlerGuard)
+  @UsePipes(new ZodValidationPipe(KickUserSchema))
+  @SubscribeMessage("kick_user")
+  async handleKickUserEvent(
+    @MessageBody() payload: KickUser,
+  ): Promise<boolean> {
     this.logger.log(
-      `userId with socket ${client.id} connected with args: ${args}`
+      `${payload.userToKick.userName} is getting kicked from ${payload.roomName}`,
     );
-    // const user = await this.userService.findByID(userId);
-    // if (!user) {
-    //   client.disconnect();
-    // } else {
-    client.join(client.id);
-    // }
-  }
-
-  handleDisconnect(client: Socket) {
-    this.logger.log("ChatGateway handleDisconnect clientid: ", client.id);
-    client.disconnect();
-  }
-
-  // @SubscribeMessage(TimerEvents.timerStart.toString())
-  // startMyTimer(@ConnectedSocket() client: any, @MessageBody() body: any): void {
-  //   // Stop any existing timer for this user device.
-  //   stopTimerForUserDevice(
-  //     client.user.id,
-  //     client.handshake.query.deviceId.toString()
-  //   );
-
-  //   // Start a new timer for this user device.
-  //   startTimerForUserDevice(
-  //     this.server,
-  //     client.user.id,
-  //     client.handshake.query.deviceId.toString(),
-  //     body.dur // Timer duration
-  //   );
-  // }
-
-  // @SubscribeMessage(TimerEvents.timerStop.toString())
-  // stopMyTimer(@ConnectedSocket() client: any): void {
-  //   // Stop current timer for this user device.
-  //   stopTimerForUserDevice(
-  //     client.user.id,
-  //     client.handshake.query.deviceId.toString()
-  //   );
-  // }
-
-  @SubscribeMessage("cliMessage")
-  async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
-    this.logger.log("onMessage in chat gateway: body = ", body);
-    this.logger.log("Socket ID: ", client.id);
-    this.logger.log("User hash: ", client.handshake.auth.token);
-    // this.chatService.createMessage(body);
-    // if (body.channel === "general") {
-    this.server.emit("servMessage", {
-      username: body.username,
-      text: body.text,
-      object: body.object,
-      channel: body.channel,
+    this.server.to(payload.roomName).emit("kick_user", payload);
+    this.server.in(payload.userToKick.socketId).socketsLeave(payload.roomName);
+    this.server.to(payload.roomName).emit("chat", {
+      user: {
+        userId: "serverId",
+        userName: "TheServer",
+        socketId: "ServerSocketId",
+      },
+      timeSent: new Date(Date.now()).toLocaleString("en-US"),
+      message: `${payload.userToKick.userName} was kicked.`,
+      roomName: payload.roomName,
     });
-    // } else {
-    //   // if (user.rooms.indexOf(body.channel)) {
-    //   //   this.logger.log("Room was find");
-    //   // } else {
-    //   //   this.logger.log("Room wasn't find");
-    //   // }
-    //   this.server.to(body.channel).emit("servMessage", {
-    //     username: body.username,
-    //     text: body.text,
-    //     object: body.object,
-    //     channel: body.channel,
-    //   });
-    // }
+    return true;
   }
 
-  @SubscribeMessage("joinChan")
-  async onChannel(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
-    this.logger.log("joinChan : body = ", body);
-    client.join(body.chan);
-    // this.server.socketsJoin(body.channel);
-    client.to(body.chan).emit("roomCreated", { room: body.channel });
+  // @UseGuards(WsThrottlerGuard)
+  async handleConnection(socket: Socket): Promise<void> {
+    this.logger.log(`Socket connected: ${socket.id}`);
+  }
+
+  // @UseGuards(WsThrottlerGuard)
+  async handleDisconnect(socket: Socket): Promise<void> {
+    const user = await this.roomService.getFirstInstanceOfUser(socket.id);
+    if (user !== "Not Exists") {
+      await this.userService.removeUserById(user.userId);
+    }
+    await this.roomService.removeUserFromAllRooms(socket.id);
+    this.logger.log(`Socket disconnected: ${socket.id}`);
   }
 }
