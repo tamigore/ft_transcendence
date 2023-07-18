@@ -1,16 +1,29 @@
 <template>
-  <div class="surface-section border-round box-shadow">
-    <div class="grid-container">
-      <div class="p-card p-component card" style="width: 29em;"><!---->
-        <div class="p-card-body">
-            <div class="image-container">
-              <img :src="avatar" :alt="Email" @click="openFile" style="cursor: pointer" />
+
+      <div v-if="showPopup">
+        <div class="popup border-round box-shadow">
+          <h2 class="popup-title">Choisir un avatar</h2>
+          <div class="image-grid">
+            <div v-for="image in imageGrid" :key="image.id" @click="selectImage(image)">
+              <div class="image-frame">
+                <img :src="image.img" :alt="'Image ' + image.id" />
+              </div>
             </div>
+          </div>
         </div>
       </div>
-      <input ref="fileInput" type="file" style="display: none" @change="loadAvatar" />
-
-      <div class="profile-details">
+    
+    <div class="surface-section border-round box-shadow">
+      <div class="grid-container">
+        <div class="p-card p-component card" style="width: 29em;"><!---->
+          <div class="p-card-body">
+            <div @click="openImagePicker" class="selected-image" :class="{ active: showPopup }">
+              <img :src="selectedImage.img" :alt="'Image ' + selectedImage.id" type="pointer"/>
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-details">
         <div class="font-medium text-3xl text-900 mb-3">Profile</div>
 
         <ul class="list-none p-0 m-0">
@@ -86,8 +99,9 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 export default defineComponent({
   name: 'ProfileView',
   computed: {
-    avatar() {
-      return require(`@/assets/${this.avatarPath}`);
+    selectedImage() {
+      const selectedId = store.state.user.avatar;
+      return this.getImageById(selectedId) || { id: 1, img: require('@/assets/welc.jpeg') };
     },
     username() {
       return store.state.user.username;
@@ -113,30 +127,32 @@ export default defineComponent({
       isSavingUsername: false,
       editedUsername: "",
       
-      avatarPath : "neon-SignUp-ping-pong.jpg",
+      showPopup: false,
+      imageGrid: [
+        { id: 1, img: require('@/assets/profiles/profil_1.jpg') },
+        { id: 2, img: require('@/assets/profiles/profil_2.jpg') },
+        { id: 3, img: require('@/assets/profiles/profil_3.jpg') },
+        { id: 4, img: require('@/assets/profiles/profil_4.jpg') },
+        { id: 5, img: require('@/assets/profiles/profil_5.jpg') },
+        { id: 6, img: require('@/assets/profiles/profil_6.jpg') },
+        { id: 7, img: require('@/assets/profiles/profil_7.jpg') },
+        { id: 8, img: require('@/assets/profiles/profil_8.jpg') },
+        { id: 9, img: require('@/assets/profiles/profil_9.jpg') },
+      ],
     }
   },
   methods: 
   {
-
-    openFile(): void 
-    {
-      (this.$refs.fileInput as HTMLInputElement).click();
+    openImagePicker() {
+      this.showPopup = true;
     },
-    loadAvatar(event: Event): void {
-
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-      this.avatar = e.target ? e.target.result as string : '';
-    };
-    reader.readAsDataURL(file);
-    this.avatarPath = file.name;
-  }
-},
-
-    
+    selectImage(image) {
+      store.commit('setAvatarId', image.id);
+      this.showPopup = false;
+    },
+    getImageById(id) {
+      return this.imageGrid.find(image => image.id === id);
+    },    
     async ModifyUserDescription() 
     {
       if (this.isEditingDescription) 
@@ -168,7 +184,6 @@ export default defineComponent({
       if (this.isEditingEmail) 
       {
         this.ModifyStoreEmail();
-        this.email = "cocorico";
         axios.defaults.baseURL = server.nestUrl;
         await axios.post('/api/user/modify', 
         {
@@ -184,7 +199,7 @@ export default defineComponent({
         {
             console.log(error);
         })
-        this.isSavingEmail = false; // Mettre à jour l'état du bouton après la requête
+        this.isSavingEmail = false;
       }
       this.isEditingEmail = !this.isEditingEmail;
     },
@@ -206,7 +221,7 @@ export default defineComponent({
         .catch((error: AxiosError) => {
             console.log(error);
         })
-        this.isSavingUsername = false; // Mettre à jour l'état du bouton après la requête
+        this.isSavingUsername = false;
       }
       this.isEditingUsername = !this.isEditingUsername;
     },
@@ -227,7 +242,63 @@ export default defineComponent({
 </script>
 
 
-<style>
+<style scoped>
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #49354f;
+  padding: 40px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 2;
+}
+
+  .popup-title {
+    color: #000;
+    font-size: 2rem;
+    font-style: italic;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    text-align: left;
+    padding-bottom: 0.3cm;
+  }
+  
+  .image-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  .image-frame {
+    width: 200px; /* Largeur de 300 pixels pour le cadre */
+    height: 200px; /* Hauteur de 300 pixels pour le cadre */
+    position: relative;
+    overflow: hidden;
+    background: #000;
+  }
+  
+  .image-frame img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    cursor: pointer;
+  }
+
+
+.selected-image {
+  cursor: pointer;
+  z-index: 1; /* Ajoutez cette ligne pour définir le z-index à 1 */
+}
+  
+  .selected-image.active {
+    border: 2px solid #000;
+  }
 
 .grid-container {
   display: grid;
@@ -239,14 +310,14 @@ export default defineComponent({
   grid-column: 1; /* Place la carte dans la première colonne */
 }
 
-.image-container {
+.selected-image {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
 }
 
-.image-container img {
+.selected-image img {
   width: 500px;
   height: 500px;
   border-radius: 50%;
@@ -258,6 +329,10 @@ export default defineComponent({
   grid-column: 2; /* Place les détails du profil dans la deuxième colonne */
 }
 
+.p-button-text {
+  color: #000;
+}
+
 .myBackground {
   background:
   linear-gradient( #290526, transparent),
@@ -267,83 +342,3 @@ export default defineComponent({
   background-blend-mode: screen;
 }
 </style>
-
-
-
-
-<!-- <template>
-  <div class="surface-section">
-    <div class="font-medium text-3xl text-900 mb-3">Profile</div>
-    <div class="text-500 mb-5" style="">{{ Email }}</div>
-    <ul class="list-none p-0 m-0">
-      <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-        <div class="text-500 w-6 md:w-2 font-medium">Email</div>
-        <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">{{ email }}</div>
-        <div class="w-6 md:w-2 flex justify-content-end">
-          <Button label="Edit" icon="pi pi-pencil" class="p-button-text"></Button>
-        </div>
-
-
-      <li class="flex align-items-center py-3 px-2 border-top-1 border-bottom-1 surface-border flex-wrap">
-        <div class="text-500 w-6 md:w-2 font-medium">Description</div>
-        <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1 line-height-3">
-            A group of professional bank robbers start to feel the heat from police
-            when they unknowingly leave a clue at their latest heist.</div>
-        <div class="w-6 md:w-2 flex justify-content-end">
-          <Button label="Edit" icon="pi pi-pencil" class="p-button-text"></Button>
-        </div>
-      </li>
-    </ul>
-  </div>
-</template>
-
-<style>
-.myBackground {
-  background:
-        linear-gradient( #290526, transparent),
-        linear-gradient(to top left, #2e081f, transparent),
-        linear-gradient(to top right, #1e1546, transparent),
-        linear-gradient(to left, #00000000, #19032583);
-  background-blend-mode: screen;
-}
-</style>
-
-<script lang="ts">
-import store from '@/store';
-import { defineComponent } from 'vue';
-import { server } from "@/helper"
-import axios, { AxiosResponse, AxiosError } from 'axios';
-
-export default defineComponent ({
-  name: 'ProfileView',
-  data() {
-    return {
-      login42: "",
-      avatar42: "",
-      Email: store.state.user.Email,
-      email: store.state.user.email,
-      avatar: store.state.user.avatar,
-    }
-  },
-  methods: {
-    async ModifUser() {
-        axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/modify', {
-            email: this.email,
-            cmd : "",
-            value : "",
-        }, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        })
-        .then((response: AxiosResponse) => {
-            console.log(response);
-        })
-        .catch((error: AxiosError) => {
-            console.log(error);
-        })
-    },
-  }
-})
-</script> -->
