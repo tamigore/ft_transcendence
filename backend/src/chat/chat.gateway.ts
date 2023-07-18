@@ -13,8 +13,7 @@ import { Server, Socket } from "socket.io";
 // import { ChatService } from "./chats.service";
 import { Logger, UseGuards } from "@nestjs/common";
 import { AtGuard } from "src/common/guards";
-import { GetCurrentUserId } from "src/common/decorators";
-// import { UserService } from "src/user/user.service";
+import { UserService } from "src/user/user.service";
 // import { WsGuard } from "src/common/guards/ws.guard";
 
 // import {
@@ -31,7 +30,7 @@ export class ChatGateway
   private logger: Logger = new Logger("ChatGateway");
   constructor(
     // private chatService: ChatService,
-    // private userService: UserService
+    private userService: UserService,
   ) {}
 
   @WebSocketServer()
@@ -42,11 +41,7 @@ export class ChatGateway
   }
 
   @UseGuards(AtGuard)
-  async handleConnection(
-    // @GetCurrentUserId() userId: number,
-    client: Socket,
-    ...args: any[]
-  ) {
+  async handleConnection(client: Socket, ...args: any[]) {
     this.logger.log("ChatGateway handleConnection args: ", args);
     this.logger.log(`user with socket ${client.id} connected`);
     // const user = await this.userService.findByID(args.pop());
@@ -116,11 +111,26 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage("joinChan")
-  async onChannel(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
-    this.logger.log("joinChan : body = ", body);
-    client.join(body.chan);
-    // this.server.socketsJoin(body.channel);
-    client.to(body.chan).emit("roomCreated", { room: body.channel });
+  // @UseGuards(WsThrottlerGuard)
+  // @UsePipes(new ZodValidationPipe(JoinRoomSchema))
+  @SubscribeMessage("join_room")
+  async handleSetClientDataEvent(
+    @MessageBody()
+    payload: JoinRoom,
+  ): Promise<boolean> {
+    this.logger.log(`${payload.user.socketId} is joining ${payload.roomName}`);
+    const user = this.userService.findById(
+      payload.user.userId,
+      payload.user.userId,
+    );
+    user.socketId = payload.user.socketId;
+    await this.userService.update(
+      payload.user.userId,
+      payload.user.userId,
+      user,
+    );
+    this.server.in(payload.user.socketId).socketsJoin(payload.roomName);
+    await this.roomService.addUserToRoom(payload.roomName, payload.user.userId);
+    return true;
   }
 }
