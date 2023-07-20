@@ -1,52 +1,51 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { Message } from "@prisma/client";
 
 @Injectable()
 export class ChatService {
+  private logger: Logger = new Logger("ChatService");
   constructor(private prisma: PrismaService) {}
 
   async createMessage(message: Message) {
-    console.log("createMessage");
+    this.logger.log("createMessage");
     await this.prisma.message
       .create({
         data: {
-          username: message.username,
-          object: message.object,
           text: message.text,
-          channel: message.channel,
+          userId: message.userId,
+          roomId: message.roomId,
         },
       })
       .catch((error: any) => {
-        console.log(error);
-        throw new Error(error);
+        this.logger.error(error);
       });
   }
 
-  async getMessages() : Promise<Message[]> {
-    console.log("getMessages");
+  async getMessages(): Promise<Message[]> {
+    this.logger.log("getMessages");
     const messages = await this.prisma.message.findMany({});
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;
   }
 
-  async getUserMessages(user: string) : Promise<Message[]> {
-    console.log("getUserMessages");
+  async getUserMessages(userId: number): Promise<Message[]> {
+    this.logger.log("getUserMessages");
     const messages = await this.prisma.message.findMany({
       where: {
-        username: user
-      }
+        userId: userId,
+      },
     });
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;
   }
 
-  async getChannelMessages(channel: string) : Promise<Message[]> {
-    console.log("getChannelMessages");
+  async getRoomMessages(roomId: number): Promise<Message[]> {
+    this.logger.log("getChannelMessages");
     const messages = await this.prisma.message.findMany({
       where: {
-        channel: channel
-      }
+        roomId: roomId,
+      },
     });
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;

@@ -8,17 +8,17 @@ export class ChatController {
   constructor(private chatService: ChatService) {}
 
   @Public()
-  @Get("channel")
+  @Get("room")
   @HttpCode(HttpStatus.OK)
-  async getChannelMessages(@Param("channel") chan: string): Promise<Message[]> {
-    return await this.chatService.getChannelMessages(chan);
+  async getChannelMessages(@Param("room") roomId: number): Promise<Message[]> {
+    return await this.chatService.getRoomMessages(roomId);
   }
 
   @Public()
   @Get("user")
   @HttpCode(HttpStatus.OK)
-  async getUserMessages(@Param("user") username: string): Promise<Message[]> {
-    return await this.chatService.getUserMessages(username);
+  async getUserMessages(@Param("user") userId: number): Promise<Message[]> {
+    return await this.chatService.getUserMessages(userId);
   }
 
   @Public()

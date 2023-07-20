@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, HttpException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  HttpException,
+  Logger,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
@@ -9,13 +14,20 @@ import { JwtPayload, Tokens } from "./types";
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private config: ConfigService
+    private config: ConfigService,
   ) {}
 
   async signupLocal(dto: AuthDto): Promise<Tokens> {
+    this.logger.debug(
+      "user email : ",
+      dto.email,
+      "user password : ",
+      dto.password,
+    );
     const newhash = await argon2.hash(dto.password);
 
     const user = await this.prisma.user
@@ -41,8 +53,13 @@ export class AuthService {
   }
 
   async signinLocal(dto: AuthDto): Promise<Tokens> {
-    console.log("user email : ", dto.email);
-    console.log("user password : ", dto.password);
+    this.logger.log("signinLocal");
+    this.logger.debug(
+      "user email : ",
+      dto.email,
+      "user password : ",
+      dto.password,
+    );
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -59,15 +76,16 @@ export class AuthService {
   }
 
   async logout(userId: number): Promise<boolean> {
+    this.logger.log("logout");
     await this.prisma.user.updateMany({
       where: {
         id: userId,
-        hashedRt: {
+        hashRt: {
           not: null,
         },
       },
       data: {
-        hashedRt: null,
+        hashRt: null,
         loggedIn: false,
       },
     });
@@ -75,14 +93,15 @@ export class AuthService {
   }
 
   async refreshTokens(userId: number, rt: string): Promise<Tokens> {
+    this.logger.log("refreshTokens");
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
     });
-    if (!user || !user.hashedRt) throw new ForbiddenException("Access Denied");
+    if (!user || !user.hashRt) throw new ForbiddenException("Access Denied");
 
-    const rtMatches = await argon2.verify(user.hashedRt, rt);
+    const rtMatches = await argon2.verify(user.hashRt, rt);
     if (!rtMatches) throw new ForbiddenException("Access Denied");
 
     const tokens = await this.getTokens(user.id, user.email);
@@ -92,18 +111,20 @@ export class AuthService {
   }
 
   async updateRtHash(userId: number, rt: string): Promise<void> {
+    this.logger.log("updateRtHash");
     const hash = await argon2.hash(rt);
     await this.prisma.user.update({
       where: {
         id: userId,
       },
       data: {
-        hashedRt: hash,
+        hashRt: hash,
       },
     });
   }
 
   async updateLog(userId: number, logged: boolean): Promise<void> {
+    this.logger.log("updateLog");
     await this.prisma.user.update({
       where: {
         id: userId,
@@ -115,6 +136,7 @@ export class AuthService {
   }
 
   async getTokens(userId: number, email: string): Promise<Tokens> {
+    this.logger.log("getTokens");
     const jwtPayload: JwtPayload = {
       sub: userId,
       email: email,
@@ -132,6 +154,7 @@ export class AuthService {
     ]);
 
     return {
+      userId: userId,
       access_token: at,
       refresh_token: rt,
     };

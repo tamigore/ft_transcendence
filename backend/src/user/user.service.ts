@@ -22,24 +22,29 @@ export class UserService {
     });
   }
 
-  async update(userId: number, id: number, updateUserDto: any) {
-    this.logger.log(`user id : ${userId} wants to updateById: ${id}`);
-    return await this.prisma.user
+  async update(userId: number, updateUserDto: any) {
+    this.logger.log(
+      `user id : ${userId} wants to updateById: ${updateUserDto.id}`,
+    );
+    await this.prisma.user
       .update({
-        where: { id: id },
+        where: { id: userId },
         data: {
           email: updateUserDto.email,
           username: updateUserDto.username,
-          description: updateUserDto.description,
           hash: updateUserDto.hash,
-          hashedRt: updateUserDto.hashedRt,
+          hashRt: updateUserDto.hashRt,
           chatSocket: updateUserDto.chatSocket,
           gameSocket: updateUserDto.gameSocket,
-          role: updateUserDto.role,
           loggedIn: updateUserDto.loggedIn,
-          profile: updateUserDto.profile,
-          rooms: updateUserDto.rooms,
+          bio: updateUserDto.bio,
           img: updateUserDto.img,
+          // profile: updateUserDto.profile,
+          // admin: updateUserDto.admin,
+          // rooms: updateUserDto.rooms,
+          // messages: updateUserDto.messages,
+          // win: updateUserDto.win,
+          // loose: updateUserDto.loose,
         },
       })
       .then((user) => {

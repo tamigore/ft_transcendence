@@ -100,7 +100,7 @@ export default defineComponent({
   name: 'ProfileView',
   computed: {
     selectedImage() {
-      const selectedId = store.state.user.avatar;
+      const selectedId = store.state.user.img;
       return this.getImageById(selectedId) || { id: 1, img: require('@/assets/welc.jpeg') };
     },
     username() {
@@ -110,7 +110,7 @@ export default defineComponent({
       return store.state.user.email;
     },
     description() {
-      return store.state.user.description;
+      return store.state.user.bio;
     },
   },
   data() {
@@ -129,15 +129,15 @@ export default defineComponent({
       
       showPopup: false,
       imageGrid: [
-        { id: 1, img: require('@/assets/profiles/profil_1.jpg') },
-        { id: 2, img: require('@/assets/profiles/profil_2.jpg') },
-        { id: 3, img: require('@/assets/profiles/profil_3.jpg') },
-        { id: 4, img: require('@/assets/profiles/profil_4.jpg') },
-        { id: 5, img: require('@/assets/profiles/profil_5.jpg') },
-        { id: 6, img: require('@/assets/profiles/profil_6.jpg') },
-        { id: 7, img: require('@/assets/profiles/profil_7.jpg') },
-        { id: 8, img: require('@/assets/profiles/profil_8.jpg') },
-        { id: 9, img: require('@/assets/profiles/profil_9.jpg') },
+        { id: "1", img: require('@/assets/profiles/profil_1.jpg') },
+        { id: "2", img: require('@/assets/profiles/profil_2.jpg') },
+        { id: "3", img: require('@/assets/profiles/profil_3.jpg') },
+        { id: "4", img: require('@/assets/profiles/profil_4.jpg') },
+        { id: "5", img: require('@/assets/profiles/profil_5.jpg') },
+        { id: "6", img: require('@/assets/profiles/profil_6.jpg') },
+        { id: "7", img: require('@/assets/profiles/profil_7.jpg') },
+        { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
+        { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
       ],
     }
   },
@@ -150,7 +150,8 @@ export default defineComponent({
       store.commit('setAvatarId', image.id);
       this.showPopup = false;
     },
-    getImageById(id) {
+    getImageById(id: string | null) {
+      if (!id) return null;
       return this.imageGrid.find(image => image.id === id);
     },    
     async ModifyUserDescription() 
@@ -158,19 +159,15 @@ export default defineComponent({
       if (this.isEditingDescription) 
       {
         this.ModifyStoreDescription();
+        const user = store.state.user;
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/modify', 
-        {
-            description: this.email,
-            cmd : "description",
-            value : this.editedDescription,
-        })
-        .then((response: AxiosResponse) => 
-        {
+        await axios.post('/api/user/update', {
+          user : user,
+        },  { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
+        .then((response: AxiosResponse) => {
             console.log(response);
         })
-        .catch((error: AxiosError) => 
-        {
+        .catch((error: AxiosError) => {
             console.log(error);
         })
 
@@ -184,19 +181,15 @@ export default defineComponent({
       if (this.isEditingEmail) 
       {
         this.ModifyStoreEmail();
+        const user = store.state.user;
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/modify', 
-        {
-            email: this.email,
-            cmd : "email",
-            value : this.editedEmail,
-        })
-        .then((response: AxiosResponse) => 
-        {
+        await axios.post('/api/user/update', {
+          user : user,
+        },  { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
+        .then((response: AxiosResponse) => {
             console.log(response);
         })
-        .catch((error: AxiosError) => 
-        {
+        .catch((error: AxiosError) => {
             console.log(error);
         })
         this.isSavingEmail = false;
@@ -209,12 +202,11 @@ export default defineComponent({
       if (this.isEditingUsername) 
       {
         this.ModifyStoreUsername();
+        const user = store.state.user;
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/modify', {
-            email: this.email,
-            cmd : "username",
-            value : this.editedUsername,
-        })
+        await axios.post('/api/user/update', {
+          user : user,
+        },  { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
         .then((response: AxiosResponse) => {
             console.log(response);
         })
@@ -230,9 +222,6 @@ export default defineComponent({
     },
     ModifyStoreEmail() {
       store.commit('setEmail', this.editedEmail);
-    },
-    ModifyStoreAvatar() {
-      store.commit('setAvatar', this.avatarPath);
     },
     ModifyStoreDescription() {
       store.commit('setDescription', this.editedDescription);

@@ -7,9 +7,9 @@
             <img alt="logo" :src="require(`@/assets/pong.png`)" height="40" class="mr-2" />
           </template>
         </Menubar>
-        <BurgerMenu right>
+        <!-- <BurgerMenu right>
           <InputChat />
-        </BurgerMenu>
+        </BurgerMenu> -->
       </div>
     </nav>
     <div>
@@ -108,17 +108,17 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import InputChat from './components/Chat.vue';
+// import InputChat from './components/Chat.vue';
 import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { server } from "@/utils/helper";
 import router from './router';
-import BurgerMenu from '@/components/BurgerMenu.vue';
+// import BurgerMenu from '@/components/BurgerMenu.vue';
 
 export default defineComponent({
   components: {
-    InputChat,
-    BurgerMenu,
+    // InputChat,
+    // BurgerMenu,
   },
   data() {
     return {
@@ -131,10 +131,10 @@ export default defineComponent({
             },
         },
         {
-            label: 'History',
-            icon: 'pi pi-history',
+            label: 'Chat',
+            icon: 'pi pi-comment',
             command: () => {
-              router.push("/history");// same as router.push({ name: history })
+              router.push("/chat");// same as router.push({ name: history })
             },
         },
         {
@@ -164,7 +164,7 @@ export default defineComponent({
         .then((response: AxiosResponse) => {
           console.log("App LogoutPost response: ", response);
           store.commit("setHash", "");
-          store.commit("setHashRT", "");
+          store.commit("setHashRt", "");
           store.commit("setLogged", false);
         })
         .catch((error: AxiosError) => {

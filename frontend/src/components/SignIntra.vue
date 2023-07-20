@@ -14,8 +14,8 @@
   
         <div class="flex align-items-center justify-content-between mb-6">
           <div class="flex align-items-center text-indigo-300">
-            <Checkbox id="rememberme1" :binary="true" v-model="checked" class="mr-2"></Checkbox>
-            <label for="rememberme1">Remember me</label>
+            <Checkbox :binary="true" v-model="checked" class="mr-2"></Checkbox>
+            <label>Remember me</label>
           </div>
         </div>
   
@@ -57,7 +57,7 @@
         .then((response: AxiosResponse) => {
           console.log(response);
           store.commit("setHash", response.data.access_token);
-          store.commit("setHashRT", response.data.refresh_token);
+          store.commit("setHashRt", response.data.refresh_token);
           store.commit("setLogged", true);
           store.commit("setUsername", this.email);
           router.push({path: '/profile'});

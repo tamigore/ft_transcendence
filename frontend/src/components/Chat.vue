@@ -20,6 +20,7 @@ import SocketioChat from "@/utils/socket";
 import { defineComponent } from "vue";
 import store from "@/store";
 import GetMessages from "./GetMessages.vue";
+import { Message } from "@/utils/interfaces";
 
 export default defineComponent({
     name: "InputChat",
@@ -32,29 +33,30 @@ export default defineComponent({
             socketio: SocketioChat as typeof SocketioChat,
             isLoading: false as boolean,
             value: "" as string,
-            messageStack: store.state.chat.messages as {username: string, text: string, object: string, channel: string}[],
+            messageStack: store.state.messages as Message[],
         }
     },
-    created() {
+    mounted() {
         this.socketio.setupSocketConnection();
     },
     methods: {
         onSubmit() {
             this.isLoading = true;
             const message = {
-                username: store.state.user.username,
+                id: 0,
+                created_at: new Date(),
                 text: this.value,
-                object: "message",
-                channel: this.channel,
-            }
-            // if (this.channel !== "general")
-            //     this.socketio.socket.emit("joinChan", {chan : this.channel});
-            this.socketio.socket.timeout(1000).emit("cliMessage", message);
+                roomId: store.state.last_room.id,
+                room: store.state.last_room,
+                userId: store.state.user.id,
+                user: store.state.user,
+            } as Message;
+            this.socketio.socket.emit("cliMessage", {user: store.state.user, room: store.state.last_room, message: message});
             this.isLoading = false;
             this.value = "";
         },
         connected() {
-            return (store.state.chat.connected ? "Connected" : "Disconnected");
+            return (store.state.connected ? "Connected" : "Disconnected");
         },
         connect() {
             this.socketio.socket.connect();

@@ -15,13 +15,7 @@ import { defineComponent } from "vue";
 import store from "@/store";
 import axios, { AxiosError } from 'axios';
 import { server } from "@/utils/helper";
-
-interface message {
-    username: string,
-    text: string,
-    object: string,
-    channel: string
-}
+import { Message } from "@/utils/interfaces";
 
 export default defineComponent({
     name: "GetMessages",
@@ -29,7 +23,7 @@ export default defineComponent({
         return {
             isLoading: false as boolean,
             value: "" as string,
-            messageStack: store.state.chat.messages as message[],
+            messageStack: store.state.messages as Message[],
         }
     },
     methods: {
@@ -38,21 +32,21 @@ export default defineComponent({
             const messages = await axios.get("api/chat")
                 .catch((error: AxiosError) => {console.log(error);});
             if (messages)
-                this.messageStack = messages.data as message[];
+                this.messageStack = messages.data as Message[];
         },
         async getUserMessages() {
             axios.defaults.baseURL = server.nestUrl;
             const messages = await axios.get("api/chat/user", { params: { user : store.state.user.username } })
                 .catch((error: AxiosError) => {console.log(error);});
             if (messages)
-                this.messageStack = messages.data as message[];
+                this.messageStack = messages.data as Message[];
         },
         async onSubmit() {
             this.isLoading = true;
             const messages = await axios.get("api/chat/channel", { params: { channel : this.value } })
                 .catch((error: AxiosError) => {console.log(error);});
             if (messages)
-                this.messageStack = messages.data as message[];
+                this.messageStack = messages.data as Message[];
             this.isLoading = false;
         },
     }

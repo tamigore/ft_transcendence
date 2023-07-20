@@ -23,8 +23,8 @@ const routes: Array<RouteRecordRaw> = [
     component: Pong
   },
   {
-    path: '/history',
-    name: 'history',
+    path: '/chat',
+    name: 'chat',
     component: Chat
   }
 ]

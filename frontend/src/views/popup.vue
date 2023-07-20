@@ -43,7 +43,7 @@
     },
     computed: {
       selectedImage() {
-        const selectedId = store.state.user.avatar;
+        const selectedId = store.state.user.img;
         return this.getImageById(selectedId) || { id: 1, img: require('@/assets/welc.jpeg') };
       },
     },

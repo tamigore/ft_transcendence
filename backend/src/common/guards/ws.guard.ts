@@ -12,7 +12,10 @@ export class WsGuard
   implements CanActivate
 {
   private logger = new Logger("WsGuard");
-  constructor(private userService: UserService, private config: ConfigService) {
+  constructor(
+    private userService: UserService,
+    private config: ConfigService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: config.get<string>("AT_SECRET"),
@@ -20,18 +23,18 @@ export class WsGuard
   }
 
   canActivate(
-    context: any
+    context: any,
   ): boolean | any | Promise<boolean | any> | Observable<boolean | any> {
     const bearerToken =
       context.args[0].handshake.headers.authorization.split(" ")[1];
     try {
       const decoded = jwt.verify(
         bearerToken,
-        this.config.get<string>("AT_SECRET")
+        this.config.get<string>("AT_SECRET"),
       ) as any;
       return new Promise((resolve, reject) => {
         return this.userService
-          .findByUsername(decoded.username)
+          .findById(decoded.id, decoded.id)
           .then((user) => {
             if (user) {
               resolve(user);

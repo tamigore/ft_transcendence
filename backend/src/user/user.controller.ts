@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   HttpCode,
   HttpStatus,
@@ -12,68 +11,41 @@ import {
 import { GetCurrentUserId, Public } from "../common/decorators";
 import { UserService } from "./user.service";
 import { User } from "@prisma/client";
-import { ModifyUserDto } from "./dto";
-import { AtGuard, RtGuard } from "../common/guards";
+import { AtGuard } from "../common/guards";
 
 @Controller("user")
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Public()
-  @Post("modify")
-  @UseGuards(RtGuard)
-  @HttpCode(HttpStatus.OK)
-  modifyUser(@Body() dto: ModifyUserDto) {
-    this.userService.modifyUser(dto);
-  }
-
-  @Public()
-  @Get("findone")
-  @HttpCode(HttpStatus.OK)
-  getUser(@Body() query: string): Promise<User> {
-    return this.userService.getUser(query);
-  }
-
-  @Public()
-  @Get("findmany")
-  @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  getUsers(@Body() query: string): Promise<User[]> {
-    return this.userService.getUsers(query);
-  }
-
-  @Public()
+  // @Public()
   @Post("update")
-  @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  updateUser(
-    @GetCurrentUserId() userId: number,
-    id: number,
-    updateUserDto: any
-  ) {
-    this.userService.update(userId, id, updateUserDto);
+  updateUser(@GetCurrentUserId() userId: number, updateUserDto: User) {
+    this.userService.update(userId, updateUserDto);
   }
 
-  @Public()
+  // @Public()
   @Get()
-  @UseGuards(AtGuard)
+  // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   findUsers(): Promise<User[]> {
     return this.userService.findAll();
   }
 
-  @Public()
+  // @Public()
   @Get(":id")
-  @UseGuards(AtGuard)
+  // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   findUser(@GetCurrentUserId() userId: number, id: number): Promise<User> {
     return this.userService.findById(userId, id);
   }
 
-  @Public()
+  // @Public()
   @Delete(":id")
-  @UseGuards(AtGuard)
+  // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   deleteUser(@GetCurrentUserId() userId: number, id: number): Promise<User> {

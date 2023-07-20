@@ -17,32 +17,30 @@ model User {
 
   email       String   @unique
   username    String?  @unique
-  description String?
   hash        String   @unique
-  hashedRt    String?
+  hashRt    String?
   chatSocket  String?
   gameSocket  String?
-  role        Role?     @default(USER)
   loggedIn    Boolean   @default(false)
-  profile     Profile?
-  rooms       String[]  @default(["general"])
-  avatar      Bytes?     @db.ByteA //Native database type attribute to stock full img (not optimized)
-  img         String?              //Path to img src
+  bio         String?
+  img         String? //Path to img src
+  admin       Room[]    @relation(name: "admin")
+  rooms       Room[]    @relation(name: "users")
+  messages    Message[]
+  win         GameHistoric[] @relation(name: "winner")
+  loose       GameHistoric[] @relation(name: "looser")
   @@map("users")
 }
 
-model Profile {
-  id     Int     @default(autoincrement()) @id
-  bio    String?
-  user   User    @relation(fields: [userId], references: [id])
-  userId Int     @unique
-}
 model GameHistoric {
-  gameId         Int      @id @default(autoincrement())
-  date DateTime @default(now())
-  winnerID Int
-  looserID Int
-  score String
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now())
+
+  winnerID    Int
+  winner      User     @relation(name: "winner", fields: [winnerID], references: [id])
+  looserID    Int
+  looser      User     @relation(name: "looser", fields: [looserID], references: [id])
+  score       String
   @@map("gamesHistoric")
 }
 
@@ -50,21 +48,23 @@ model Message {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  username String
-  object   String
-  text     String
-  channel  String
-
+  text      String
+  roomId    Int
+  room      Room     @relation(fields: [roomId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
   @@map("Messages")
 }
 
-enum Role {
-  USER
-  ADMIN
-}
+model Room {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
 
-enum Invite {
-  SPEC
-  PLAY
-  FREND
+  name        String
+  adminId     Int
+  admin       User     @relation(name: "admin", fields: [adminId], references: [id])
+  users       User[]   @relation(name: "users")
+  messages    Message[]
+  description String?
+  @@map("Rooms")
 }

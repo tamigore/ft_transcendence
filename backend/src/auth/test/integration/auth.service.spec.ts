@@ -130,7 +130,7 @@ describe("Auth Flow", () => {
           email: user.email,
         },
       });
-      expect(userFromDb?.hashedRt).toBeTruthy();
+      expect(userFromDb?.hashRt).toBeTruthy();
 
       // logout
       await authService.logout(userFromDb!.id);
@@ -141,7 +141,7 @@ describe("Auth Flow", () => {
         },
       });
 
-      expect(userFromDb?.hashedRt).toBeFalsy();
+      expect(userFromDb?.hashRt).toBeFalsy();
     });
   });
 
@@ -176,7 +176,7 @@ describe("Auth Flow", () => {
       const decoded = decode(rt);
       const userId = Number(decoded?.sub);
 
-      // logout the user so the hashedRt is set to null
+      // logout the user so the hashRt is set to null
       await authService.logout(userId);
 
       let tokens: Tokens | undefined;

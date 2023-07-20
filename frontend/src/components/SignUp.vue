@@ -1,28 +1,34 @@
 <template>
-    <div class="surface-card p-4 shadow-8 border-round w-full">
-        <div class="text-center mb-5">
-            <img :src="require(`@/assets/pong.png`)" alt="Image" height="50" class="mb-3">
-            <div class="text-900 text-3xl font-medium mb-3">Welcome</div>
-        </div>
-
-        <div>
-            <label for="email1" class="block text-900 font-medium mb-2">Email</label>
-            <InputText v-model="email" id="email1" type="text" class="w-full mb-3" />
-
-            <label for="password1" class="block text-900 font-medium mb-2">Password</label>
-            <InputText v-model="password" id="password1" type="password" class="w-full mb-3" />
-
-            <div class="flex align-items-center justify-content-between mb-6">
-                <div class="flex align-items-center text-indigo-300">
-                    <Checkbox id="rememberme1" :binary="true" v-model="checked" class="mr-2"></Checkbox>
-                    <label for="rememberme1">Remember me</label>
-                </div>
-            </div>
-
-            <Button @click="SignUpPost()" label="Sign Up" icon="pi pi-user" class="w-full"></Button>
-        </div>
+  <div class="surface-card p-4 shadow-8 border-round w-full">
+    <div class="text-center mb-5">
+      <img :src="require(`@/assets/pong.png`)" alt="Image" height="50" class="mb-3">
+      <div class="text-900 text-3xl font-medium mb-3">Welcome</div>
     </div>
+
+    <div>
+      <label for="email1" class="block text-900 font-medium mb-2">Email</label>
+      <InputText v-model="email" id="email1" type="text" class="w-full mb-3" />
+
+      <label for="password1" class="block text-900 font-medium mb-2">Password</label>
+      <InputText v-model="password" id="password1" type="password" class="w-full mb-3" />
+
+      <div class="flex align-items-center justify-content-between mb-6">
+        <div class="flex align-items-center text-indigo-300">
+          <Checkbox :binary="true" v-model="checked" class="mr-2"></Checkbox>
+          <label>Remember me</label>
+        </div>
+      </div>
+
+      <Button @click="SignUpPost()" label="Sign Up" icon="pi pi-user" class="w-full"></Button>
+    </div>
+  </div>
 </template>
+
+<style>
+#rememberme1 {
+  color: #ed80d3;
+}
+</style>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
@@ -56,8 +62,9 @@ export default defineComponent ({
       })
       .then((response: AxiosResponse) => {
         console.log(response);
+        // store.commit("setUser", response.data);
         store.commit("setHash", response.data.access_token);
-        store.commit("setHashRT", response.data.refresh_token);
+        store.commit("setHashedRt", response.data.refresh_token);
         store.commit("setLogged", true);
         store.commit("setUsername", this.email);
         router.push("/profile");

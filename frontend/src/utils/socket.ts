@@ -1,25 +1,28 @@
 import { io, Socket  } from "socket.io-client";
 import { server } from "@/utils/helper";
 import store from "@/store";
+import { User, Message, Room } from "./interfaces"
 
-interface ServerToClientEvents {
-  servMessage: (message: {username: string, text: string, object: string, channel: string}) => void;
+export interface ServerToClientEvents {
+  servMessage: (e: {user: User, room: Room, message: Message}) => void;
 }
 
-interface ClientToServerEvents {
-  cliMessage: (message: {username: string, text: string, object: string, channel: string}) => void;
-  joinChan: (message: {chan: string}) => void;
+export interface ClientToServerEvents {
+  join_room: (e: { user: User; roomName: string }) => void;
+  kick_user: (e: { user: User; user_to_kick: User; roomName: string }) => void;
+  cliMessage: (e: {user: User, room: Room, message: Message}) => void;
 }
 
 class SocketioChat {
   socket: Socket<ServerToClientEvents, ClientToServerEvents>;
 
   setupSocketConnection() {
-    const auth = "Bearer " + store.state.user.hashRT;
+    console.log("setupSocketConnection");
+    const auth = "Bearer " + store.state.user.hash;
     this.socket = io(server.chatUrl,
       {
         transports : ['websocket'],
-        autoConnect: true,
+        autoConnect: false,
         auth: {
           token: auth,
         },
@@ -48,13 +51,10 @@ class SocketioChat {
   }
 
   socketMessage() {
-    this.socket.on("servMessage", (args:  {username: string, text: string, object: string, channel: string}) => {
-      console.log("Socket msg : ", args);
-      store.commit("setChatMessages", args);
-      if (store.state.chat.channels.includes(args.channel) === false)
-        store.commit("setChatChannels", args.channel);
-      if (store.state.chat.channel != args.channel)
-        store.commit("setChatChannel", args.channel);
+    this.socket.on("servMessage",
+    (message:  {user: User, room: Room, message: Message}) => {
+      console.log("Socket msg : ", message);
+      store.commit("setMessages", message);
     });
   }
 }

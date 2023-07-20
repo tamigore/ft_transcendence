@@ -1,13 +1,15 @@
 /* eslint-disable prettier/prettier */
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { GameHistoric } from "@prisma/client";
 
 @Injectable()
 export class HistoricService {
+  private logger: Logger = new Logger("HistoricService");
   constructor(private prisma: PrismaService) {}
+  
   async getGamesByPlayerId(body: any) : Promise<GameHistoric[]> {
-    var userId : number = 0;
+    let userId : number = 0;
     userId = + body.id;
     const messages = await this.prisma.gameHistoric.findMany({
       where: {
@@ -26,11 +28,11 @@ export class HistoricService {
   }
 
   async getGameByGameId(body: any) : Promise<GameHistoric> {
-      var id : number = 0;
+      let id : number = 0;
       id = + body.id;
     const message = await this.prisma.gameHistoric.findUnique({
       where: {
-        gameId: id ,
+        id: id ,
       }
     });
     if (!message) throw new ForbiddenException("Access Denied");
@@ -38,12 +40,12 @@ export class HistoricService {
   }
 
   async setGameByGameId(body: any) : Promise<void> {
-    var winnerID : number = 0;
+    let winnerID : number = 0;
     winnerID = + body.winnerID;
-    var looserID : number = 0;
+    let looserID : number = 0;
     looserID = + body.looserID;
 
-    const user = await this.prisma.gameHistoric
+    await this.prisma.gameHistoric
       .create({
         data: {
           winnerID: winnerID,
@@ -52,7 +54,7 @@ export class HistoricService {
         },
       })
       .catch((error: any) => {
-      console.log("==ERROR--")
+        this.logger.log("", error)
       });
     }
     

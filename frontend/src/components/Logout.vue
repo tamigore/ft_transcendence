@@ -17,7 +17,7 @@ export default defineComponent ({
         .then((response: AxiosResponse) => {
             console.log(response)
             store.commit("setHash", "");
-            store.commit("setHashRT", "");
+            store.commit("setHashRt", "");
             store.commit("setLogged", false);
             console.log(store.state.user.loggedIn) // -> 0
             router.push("/");

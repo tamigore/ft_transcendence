@@ -1,13 +1,13 @@
 import { User, Message, Room } from "@prisma/client";
+import { Socket } from "socket.io";
 
 export interface ServerToClientEvents {
-  chat: (e: Message) => void;
   servMessage: (e: Message) => void;
 }
 
 export interface ClientToServerEvents {
-  chat: (e: Message) => void;
   join_room: (e: { user: User; roomName: string }) => void;
+  kick_user: (e: { user: User; user_to_kick: User; roomName: string }) => void;
   cliMessage: (e: Message) => void;
 }
 
@@ -22,4 +22,10 @@ export interface KickUser {
   userToKick: User;
   room: Room;
   eventName: string;
+}
+
+export interface MessageEvent {
+  user: User;
+  room: Room;
+  socket: Socket;
 }

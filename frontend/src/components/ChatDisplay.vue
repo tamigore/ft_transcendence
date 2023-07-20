@@ -29,7 +29,7 @@
 
 <script lang="ts">
 // import SocketioChat from "@/utils/socket";
-import { defineComponent, computed } from "vue";
+import { defineComponent } from "vue";
 // import store from "@/store";
 
 export default defineComponent({
