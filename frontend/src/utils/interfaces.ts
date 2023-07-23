@@ -12,14 +12,15 @@ export interface User {
   loggedIn: boolean;
   bio: string | null,
   img: string | null, //Path to img src
+  owner: Room[];
   admin: Room[];
   rooms: Room[];
   messages: Message[];
-  win: GameHistoric;
-  loose: GameHistoric;
+  win: Historic;
+  loose: Historic;
 }
 
-export interface GameHistoric {
+export interface Historic {
   id: number;
   created_at: Date;
 
@@ -46,8 +47,9 @@ export interface Room {
   created_at: Date;
 
   name: string;
-  adminId: number;
-  admin: User;
+  ownerId: number;
+  owner: User;
+  admin: User[];
   users: User[];
   messages: Message[];
   description: string | null;

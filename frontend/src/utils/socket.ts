@@ -18,13 +18,17 @@ class SocketioChat {
 
   setupSocketConnection() {
     console.log("setupSocketConnection");
-    const auth = "Bearer " + store.state.user.hash;
+    const auth: string = "Bearer " + store.state.user.hash;
+    const userId: string = store.state.user.id.toString();
     this.socket = io(server.chatUrl,
       {
         transports : ['websocket'],
         autoConnect: false,
         auth: {
           token: auth,
+        },
+        query: {
+          "userId": userId,
         },
       }
     );
@@ -33,20 +37,20 @@ class SocketioChat {
     this.socketDisconnect();
     this.socketMessage();
   }
-    
+
   socketConnect() {
     this.socket.on("connect", () => {
+      console.log("socketDisconnect");
       store.commit("setChatConnect", true);
       store.commit("setChatSocket", this.socket.id);
-      console.log("Socket connect : " + this.socket.id);
     });
   }
   
   socketDisconnect() {
     this.socket.on("disconnect", () => {
+      console.log("socketDisconnect");
       store.commit("setChatConnect", false);
       store.commit("setChatSocket", "");
-      console.log("Socket disconnect");
     });
   }
 
@@ -60,3 +64,7 @@ class SocketioChat {
 }
 
 export default new SocketioChat();
+
+// const socketio = new SocketioChat();
+
+// export default socketio;

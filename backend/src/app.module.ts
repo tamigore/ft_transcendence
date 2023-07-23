@@ -7,6 +7,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { ChatModule } from "./chat/chat.module";
 import { UserModule } from "./user/user.module";
 import { GameModule } from "./game/game.module";
+import { RoomModule } from "./room/room.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { GameModule } from "./game/game.module";
     ChatModule,
     UserModule,
     GameModule,
+    RoomModule,
   ],
   providers: [
     {

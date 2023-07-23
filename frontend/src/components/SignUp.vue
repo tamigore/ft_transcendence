@@ -9,6 +9,9 @@
       <label for="email1" class="block text-900 font-medium mb-2">Email</label>
       <InputText v-model="email" id="email1" type="text" class="w-full mb-3" />
 
+      <label for="username1" class="block text-900 font-medium mb-2">Username</label>
+      <InputText v-model="username" id="username1" type="text" class="w-full mb-3" />
+
       <label for="password1" class="block text-900 font-medium mb-2">Password</label>
       <InputText v-model="password" id="password1" type="password" class="w-full mb-3" />
 
@@ -42,43 +45,42 @@ export default defineComponent ({
   data() {
     return {
       email: "",
+      username: "",
       password: "",
       checked: false,
     };
   },
   methods: {
-    isLogged : () => { 
-      return store.state.user.loggedIn;
-    },
     async SignUpPost() {
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/auth/local/signup', {
         email: this.email,
+        username: this.username,
         password: this.password,
       }, {
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded'
         }
       })
       .then((response: AxiosResponse) => {
         console.log(response);
-        // store.commit("setUser", response.data);
         store.commit("setHash", response.data.access_token);
-        store.commit("setHashedRt", response.data.refresh_token);
-        store.commit("setLogged", true);
-        store.commit("setUsername", this.email);
-        router.push("/profile");
+        store.commit("setHashRt", response.data.refresh_token);
+        store.commit("setUserID", response.data.userId);
+        router.push({path: '/profile'});
       })
       .catch((error: AxiosError) => {
         console.log(error);
         if (error.response && error.response.status == 403)
-        window.alert("Signup failed : Email already exists");
+          window.alert("Signup failed : Email already exists");
         else
-        window.alert("Signup failed :" + error);
+          window.alert("Signup failed :" + error);
       })
       if (!this.checked)
       {
+        console.log("SignUpPost: finished and data safe");
         this.email = "";
+        this.username = "";
         this.password = "";
       }
     },

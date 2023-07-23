@@ -7,9 +7,6 @@
             <img alt="logo" :src="require(`@/assets/pong.png`)" height="40" class="mr-2" />
           </template>
         </Menubar>
-        <!-- <BurgerMenu right>
-          <InputChat />
-        </BurgerMenu> -->
       </div>
     </nav>
     <div>
@@ -108,17 +105,13 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-// import InputChat from './components/Chat.vue';
 import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { server } from "@/utils/helper";
 import router from './router';
-// import BurgerMenu from '@/components/BurgerMenu.vue';
 
 export default defineComponent({
   components: {
-    // InputChat,
-    // BurgerMenu,
   },
   data() {
     return {
@@ -158,7 +151,6 @@ export default defineComponent({
     async LogoutPost() {
         axios.defaults.baseURL = server.nestUrl;
         await axios.post("api/auth/logout", {}, {
-          timeout: 1000,
           headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
         .then((response: AxiosResponse) => {
@@ -166,12 +158,13 @@ export default defineComponent({
           store.commit("setHash", "");
           store.commit("setHashRt", "");
           store.commit("setLogged", false);
+          store.commit("setUsername", "");
+          store.commit("delUser");
         })
         .catch((error: AxiosError) => {
           console.log("App LogoutPost error: ", error);
           throw new Error("Logout failed: " + error);
         })
-        store.commit("setUsername", "");
         router.push("/");
     },
     isLogged : () => { 

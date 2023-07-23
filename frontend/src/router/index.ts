@@ -5,6 +5,7 @@ import Pong from '@/views/Pong.vue';
 // import NotFound from '@/views/404notFound.vue';
 import Chat from '@/views/ChatView.vue';
 import store from '@/store';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -36,7 +37,20 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
   if (from.name === 'pong') {
-    console.log('leaving pong');
+    console.log('leaving pong: if game not finished user lose');
+  }
+  if (from.name === 'home') {
+    await axios.get(`api/user/:id=${store.state.user.id}`, {
+      headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+    })
+    .then((response: AxiosResponse) => {
+      console.log(response);
+      store.commit("setUser", response.data);
+    })
+    .catch((error: AxiosError) => {
+      console.log(error)
+      throw new Error("router get user failed: " + error);
+    })
   }
   if (
     !store.state.user.loggedIn &&

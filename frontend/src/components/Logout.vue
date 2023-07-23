@@ -19,14 +19,16 @@ export default defineComponent ({
             store.commit("setHash", "");
             store.commit("setHashRt", "");
             store.commit("setLogged", false);
+            store.commit("setUsername", "");
             console.log(store.state.user.loggedIn) // -> 0
+            store.commit("delUser", false);
+            console.log(store.state.user) // -> empty
             router.push("/");
         })
         .catch((error: AxiosError) => {
             console.log(error)
             throw new Error("Logout failed: " + error);
         })
-        store.commit("setUsername", "");
     },
   },
 });

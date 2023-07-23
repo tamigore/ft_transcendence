@@ -1,25 +1,21 @@
 import { IsNotEmpty, IsString } from "class-validator";
 
-export class SignUpDto {
+export class AddDelUserDto {
   @IsNotEmpty()
   @IsString()
-  email: string;
+  userId: number;
 
   @IsNotEmpty()
   @IsString()
-  username: string;
-
-  @IsNotEmpty()
-  @IsString()
-  password: string;
+  roomId: number;
 }
 
-export class SignInDto {
+export class RemmoveUserDto {
   @IsNotEmpty()
   @IsString()
-  email: string;
+  userID: string;
 
   @IsNotEmpty()
   @IsString()
-  password: string;
+  roomId: string;
 }

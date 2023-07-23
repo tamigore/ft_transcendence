@@ -72,14 +72,14 @@
           </li>
           
           <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 font-medium">Description</div>
+            <div class="text-500 w-6 md:w-2 font-medium">Bio</div>
             <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
-              <span v-if="!isEditingDescription">{{ description }}</span>
-              <input v-else type="text" v-model="editedDescription" @keyup.enter="ModifyUserDescription" />
+              <span v-if="!isEditingBio">{{ Bio }}</span>
+              <input v-else type="text" v-model="editedBio" @keyup.enter="ModifyUserBio" />
             </div>
             <div class="w-6 md:w-2 flex justify-content-end">
-              <button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserDescription">
-                {{ isEditingDescription ? (isSavingDescription ? 'Saving...' : 'Save') : 'Edit' }}
+              <button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserBio">
+                {{ isEditingBio ? (isSavingBio ? 'Saving...' : 'Save') : 'Edit' }}
               </button>
             </div>
           </li>
@@ -109,7 +109,7 @@ export default defineComponent({
     email() {
       return store.state.user.email;
     },
-    description() {
+    Bio() {
       return store.state.user.bio;
     },
   },
@@ -119,9 +119,9 @@ export default defineComponent({
       isSavingEmail: false,
       editedEmail: "",
       
-      isEditingDescription: false,
-      isSavingDescription: false,
-      editedDescription: "", 
+      isEditingBio: false,
+      isSavingBio: false,
+      editedBio: "", 
       
       isEditingUsername: false,
       isSavingUsername: false,
@@ -154,16 +154,15 @@ export default defineComponent({
       if (!id) return null;
       return this.imageGrid.find(image => image.id === id);
     },    
-    async ModifyUserDescription() 
+    async ModifyUserBio() 
     {
-      if (this.isEditingDescription) 
+      if (this.isEditingBio) 
       {
-        this.ModifyStoreDescription();
+        this.ModifyStoreBio();
         const user = store.state.user;
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/update', {
-          user : user,
-        },  { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
+        await axios.post('/api/user/update', user,
+          { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
         .then((response: AxiosResponse) => {
             console.log(response);
         })
@@ -171,9 +170,9 @@ export default defineComponent({
             console.log(error);
         })
 
-        this.isSavingDescription = false; // Mettre à jour l'état du bouton après la requête
+        this.isSavingBio = false; // Mettre à jour l'état du bouton après la requête
       }
-      this.isEditingDescription = !this.isEditingDescription;
+      this.isEditingBio = !this.isEditingBio;
     },
 
     async ModifyUserEmail() 
@@ -183,9 +182,8 @@ export default defineComponent({
         this.ModifyStoreEmail();
         const user = store.state.user;
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/update', {
-          user : user,
-        },  { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
+        await axios.post('/api/user/update', user,
+          { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
         .then((response: AxiosResponse) => {
             console.log(response);
         })
@@ -204,9 +202,8 @@ export default defineComponent({
         this.ModifyStoreUsername();
         const user = store.state.user;
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/update', {
-          user : user,
-        },  { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
+        await axios.post('/api/user/update', user,
+          { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
         .then((response: AxiosResponse) => {
             console.log(response);
         })
@@ -223,8 +220,8 @@ export default defineComponent({
     ModifyStoreEmail() {
       store.commit('setEmail', this.editedEmail);
     },
-    ModifyStoreDescription() {
-      store.commit('setDescription', this.editedDescription);
+    ModifyStoreBio() {
+      store.commit('setBio', this.editedBio);
     },
   }
 })

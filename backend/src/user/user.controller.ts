@@ -5,13 +5,15 @@ import {
   Post,
   Header,
   Get,
-  UseGuards,
+  // UseGuards,
   Delete,
+  Body,
+  Param,
 } from "@nestjs/common";
-import { GetCurrentUserId, Public } from "../common/decorators";
+import { GetCurrentUserId } from "../common/decorators";
 import { UserService } from "./user.service";
 import { User } from "@prisma/client";
-import { AtGuard } from "../common/guards";
+// import { AtGuard } from "../common/guards";
 
 @Controller("user")
 export class UserController {
@@ -22,8 +24,19 @@ export class UserController {
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  updateUser(@GetCurrentUserId() userId: number, updateUserDto: User) {
+  updateUser(@GetCurrentUserId() userId: number, @Body() updateUserDto: User) {
     this.userService.update(userId, updateUserDto);
+  }
+
+  @Post("chatsocket")
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  updateChatSocket(
+    @GetCurrentUserId() userId: number,
+    @Body() chatSocket: any,
+  ) {
+    this.userService.updateChatSocket(userId, chatSocket.socket);
   }
 
   // @Public()
@@ -39,8 +52,9 @@ export class UserController {
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  findUser(@GetCurrentUserId() userId: number, id: number): Promise<User> {
-    return this.userService.findById(userId, id);
+  findUser(@Param("id") param: string): Promise<User> {
+    const id = parseInt(param.split("=")[1]);
+    return this.userService.findById(id);
   }
 
   // @Public()
@@ -48,7 +62,11 @@ export class UserController {
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  deleteUser(@GetCurrentUserId() userId: number, id: number): Promise<User> {
+  deleteUser(
+    @GetCurrentUserId() userId: number,
+    @Param("id") param: string,
+  ): Promise<User> {
+    const id = parseInt(param.split("=")[1]);
     return this.userService.remove(userId, id);
   }
 }

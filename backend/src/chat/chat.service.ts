@@ -7,15 +7,26 @@ export class ChatService {
   private logger: Logger = new Logger("ChatService");
   constructor(private prisma: PrismaService) {}
 
-  async createMessage(message: Message) {
+  async createMessage(message: Message, roomId: number, userId: number) {
     this.logger.log("createMessage");
     await this.prisma.message
       .create({
         data: {
           text: message.text,
-          userId: message.userId,
-          roomId: message.roomId,
+          room: {
+            connect: {
+              id: roomId,
+            },
+          },
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
         },
+      })
+      .then((newMessage) => {
+        this.logger.log(`createMessage success: ${newMessage}`);
       })
       .catch((error: any) => {
         this.logger.error(error);

@@ -1,17 +1,17 @@
 /* eslint-disable prettier/prettier */
 import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { GameHistoric } from "@prisma/client";
+import { Historic } from "@prisma/client";
 
 @Injectable()
 export class HistoricService {
   private logger: Logger = new Logger("HistoricService");
   constructor(private prisma: PrismaService) {}
   
-  async getGamesByPlayerId(body: any) : Promise<GameHistoric[]> {
+  async getGamesByPlayerId(body: any) : Promise<Historic[]> {
     let userId : number = 0;
     userId = + body.id;
-    const messages = await this.prisma.gameHistoric.findMany({
+    const messages = await this.prisma.historic.findMany({
       where: {
         OR: [
             {
@@ -27,10 +27,10 @@ export class HistoricService {
     return messages;
   }
 
-  async getGameByGameId(body: any) : Promise<GameHistoric> {
+  async getGameByGameId(body: any) : Promise<Historic> {
       let id : number = 0;
       id = + body.id;
-    const message = await this.prisma.gameHistoric.findUnique({
+    const message = await this.prisma.historic.findUnique({
       where: {
         id: id ,
       }
@@ -45,7 +45,7 @@ export class HistoricService {
     let looserID : number = 0;
     looserID = + body.looserID;
 
-    await this.prisma.gameHistoric
+    await this.prisma.historic
       .create({
         data: {
           winnerID: winnerID,

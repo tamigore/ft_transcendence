@@ -56,11 +56,9 @@ export default defineComponent ({
       })
       .then((response: AxiosResponse) => {
         console.log(response);
-        // store.commit("setUser", response.data.user);
         store.commit("setHash", response.data.access_token);
-        store.commit("setHashedRt", response.data.refresh_token);
-        store.commit("setLogged", true);
-        store.commit("setUsername", this.email);
+        store.commit("setHashRt", response.data.refresh_token);
+        store.commit("setUserID", response.data.userId);
         router.push({path: '/profile'});
       })
       .catch((error: AxiosError) => {
@@ -69,6 +67,7 @@ export default defineComponent ({
       })
       if (!this.checked)
       {
+        console.log("SignInPost: finished and data safe");
         this.email = "";
         this.password = "";
       }

@@ -10,7 +10,25 @@ const store = createStore({
         last_room: {} as Room,
     },
     mutations: {
-        setUser: function (state, user) {
+        setChatConnect : function (state, chatConnect: boolean) {
+            state.connected = chatConnect;
+        },
+        setLastRoom: function (state, room: Room) {
+            console.log('setLastRoom: ', room);
+            state.last_room.id = room.id;
+            state.last_room.name = room.name;
+            state.last_room.ownerId = room.ownerId;
+            state.last_room.description = room.description;
+        },
+        setRooms: function (state, rooms: Room[]) {
+            console.log('setRooms: ', rooms);
+            state.rooms = rooms;
+        },
+        addRoom: function (state, room: Room) {
+            console.log('addRoom: ', room);
+            state.rooms.push(room);
+        },
+        setUser: function (state, user: User) {
             console.log('setUser: ', user);
             state.user.id = user.id;
             state.user.created_at = user.created_at;
@@ -24,6 +42,13 @@ const store = createStore({
             state.user.loggedIn = user.loggedIn;
             state.user.bio = user.bio;
             state.user.img = user.img;
+        },
+        delUser: function (state) {
+            console.log('delUser');
+            state.user = {} as User;
+        },
+        setUserID: function (state, id: number) {
+            state.user.id = id;
         },
         setLogged: function (state, islog: boolean) {
             state.user.loggedIn = islog;
@@ -40,20 +65,20 @@ const store = createStore({
         setHashRt: function (state, hashRt: string) {
             state.user.hashRt = hashRt;
         },
-        setChatConnect : function (state, chatConnect: boolean) {
-            state.connected = chatConnect;
-        },
         setChatSocket : function (state, chatSocket: string) {
             state.user.chatSocket = chatSocket;
-        },
-        setMessages : function (state, chatMessage: Message) {
-            state.messages.push(chatMessage);
         },
         setAvatarId : function (state, avatarId: string) {
             state.user.img = avatarId;
         },
-        setDescription : function (state, description: string) {
+        setBio : function (state, description: string) {
             state.user.bio = description;
+        },
+        addMessage : function (state, chatMessage: Message) {
+            state.messages.push(chatMessage);
+        },
+        setMessages : function (state, chatMessages: Message[]) {
+            state.messages = chatMessages;
         },
     },
 })

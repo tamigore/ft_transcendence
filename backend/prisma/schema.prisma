@@ -18,21 +18,22 @@ model User {
   email       String   @unique
   username    String?  @unique
   hash        String   @unique
-  hashRt    String?
+  hashRt      String?
   chatSocket  String?
   gameSocket  String?
   loggedIn    Boolean   @default(false)
   bio         String?
   img         String? //Path to img src
+  owner       Room[]    @relation(name: "owner")
   admin       Room[]    @relation(name: "admin")
   rooms       Room[]    @relation(name: "users")
   messages    Message[]
-  win         GameHistoric[] @relation(name: "winner")
-  loose       GameHistoric[] @relation(name: "looser")
+  win         Historic[] @relation(name: "winner")
+  loose       Historic[] @relation(name: "looser")
   @@map("users")
 }
 
-model GameHistoric {
+model Historic {
   id          Int      @id @default(autoincrement())
   created_at  DateTime @default(now())
 
@@ -41,8 +42,25 @@ model GameHistoric {
   looserID    Int
   looser      User     @relation(name: "looser", fields: [looserID], references: [id])
   score       String
+  // gameId      Int
+  // game        Game @relation(fields: [gameId], references: [id])
   @@map("gamesHistoric")
 }
+
+// model Game {
+//   id         Int      @id @default(autoincrement())
+//   created_at DateTime @default(now())
+
+//   name        String
+//   player1Id   Int
+//   player1     User      @relation(name: "player1", fields: [player1Id], references: [id])
+//   player2Id   Int
+//   player2     User      @relation(name: "player2", fields: [player2Id], references: [id])
+//   spectator   User[]    @relation(name: "spectator")
+//   historicId  Int?
+//   historic    Historic  @relation(fields: [historicId], references: [id])
+//   @@map("Rooms")
+// }
 
 model Message {
   id         Int      @id @default(autoincrement())
@@ -61,8 +79,9 @@ model Room {
   created_at DateTime @default(now())
 
   name        String
-  adminId     Int
-  admin       User     @relation(name: "admin", fields: [adminId], references: [id])
+  ownerId     Int?
+  owner       User?    @relation(name: "owner", fields: [ownerId], references: [id])
+  admin       User[]   @relation(name: "admin")
   users       User[]   @relation(name: "users")
   messages    Message[]
   description String?

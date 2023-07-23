@@ -9,7 +9,7 @@ import { JwtService } from "@nestjs/jwt";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/binary";
 import * as argon2 from "argon2/argon2";
 import { PrismaService } from "../prisma/prisma.service";
-import { AuthDto } from "./dto";
+import { SignUpDto, SignInDto } from "./dto";
 import { JwtPayload, Tokens } from "./types";
 
 @Injectable()
@@ -21,12 +21,11 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signupLocal(dto: AuthDto): Promise<Tokens> {
+  async signupLocal(dto: SignUpDto): Promise<Tokens> {
     this.logger.debug(
-      "user email : ",
-      dto.email,
-      "user password : ",
-      dto.password,
+      `email : ${dto.email}`,
+      `username : ${dto.username}`,
+      `password : ${dto.password}`,
     );
     const newhash = await argon2.hash(dto.password);
 
@@ -34,6 +33,7 @@ export class AuthService {
       .create({
         data: {
           email: dto.email,
+          username: dto.username,
           hash: newhash,
         },
       })
@@ -52,7 +52,7 @@ export class AuthService {
     return tokens;
   }
 
-  async signinLocal(dto: AuthDto): Promise<Tokens> {
+  async signinLocal(dto: SignInDto): Promise<Tokens> {
     this.logger.log("signinLocal");
     this.logger.debug(
       "user email : ",
@@ -145,7 +145,7 @@ export class AuthService {
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
         secret: this.config.get<string>("AT_SECRET"),
-        expiresIn: "30m",
+        expiresIn: "7d",
       }),
       this.jwtService.signAsync(jwtPayload, {
         secret: this.config.get<string>("RT_SECRET"),

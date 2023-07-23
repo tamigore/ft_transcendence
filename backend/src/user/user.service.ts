@@ -12,19 +12,27 @@ export class UserService {
   ) {}
 
   async findAll(): Promise<User[]> {
+    this.logger.log(`findAll users`);
     return await this.prisma.user.findMany();
   }
 
-  async findById(userId: number, id: number): Promise<User> {
-    this.logger.log(`user id : ${userId} wants to findById: ${id}`);
+  async findById(id: number): Promise<User> {
+    this.logger.log(`findById user: ${id}`);
     return await this.prisma.user.findUnique({
       where: { id: id },
     });
   }
 
+  async findByChatSocket(socket: string): Promise<User> {
+    this.logger.log(`findByChatSocket : ${socket}`);
+    return await this.prisma.user.findFirst({
+      where: { chatSocket: socket },
+    });
+  }
+
   async update(userId: number, updateUserDto: any) {
     this.logger.log(
-      `user id : ${userId} wants to updateById: ${updateUserDto.id}`,
+      `user id : ${userId} wants to update user: ${updateUserDto}`,
     );
     await this.prisma.user
       .update({
@@ -32,19 +40,9 @@ export class UserService {
         data: {
           email: updateUserDto.email,
           username: updateUserDto.username,
-          hash: updateUserDto.hash,
-          hashRt: updateUserDto.hashRt,
-          chatSocket: updateUserDto.chatSocket,
-          gameSocket: updateUserDto.gameSocket,
           loggedIn: updateUserDto.loggedIn,
           bio: updateUserDto.bio,
           img: updateUserDto.img,
-          // profile: updateUserDto.profile,
-          // admin: updateUserDto.admin,
-          // rooms: updateUserDto.rooms,
-          // messages: updateUserDto.messages,
-          // win: updateUserDto.win,
-          // loose: updateUserDto.loose,
         },
       })
       .then((user) => {
@@ -52,6 +50,25 @@ export class UserService {
       })
       .catch((error) => {
         this.logger.error("User update error: ", error);
+      });
+  }
+
+  async updateChatSocket(userId: number, chatSocket: string) {
+    this.logger.log(
+      `user id : ${userId} wants to update chatSocket: ${chatSocket}`,
+    );
+    await this.prisma.user
+      .update({
+        where: { id: userId },
+        data: {
+          chatSocket: chatSocket,
+        },
+      })
+      .then((user) => {
+        this.logger.log("chatSocket update success: ", user);
+      })
+      .catch((error) => {
+        this.logger.error("chatSocket update error: ", error);
       });
   }
 
