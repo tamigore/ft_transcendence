@@ -20,6 +20,17 @@ export interface User {
   loose: Historic;
 }
 
+export	interface Game {
+	id: number;
+	created_at: Date;
+
+	player1up: boolean;
+	player1down: boolean;
+	player2up: boolean;
+	player2down: boolean;
+	
+}
+
 export interface Historic {
   id: number;
   created_at: Date;

@@ -30,6 +30,9 @@ model User {
   messages    Message[]
   win         Historic[] @relation(name: "winner")
   loose       Historic[] @relation(name: "looser")
+//   player1     User[]     @relation(name: "player1")
+//   player2     User[]     @relation(name: "player2")
+//   spectator		User[] 	@relation(name: "spectator")
   @@map("users")
 }
 
@@ -42,9 +45,9 @@ model Historic {
   looserID    Int
   looser      User     @relation(name: "looser", fields: [looserID], references: [id])
   score       String
-  // gameId      Int
-  // game        Game @relation(fields: [gameId], references: [id])
-  @@map("gamesHistoric")
+  gameId      Int @unique
+//   game        Game @relation(fields: [gameId], references: [id])
+  @@map("historics")
 }
 
 // model Game {
@@ -58,8 +61,8 @@ model Historic {
 //   player2     User      @relation(name: "player2", fields: [player2Id], references: [id])
 //   spectator   User[]    @relation(name: "spectator")
 //   historicId  Int?
-//   historic    Historic  @relation(fields: [historicId], references: [id])
-//   @@map("Rooms")
+//   historic    Historic?  @relation(fields: [historicId], references: [id])
+//   @@map("games")
 // }
 
 model Message {
@@ -71,7 +74,7 @@ model Message {
   room      Room     @relation(fields: [roomId], references: [id])
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
-  @@map("Messages")
+  @@map("messages")
 }
 
 model Room {
@@ -85,5 +88,5 @@ model Room {
   users       User[]   @relation(name: "users")
   messages    Message[]
   description String?
-  @@map("Rooms")
+  @@map("rooms")
 }

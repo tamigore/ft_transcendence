@@ -130,6 +130,10 @@ text-align: left;
 <script lang="ts">
 import { defineComponent,onMounted,onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
+import store from "@/store";
+import axios, { AxiosError } from 'axios';
+import { server } from "@/utils/helper";
+import {socket} from "@/utils/gameSocket"
 import {
   SetPongWidth,
   SetPongHeight,
@@ -454,6 +458,7 @@ inertie:number[];
 wallIsUp:boolean;
 veloDiv:number;
 
+
 constructor()
 {
 this.width = SetPongWidth;
@@ -711,26 +716,40 @@ restartMatch(gameIsRunnig?:boolean, rightBot?:boolean, wallIsUp?:boolean, bothBo
 
 moovePaddles() {
   if (this.leftArrowUp && this.leftPaddleY > 1 - this.leftPaddleHeight)
+  {
+	// SocketioGame.socket.emit(up);
     this.leftPaddleY -= this.leftPaddleSpeed * this.leftArrowUp;
+  }
   else if (this.leftArrowDown && this.leftPaddleY < this.height - 1)
+  {
+	// SocketioGame.socket.emit(down);
     this.leftPaddleY += this.leftPaddleSpeed * this.leftArrowDown;
+  }
 
   if (this.rightArrowUp && this.rightPaddleY > 1 - this.rightPaddleHeight)
     this.rightPaddleY -= this.rightPaddleSpeed * this.rightArrowUp;
   else if (this.rightArrowDown && this.rightPaddleY < this.height - 1)
     this.rightPaddleY += this.rightPaddleSpeed * this.rightArrowDown;
 }
-
  handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === this.leftPlayerKeyUp) 
-    this.leftArrowUp = 1;
-  else if (event.key === this.leftPlayerKeyDown)
-    this.leftArrowDown = 1;
-
-  if (event.key === this.rightPlayerKeyUp)
-    this.rightArrowUp = 1;
-  else if (event.key === this.rightPlayerKeyDown)
-    this.rightArrowDown = 1;
+	
+	
+		if (event.key === this.leftPlayerKeyUp) 
+		{
+			socket.emit("up", {user: store.state.user , room: store.state.last_room});
+			this.leftArrowUp = 1;
+		}
+		else if (event.key === this.leftPlayerKeyDown)
+		{
+			socket.emit("down", {user: store.state.user , room: store.state.last_room});
+			this.leftArrowDown = 1;
+		}
+		socket.on("up", () => {
+				this.rightArrowUp = 1;
+		});
+		socket.on("down", () => {
+				this.rightArrowDown = 1;
+		});
 };
 
  handleKeyUp = (event: KeyboardEvent) => {
@@ -928,6 +947,7 @@ const gameLoop = () => {
 
 onMounted(() => {
   if (myCanvas.value) {
+		SocketioGame.setupSocketConnection();
         ctx = myCanvas.value.getContext('2d');
         if (ctx)
         {

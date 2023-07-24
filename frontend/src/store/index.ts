@@ -7,11 +7,15 @@ const store = createStore({
         messages: [{}] as Message[],
         rooms: [{}] as Room[],
         connected: false as boolean,
+        ingame: false as boolean,
         last_room: {} as Room,
     },
     mutations: {
         setChatConnect : function (state, chatConnect: boolean) {
             state.connected = chatConnect;
+        },
+		setGameConnect : function (state, ingame: boolean) {
+            state.ingame = ingame;
         },
         setLastRoom: function (state, room: Room) {
             console.log('setLastRoom: ', room);
@@ -67,6 +71,9 @@ const store = createStore({
         },
         setChatSocket : function (state, chatSocket: string) {
             state.user.chatSocket = chatSocket;
+        },
+		setGameSocket : function (state, gameSocket: string) {
+            state.user.gameSocket = gameSocket;
         },
         setAvatarId : function (state, avatarId: string) {
             state.user.img = avatarId;

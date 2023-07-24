@@ -1,0 +1,27 @@
+BACK :
+
+game.gateway : 
+	besoin user
+	besoin room ? -> non
+	
+
+
+
+
+
+
+
+
+FRONT :
+
+	2 player
+	joueur de gauche ou de droite
+	gerer les emvoie et recu en fonction de son role
+	envoyer signale si mouvement diretement
+	
+
+
+
+
+
+
