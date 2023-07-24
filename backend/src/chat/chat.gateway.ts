@@ -27,30 +27,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  // @UseGuards(WsGuard)
   async handleConnection(@MessageBody() client: Socket) {
     this.logger.debug(`user with socket ${client.id} connected`);
-    this.logger.debug(`auth: ${client.handshake.auth.token}`);
-    this.logger.debug("userID: " + client.handshake.query.userId);
-    const userId: number = parseInt(client.handshake.query.userId.toString());
-    const user = await this.userService.findById(userId);
-    if (!user) throw new Error("handleConnection no user found");
-    this.userService.updateChatSocket(user.id, client.id);
-    this.roomService.addUser(1, user.id);
-    this.server.in(client.id).socketsJoin("general");
     return client.id;
   }
 
-  // @UseGuards(WsGuard)
   async handleDisconnect(client: Socket) {
     this.logger.log("ChatGateway handleDisconnect clientid: ", client.id);
-    this.logger.debug("client: " + client.handshake.query.userId);
-    const userId: number = parseInt(client.handshake.query.userId.toString());
-    const user = await this.userService.findById(userId);
-    if (!user) throw new Error("handleDisconnect no user found");
-    this.userService.updateChatSocket(user.id, "");
-    // this.roomService.delUser(1, user.id);
-    client.disconnect();
   }
 
   // @UseGuards(WsGuard)

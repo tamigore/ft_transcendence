@@ -9,7 +9,7 @@ export class HistoricService {
   constructor(private prisma: PrismaService) {}
   
   async getGamesByPlayerId(body: any) : Promise<Historic[]> {
-    let userId : number = 0;
+    let userId = 0;
     userId = + body.id;
     const messages = await this.prisma.historic.findMany({
       where: {
@@ -28,7 +28,7 @@ export class HistoricService {
   }
 
   async getGameByGameId(body: any) : Promise<Historic> {
-      let id : number = 0;
+      let id = 0;
       id = + body.id;
     const message = await this.prisma.historic.findUnique({
       where: {
@@ -40,17 +40,30 @@ export class HistoricService {
   }
 
   async setGameByGameId(body: any) : Promise<void> {
-    let winnerID : number = 0;
+    let winnerID = 0;
     winnerID = + body.winnerID;
-    let looserID : number = 0;
+    let looserID = 0;
     looserID = + body.looserID;
 
     await this.prisma.historic
       .create({
         data: {
-          winnerID: winnerID,
-          looserID: looserID,
+          winner: {
+            connect: {
+              id: winnerID,
+            },
+          },
+          looser: {
+            connect: {
+              id: looserID,
+            },
+          },
           score : body.score,
+          game : {
+            connect : {
+              id : body.gameId
+            }
+          }
         },
       })
       .catch((error: any) => {

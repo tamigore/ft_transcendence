@@ -53,7 +53,9 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   findUser(@Param("id") param: string): Promise<User> {
-    const id = parseInt(param.split("=")[1]);
+    console.log(param);
+    const id = parseInt(param);
+    console.log(id);
     return this.userService.findById(id);
   }
 

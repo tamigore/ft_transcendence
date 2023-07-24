@@ -28,6 +28,9 @@ model User {
   admin       Room[]    @relation(name: "admin")
   rooms       Room[]    @relation(name: "users")
   messages    Message[]
+  player1     Game[]     @relation(name: "player1")
+  player2     Game[]     @relation(name: "player2")
+  spectator   Game[]     @relation(name: "spectator")
   win         Historic[] @relation(name: "winner")
   loose       Historic[] @relation(name: "looser")
   @@map("users")
@@ -42,25 +45,24 @@ model Historic {
   looserID    Int
   looser      User     @relation(name: "looser", fields: [looserID], references: [id])
   score       String
-  // gameId      Int
-  // game        Game @relation(fields: [gameId], references: [id])
-  @@map("gamesHistoric")
+  gameId      Int      @unique
+  game        Game     @relation(fields: [gameId], references: [id])
+  @@map("historics")
 }
 
-// model Game {
-//   id         Int      @id @default(autoincrement())
-//   created_at DateTime @default(now())
+model Game {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
 
-//   name        String
-//   player1Id   Int
-//   player1     User      @relation(name: "player1", fields: [player1Id], references: [id])
-//   player2Id   Int
-//   player2     User      @relation(name: "player2", fields: [player2Id], references: [id])
-//   spectator   User[]    @relation(name: "spectator")
-//   historicId  Int?
-//   historic    Historic  @relation(fields: [historicId], references: [id])
-//   @@map("Rooms")
-// }
+  name        String
+  player1Id   Int
+  player1     User      @relation(name: "player1", fields: [player1Id], references: [id])
+  player2Id   Int
+  player2     User      @relation(name: "player2", fields: [player2Id], references: [id])
+  spectator   User[]    @relation(name: "spectator")
+  historic    Historic?
+  @@map("games")
+}
 
 model Message {
   id         Int      @id @default(autoincrement())
@@ -71,7 +73,7 @@ model Message {
   room      Room     @relation(fields: [roomId], references: [id])
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
-  @@map("Messages")
+  @@map("messages")
 }
 
 model Room {
@@ -85,5 +87,5 @@ model Room {
   users       User[]   @relation(name: "users")
   messages    Message[]
   description String?
-  @@map("Rooms")
+  @@map("rooms")
 }

@@ -1,7 +1,5 @@
 <template>
     <p style="color: blueviolet;">State: {{ connected() }}</p>
-    <button @click="connect()">Connect</button>
-    <button @click="disconnect()">Disconnect</button>
     <div class="grid">
         <div class="col-4">
             <div v-for="Room in Rooms" :key="Room.id"  >
@@ -36,18 +34,16 @@
 </template>
 
 <script lang="ts">
-import SocketioChat from "@/utils/socket";
+import socket from "@/utils/socket";
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { defineComponent } from "vue";
 import { Room, Message, User } from "@/utils/interfaces";
 import store from "@/store";
 import { server } from "@/utils/helper";
-
 export default defineComponent({
     name: "ChatDisplay",
     data() {
         return {
-            socketio: SocketioChat as typeof SocketioChat,
             Rooms: [{}] as Room[],
             Messages: [{}] as Message[],
             selected: {} as Room,
@@ -58,12 +54,7 @@ export default defineComponent({
     },
     mounted() {
         this.getRooms();
-        this.socketio.setupSocketConnection();
         this.User = store.state.user;
-        this.connect();
-    },
-    unmounted() {
-        this.disconnect();
     },
 	methods: {
         onSubmit() {
@@ -76,7 +67,7 @@ export default defineComponent({
                 userId: store.state.user.id,
                 user: store.state.user,
             } as Message;
-            this.socketio.socket.emit("cliMessage", {user: store.state.user, room: this.selected, message: message});
+            socket.emit("cliMessage", {user: store.state.user, room: this.selected, message: message});
             this.text = "";
         },
 		async getRooms() {
@@ -111,15 +102,8 @@ export default defineComponent({
             console.log(this.selected);
             this.getMessages(this.selected);
         },
-        
         connected() {
-            return (store.state.connected ? "Connected" : "Disconnected");
-        },
-        connect() {
-            this.socketio.socket.connect();
-        },
-        disconnect() {
-            this.socketio.socket.disconnect();
+            return (socket.connected ? "Connected" : "Disconnected");
         },
     }
 });

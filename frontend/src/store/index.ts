@@ -6,13 +6,9 @@ const store = createStore({
         user: {} as User,
         messages: [{}] as Message[],
         rooms: [{}] as Room[],
-        connected: false as boolean,
         last_room: {} as Room,
     },
     mutations: {
-        setChatConnect : function (state, chatConnect: boolean) {
-            state.connected = chatConnect;
-        },
         setLastRoom: function (state, room: Room) {
             console.log('setLastRoom: ', room);
             state.last_room.id = room.id;

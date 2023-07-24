@@ -27,7 +27,8 @@
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^4.2.4",
     "vue-socket.io": "^3.0.10",
-    "vuex": "^4.1.0"
+    "vuex": "^4.1.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/node": "^20.4.2",
