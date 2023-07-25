@@ -731,28 +731,41 @@ moovePaddles() {
   else if (this.rightArrowDown && this.rightPaddleY < this.height - 1)
     this.rightPaddleY += this.rightPaddleSpeed * this.rightArrowDown;
 }
- handleKeyDown = (event: KeyboardEvent) => {
-	
-	
-		if (event.key === this.leftPlayerKeyUp) 
-		{
-			socket.emit("up", {user: store.state.user , room: store.state.last_room});
+
+  offlineKeyDown = (event: KeyboardEvent) => {
+    if (event.key === this.leftPlayerKeyUp) 
 			this.leftArrowUp = 1;
-		}
 		else if (event.key === this.leftPlayerKeyDown)
-		{
-			socket.emit("down", {user: store.state.user , room: store.state.last_room});
 			this.leftArrowDown = 1;
-		}
-		socket.on("up", () => {
+    else if (event.key === this.rightPlayerKeyUp) 
+				this.rightArrowUp = 1;
+    else if (event.key === this.rightPlayerKeyUp)
+				this.rightArrowDown = 1;
+  }
+
+  onlineKeyDown = (event: KeyboardEvent) => {
+    if (event.key === this.leftPlayerKeyUp) 
+      socket.emit("up", {user: store.state.user, room: store.state.room});
+    else if (event.key === this.leftPlayerKeyDown)
+      socket.emit("down", {user: store.state.user, room: store.state.room});
+    socket.on("up", () => {
 				this.rightArrowUp = 1;
 		});
 		socket.on("down", () => {
 				this.rightArrowDown = 1;
 		});
+  }
+
+  handleKeyDown = (event: KeyboardEvent) => {
+    if (1)
+      this.offlineKeyDown(event);
+    else
+      this.onlineKeyDown(event);
+	
+		
 };
 
- handleKeyUp = (event: KeyboardEvent) => {
+offlineKeyUp = (event: KeyboardEvent) => {
   if (event.key === this.leftPlayerKeyUp)
     this.leftArrowUp = 0;
   else if (event.key === this.leftPlayerKeyDown)
@@ -762,6 +775,26 @@ moovePaddles() {
     this.rightArrowUp = 0;
   else if (event.key === this.rightPlayerKeyDown)
     this.rightArrowDown = 0;
+}
+
+onlineKeyUp = (event: KeyboardEvent) => {
+  if (event.key === this.leftPlayerKeyUp) 
+      socket.emit("upNo", {user: store.state.user, room: store.state.room});
+    else if (event.key === this.leftPlayerKeyDown)
+      socket.emit("downNo", {user: store.state.user, room: store.state.room});
+    socket.on("upNo", () => {
+				this.rightArrowUp = 0;
+		});
+		socket.on("downNo", () => {
+				this.rightArrowDown = 0;
+		});
+}
+
+ handleKeyUp = (event: KeyboardEvent) => {
+  if (1)
+    this.offlineKeyUp(event);
+  else
+    this.onlineKeyUp(event);
 };
 
 
