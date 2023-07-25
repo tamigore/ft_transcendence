@@ -6,7 +6,7 @@ import Pong from '@/views/Pong.vue';
 import Chat from '@/views/ChatView.vue';
 import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import socket from "@/utils/socket"
+import socket from "@/utils/socket";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -47,13 +47,26 @@ router.beforeEach(async (to, from) => {
     .then((response: AxiosResponse) => {
       console.log(response);
       store.commit("setUser", response.data);
-      socket.connect();
+      if (!socket.connected) {
+        socket.connect();
+      }
     })
     .catch((error: AxiosError) => {
       console.log(error)
       throw new Error("router get user failed: " + error);
     })
   }
+  // if (to.name === 'home' && store.state.user.loggedIn)
+  //   console.log("going to home (localhost:8080/) and stil connected...");
+  // if (to.name === 'home' && !store.state.user.loggedIn)
+  // {
+  //   if (socket.connected)
+  //   {
+  //     console.log("Should not be connected");
+  //     socket.disconnect();
+  //   }
+  //   console.log("going to home (localhost:8080/) and not connected !");
+  // }
   if (
     !store.state.user.loggedIn &&
     to.name !== 'home'

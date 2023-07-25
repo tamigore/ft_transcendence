@@ -41,16 +41,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
     this.logger.log("onMessage");
     this.logger.debug("body: ", body, "ConnectedSocket: ", client.id);
-    this.chatService.createMessage(body.message, body.room.id, body.user.id);
-    this.server.to(body.room.name).emit("servMessage", {
-      user: body.user,
+    this.chatService.createMessage(body.message);
+    this.server.emit("servMessage", {
       message: body.message,
-      room: body.room,
+    }); // to(body.room.name)
+  }
+
+  @SubscribeMessage("privMassage")
+  async onPrivMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: any,
+  ) {
+    this.logger.log("onMessage");
+    this.logger.debug("body: ", body, "ConnectedSocket: ", client.id);
+    this.chatService.createMessage(body.message);
+    this.server.to(body.room.name).emit("servMessage", {
+      message: body.message,
     });
   }
 
   // @UseGuards(WsThrottlerGuard)
-  // @UsePipes(new ZodValidationPipe(JoinRoomSchema))
   // @UseGuards(WsGuard)
   @SubscribeMessage("join_room")
   async onJoinRoom(

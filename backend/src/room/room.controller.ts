@@ -33,6 +33,20 @@ export class RoomController {
     this.roomService.addUser(dto.roomId, dto.userId);
   }
 
+  @Post("create")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  createRoom(@Body() dto: Room) {
+    this.roomService.createRoom(dto);
+  }
+
+  @Post("delete")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  deleteRoom(@GetCurrentUserId() userId: number, @Body() dto: Room) {
+    this.roomService.remove(userId, dto.id);
+  }
+
   @Post("delUser")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)

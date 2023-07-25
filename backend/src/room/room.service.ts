@@ -1,15 +1,37 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 import { Room } from "@prisma/client";
 
 @Injectable()
-export class RoomService {
+export class RoomService implements OnModuleInit {
   private logger: Logger = new Logger("RoomService");
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
   ) {}
+
+  async onModuleInit() {
+    const general = await this.prisma.room.findFirst({ where: { id: 1 } });
+    if (!general || !general.id) {
+      await this.prisma.room
+        .create({
+          data: {
+            name: "general",
+            description: "General chat room",
+          },
+          include: {
+            users: true,
+          },
+        })
+        .then((user) => {
+          this.logger.log("addUser success: ", user);
+        })
+        .catch((error) => {
+          this.logger.error("addUser error: ", error);
+        });
+    }
+  }
 
   async findAll(): Promise<Room[]> {
     this.logger.log(`findAll rooms`);
@@ -69,55 +91,28 @@ export class RoomService {
 
   async addUser(roomId: number, userId: number) {
     this.logger.log(`Add user: ${userId} to room: ${roomId}`);
-    const general = await this.prisma.room.findFirst({ where: { id: 1 } });
-    console.log("addUser general: ", general);
-    if (general && general.id === 1)
-      await this.prisma.room
-        .update({
-          where: { id: roomId },
-          data: {
-            users: {
-              connect: [
-                {
-                  id: userId,
-                },
-              ],
-            },
+    await this.prisma.room
+      .update({
+        where: { id: roomId },
+        data: {
+          users: {
+            connect: [
+              {
+                id: userId,
+              },
+            ],
           },
-          include: {
-            users: true,
-          },
-        })
-        .then((user) => {
-          this.logger.log("addUser success: ", user);
-        })
-        .catch((error) => {
-          this.logger.error("addUser error: ", error);
-        });
-    else
-      await this.prisma.room
-        .create({
-          data: {
-            name: "general",
-            description: "General chat room",
-            users: {
-              connect: [
-                {
-                  id: userId,
-                },
-              ],
-            },
-          },
-          include: {
-            users: true,
-          },
-        })
-        .then((user) => {
-          this.logger.log("addUser success: ", user);
-        })
-        .catch((error) => {
-          this.logger.error("addUser error: ", error);
-        });
+        },
+        include: {
+          users: true,
+        },
+      })
+      .then((room) => {
+        this.logger.log("addUser success: ", room);
+      })
+      .catch((error) => {
+        this.logger.error("addUser error: ", error);
+      });
   }
 
   async remove(userId: number, id: number): Promise<Room> {

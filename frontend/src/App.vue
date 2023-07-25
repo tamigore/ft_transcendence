@@ -109,6 +109,7 @@ import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { server } from "@/utils/helper";
 import router from './router';
+import { useToast } from 'primevue/usetoast';
 
 export default defineComponent({
   components: {
@@ -145,7 +146,11 @@ export default defineComponent({
           }
         },
       ]),
+      toast: useToast(),
     };
+  },
+  mounted() {
+    console.log("APP mounted");
   },
   methods : {
     async LogoutPost() {
@@ -172,12 +177,12 @@ export default defineComponent({
     },
   },
   created() {
+    console.log("APP CREATED");
     const store_item = sessionStorage.getItem('store');
     if (store_item) {
       store.replaceState(Object.assign({}, store.state, JSON.parse(store_item)));
     }
     window.addEventListener('beforeunload', () => { sessionStorage.setItem('store', JSON.stringify(store.state)); });
-    console.log("APP CREATED");
   },
   unmounted() {
     console.log("App unmounted, user is log ? ", store.state.user.loggedIn);

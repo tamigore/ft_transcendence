@@ -7,6 +7,7 @@ const store = createStore({
         messages: [{}] as Message[],
         rooms: [{}] as Room[],
         last_room: {} as Room,
+        last_message: {} as Message,
     },
     mutations: {
         setLastRoom: function (state, room: Room) {
@@ -75,6 +76,9 @@ const store = createStore({
         },
         setMessages : function (state, chatMessages: Message[]) {
             state.messages = chatMessages;
+        },
+        setLastMessage : function (state, chatMessages: Message) {
+            state.last_message = chatMessages;
         },
     },
 })

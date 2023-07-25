@@ -109,9 +109,24 @@ import TreeTable from 'primevue/treetable';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import VirtualScroller from 'primevue/virtualscroller';
 
+// FontAwesome
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+/* import specific icons */
+import * as fonts from '@fortawesome/free-solid-svg-icons'
+
+library.add(fonts.faUser);
+library.add(fonts.faCheck);
+library.add(fonts.faMessage);
+library.add(fonts.faImage);
+library.add(fonts.faPaperPlane);
+library.add(fonts.faPaperPlane);
+
 const app = createApp({
   extends: App,
 });
+
+app.component('font-awesome-icon', FontAwesomeIcon)
 
 // PRIMEVUE
 app.use(PrimeVue, { ripple: true });

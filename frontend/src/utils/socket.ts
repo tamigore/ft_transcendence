@@ -1,15 +1,16 @@
 import { io, Socket  } from "socket.io-client";
 import { server } from "@/utils/helper";
-import { User, Message, Room } from "./interfaces"
+import { User, Message } from "./interfaces"
 
 export interface ServerToClientEvents {
-  servMessage: (e: {user: User, room: Room, message: Message}) => void;
+  servMessage: (e: {message: Message}) => void;
 }
 
 export interface ClientToServerEvents {
   join_room: (e: { user: User; roomName: string }) => void;
   kick_user: (e: { user: User; user_to_kick: User; roomName: string }) => void;
-  cliMessage: (e: {user: User, room: Room, message: Message}) => void;
+  cliMessage: (e: {message: Message}) => void;
+  privMessage: (e: {message: Message}) => void;
 }
 
 class SocketioChat {

@@ -7,7 +7,7 @@ export class ChatService {
   private logger: Logger = new Logger("ChatService");
   constructor(private prisma: PrismaService) {}
 
-  async createMessage(message: Message, roomId: number, userId: number) {
+  async createMessage(message: Message) {
     this.logger.log("createMessage");
     await this.prisma.message
       .create({
@@ -15,12 +15,12 @@ export class ChatService {
           text: message.text,
           room: {
             connect: {
-              id: roomId,
+              id: message.roomId,
             },
           },
           user: {
             connect: {
-              id: userId,
+              id: message.userId,
             },
           },
         },

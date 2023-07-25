@@ -69,8 +69,8 @@ model Message {
   created_at DateTime @default(now())
 
   text      String
-  roomId    Int
-  room      Room     @relation(fields: [roomId], references: [id])
+  roomId    Int?
+  room      Room?     @relation(fields: [roomId], references: [id])
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
   @@map("messages")

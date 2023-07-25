@@ -45,7 +45,6 @@ export class AuthService {
         }
         throw new HttpException("Access Denied", 403);
       });
-
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
     await this.updateLog(user.id, true);
