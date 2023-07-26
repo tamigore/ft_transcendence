@@ -18,9 +18,25 @@ export class UserService {
 
   async findById(id: number): Promise<User> {
     this.logger.log(`findById user: ${id}`);
-    return await this.prisma.user.findUnique({
-      where: { id: id },
+    return await this.prisma.user
+      .findUnique({
+        where: { id: id },
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async findPrivate(userId: number): Promise<User[]> {
+    this.logger.log(`findPrivate user: ${userId}`);
+    const users = await this.prisma.user.findMany({
+      where: {
+        NOT: {
+          id: userId,
+        },
+      },
     });
+    return users;
   }
 
   async findByChatSocket(socket: string): Promise<User> {
@@ -50,6 +66,7 @@ export class UserService {
       })
       .catch((error) => {
         this.logger.error("User update error: ", error);
+        throw new Error(error);
       });
   }
 
@@ -69,13 +86,74 @@ export class UserService {
       })
       .catch((error) => {
         this.logger.error("chatSocket update error: ", error);
+        throw new Error(error);
       });
   }
 
-  async remove(userId: number, id: number): Promise<User> {
-    this.logger.log(`user id : ${userId} wants to removeById: ${id}`);
-    return await this.prisma.user.delete({
-      where: { id: id },
-    });
-  }
+  // async remove(userId: number, id: number) {
+  //   this.logger.log(`user id : ${userId} wants to removeById: ${id}`);
+  //   await this.prisma.user
+  //     .update({
+  //       where: { id: id },
+  //       data: {
+  //         friend: {
+  //           set: [],
+  //         },
+  //         friendBy: {
+  //           set: [],
+  //         },
+  //         blocked: {
+  //           set: [],
+  //         },
+  //         blockedBy: {
+  //           set: [],
+  //         },
+  //         owner: {
+  //           set: [],
+  //         },
+  //         admin: {
+  //           set: [],
+  //         },
+  //         rooms: {
+  //           set: [],
+  //         },
+  //         messages: {
+  //           set: [],
+  //         },
+  //         player1: {
+  //           set: [],
+  //         },
+  //         player2: {
+  //           set: [],
+  //         },
+  //         spectator: {
+  //           set: [],
+  //         },
+  //         win: {
+  //           set: [],
+  //         },
+  //         loose: {
+  //           set: [],
+  //         },
+  //       },
+  //     })
+  //     .then(() => {
+  //       console.log(`user ${userId} removed successfully...`);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //       throw new Error(error);
+  //     });
+  //   await this.prisma.user
+  //     .delete({
+  //       where: { id: id },
+  //     })
+  //     .then(() => {
+  //       console.log(`user ${userId} removed successfully...`);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //       throw new Error(error);
+  //     });
+  // }
 }

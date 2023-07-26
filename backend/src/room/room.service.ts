@@ -69,9 +69,9 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async update(userId: number, roomDto: Room): Promise<Room> {
+  async update(userId: number, roomDto: Room) {
     this.logger.log(`user id : ${userId} wants to room: ${roomDto}`);
-    return await this.prisma.room
+    await this.prisma.room
       .update({
         where: { id: roomDto.id },
         data: {
@@ -112,13 +112,66 @@ export class RoomService implements OnModuleInit {
       })
       .catch((error) => {
         this.logger.error("addUser error: ", error);
+        throw new Error(error);
       });
   }
 
-  async remove(userId: number, id: number): Promise<Room> {
-    this.logger.log(`user id : ${userId} wants to removeById: ${id}`);
+  async addAdmin(roomId: number, userId: number) {
+    this.logger.log(`Add user: ${userId} to room: ${roomId}`);
+    await this.prisma.room
+      .update({
+        where: { id: roomId },
+        data: {
+          admins: {
+            connect: [
+              {
+                id: userId,
+              },
+            ],
+          },
+        },
+        include: {
+          admins: true,
+        },
+      })
+      .then((room) => {
+        this.logger.log("addUser success: ", room);
+      })
+      .catch((error) => {
+        this.logger.error("addUser error: ", error);
+        throw new Error(error);
+      });
+  }
+
+  async remove(userId: number, roomId: number): Promise<Room> {
+    this.logger.log(`user id : ${userId} wants to removeById: ${roomId}`);
+    await this.prisma.room
+      .update({
+        where: { id: roomId },
+        data: {
+          users: {
+            set: [],
+          },
+          admins: {
+            set: [],
+          },
+          owner: {
+            disconnect: true,
+          },
+          messages: {
+            set: [],
+          },
+        },
+      })
+      .then((user) => {
+        this.logger.log("remove update success: ", user);
+      })
+      .catch((error) => {
+        this.logger.error("remove update error: ", error);
+        throw new Error(error);
+      });
     return await this.prisma.room.delete({
-      where: { id: id },
+      where: { id: roomId },
     });
   }
 

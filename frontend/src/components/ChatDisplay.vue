@@ -26,41 +26,45 @@
               <Button @click="createRoom()">Create Room</button>
             </div>
           </form>
-          <div class="flex justify-content-center">
-            <form>
-              <div class="p-inputgroup flex">
-                <span class="p-inputgroup-addon">
-                  <i class="pi pi-user"></i>
-                </span>
-                <InputText v-model="usernamePM" placeholder="Private Message" />
-                <span class="p-inputgroup-addon">
-                  <i class="pi pi-user"></i>
-                </span>
-                <Button @click="privateMessage()">Create Room</button>
-              </div>
-            </form>
-          </div>
         </div>
       </div>
       <div class="flex flex-row flex-wrap col">
-        <div class="flex flex-column flex-wrap col-4">
-          <div v-for="Room in Rooms" :key="Room.id" class="p-2">
-            <div class="flex flex-row box-shadow-dark" v-on:click="selectSet(Room)">
-              <div class="flex flex-row">
-                {{ Room.name }}
-              </div>
-              <div class="flex flex-row">
-                <Button label="Delete" severity="danger" v-if="owner(Room)" @click="deleteRoom(Room)" />
+        <TabView>
+          <TabPanel header="Romms">
+            <div class="flex flex-column flex-wrap col-4">
+              <div v-for="Room in Rooms" :key="Room.id" class="p-2">
+                <div class="flex flex-row box-shadow-dark" v-on:click="selectSet(Room)">
+                  <div class="flex flex-row">
+                    {{ Room.name }}
+                  </div>
+                  <div class="flex flex-row">
+                    <Button label="Delete" severity="danger" v-if="owner(Room)" @click="deleteRoom(Room)" />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </TabPanel>
+          <TabPanel header="Users">
+            <div class="flex flex-column flex-wrap col-4">
+              <div v-for="User in Users" :key="User.id" class="p-2">
+                <div class="flex flex-row box-shadow-dark" v-on:click="selectUser(User)">
+                  <div class="flex flex-row">
+                    {{ User.username }}
+                  </div>
+                  <!-- <div class="flex flex-row">
+                    <Button label="Leave" severity="danger" @click="deleteRoom(Room)" />
+                  </div> -->
+                </div>
+              </div>
+            </div>
+          </TabPanel>
+      </TabView>
         <div class="flex flex-row flex-wrap col-8">
           <div class="flex flex-column col box-shadow-dark">
             <div v-for="Room in Rooms" :key="Room.id">
-              <div v-if="Room.name == selected.name">
+              <div v-if="Room.name == selectedRoom.name">
                 <div v-for="msg in Messages" :key="msg.id">
-                  <div class="col-6" :class="{ ' col-offset-6 ': msg.userId === User.id }">
+                  <div class="col-6" :class="{ ' col-offset-6 ': msg.userId === userId }">
                     <!-- <Message :closable="false" severity="success">{{ msg.text }}</Message> -->
                     <Message
                       :style="{
@@ -115,17 +119,22 @@ export default defineComponent({
       roomDescription: "" as string,
       Rooms: store.state.rooms as Room[],
       Messages: [{}] as Message[],
-      selected: {} as Room,
+      selectedRoom: {} as Room,
+      selectedUser: {} as User,
       text: "" as string,
-      User: store.state.user as User,
+      Users: [{}] as User[],
       connected: socket.connected as boolean,
+      userId: store.state.user.id,
       usernamePM: "" as string,
     };
   },
-  mounted() {
+  updated() {
     this.connected = socket.connected;
+    console.log("updated");
+  },
+  mounted() {
     this.getRooms();
-    this.User = store.state.user;
+    this.getUsers();
     socket.on("servMessage", (e: {message: Message}) => {
       console.log("servMessage");
       if (socket.connected) {
@@ -142,34 +151,45 @@ export default defineComponent({
   },
   methods: {
     onSubmit() {
-      if (!this.selected || !this.selected.name || !this.text || this.text === "")
+      if (!this.selectedRoom || !this.selectedRoom.name || !this.text || this.text === "")
         return ;
       const message: Message = {
         id: 0,
         created_at: new Date(),
         text: this.text,
-        roomId: this.selected.id,
-        room: this.selected,
-        userId:this.User.id,
-        user: this.User,
+        roomId: this.selectedRoom.id,
+        room: this.selectedRoom,
+        userId: store.state.user.id,
+        user: store.state.user,
       } as Message;
       socket.emit("cliMessage", { message: message });
       this.text = "";
     },
     privateMessage() {
-      if (!this.selected || !this.selected.name || !this.text || this.text === "")
+      if (!this.selectedRoom || !this.selectedRoom.name || !this.text || this.text === "")
         return ;
       const message: Message = {
         id: 0,
         created_at: new Date(),
         text: this.text,
-        roomId: this.selected.id,
-        room: this.selected,
-        userId:this.User.id,
-        user: this.User,
+        roomId: this.selectedRoom.id,
+        room: this.selectedRoom,
+        userId: store.state.user.id,
+        user: store.state.user,
       } as Message;
       socket.emit("privMessage", { message: message });
       this.text = "";
+    },
+    async getUsers() {
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.get(`api/user/private/${store.state.user.id}`, {
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+      })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          this.Users = response.data;
+        })
+        .catch((error: AxiosError) => { throw error; });
     },
     async getRooms() {
       axios.defaults.baseURL = server.nestUrl;
@@ -181,9 +201,7 @@ export default defineComponent({
           this.Rooms = response.data;
           store.commit("setRooms", this.Rooms);
         })
-        .catch((error: AxiosError) => {
-          console.log(error);
-        });
+        .catch((error: AxiosError) => { throw error; });
     },
     async getMessages(room: Room) {
       await axios.get(`api/chat/room/${room.id}`, {
@@ -194,26 +212,21 @@ export default defineComponent({
           this.Messages = response.data;
           store.commit("setRooms", this.Rooms);
         })
-        .catch((error: AxiosError) => {
-          console.log(error);
-        });
+        .catch((error: AxiosError) => { throw error; });
     },
     async createRoom() {
       if (this.roomName == "") {
         console.log("Room must have a valide name.");
         return;
       }
-      const room = { ownerId: this.User.id, name: this.roomName, description: this.roomDescription } as Room;
+      const room = { ownerId: store.state.user.id, name: this.roomName, description: this.roomDescription } as Room;
       await axios.post(`api/room/create`, room, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
           console.log("createRoom success: " + response);
         })
-        .catch((error: AxiosError) => {
-          console.log(error);
-          throw error;
-        });
+        .catch((error: AxiosError) => { throw error; });
         this.getRooms();
     },
     async deleteRoom(room: Room) {
@@ -223,19 +236,21 @@ export default defineComponent({
         .then((response: AxiosResponse) => {
           console.log("deleteRoom success: " + response);
         })
-        .catch((error: AxiosError) => {
-          console.log(error);
-          throw error;
-        });
+        .catch((error: AxiosError) => { throw error; });
         this.getRooms();
     },
     selectSet(value: Room) {
-      this.selected = value;
-      console.log(this.selected);
-      this.getMessages(this.selected);
+      this.selectedRoom = value;
+      console.log(this.selectedRoom);
+      this.getMessages(this.selectedRoom);
+    },
+    selectUser(value: User) {
+      this.selectedUser = value;
+      console.log(this.selectedUser);
+      this.getUsers();
     },
     owner(value: Room): boolean {
-      return this.User.id === value.ownerId;
+      return store.state.user.id === value.ownerId;
     }
   },
 });

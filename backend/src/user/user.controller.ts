@@ -6,7 +6,7 @@ import {
   Header,
   Get,
   // UseGuards,
-  Delete,
+  // Delete,
   Body,
   Param,
 } from "@nestjs/common";
@@ -59,16 +59,24 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  // @Public()
-  @Delete(":id")
+  @Get("private/:id")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  deleteUser(
-    @GetCurrentUserId() userId: number,
-    @Param("id") param: string,
-  ): Promise<User> {
-    const id = parseInt(param.split("=")[1]);
-    return this.userService.remove(userId, id);
+  findPrivate(@Param("id") param: string): Promise<User[]> {
+    console.log(param);
+    const id = parseInt(param);
+    console.log(id);
+    return this.userService.findPrivate(id);
   }
+
+  // // @Public()
+  // @Delete(":id")
+  // // @UseGuards(AtGuard)
+  // @HttpCode(HttpStatus.OK)
+  // @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // deleteUser(@GetCurrentUserId() userId: number, @Param("id") param: string) {
+  //   const id = parseInt(param.split("=")[1]);
+  //   return this.userService.remove(userId, id);
+  // }
 }

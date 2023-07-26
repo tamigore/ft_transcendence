@@ -33,6 +33,13 @@ export class RoomController {
     this.roomService.addUser(dto.roomId, dto.userId);
   }
 
+  @Post("addAdmin")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  addAdmin(@Body() dto: AddDelUserDto) {
+    this.roomService.addAdmin(dto.roomId, dto.userId);
+  }
+
   @Post("create")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
@@ -71,15 +78,6 @@ export class RoomController {
     const id: number = parseInt(param);
     return this.roomService.findById(id);
   }
-
-  // @Get("message/:id")
-  // // @UseGuards(AtGuard)
-  // @HttpCode(HttpStatus.OK)
-  // @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  // findMessageInRoom(@Param("id") param: string): Promise<Room> {
-  //   const id: number = parseInt(param);
-  //   return this.roomService.findMessages(id);
-  // }
 
   // @Public()
   @Delete(":id")
