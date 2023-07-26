@@ -11,8 +11,6 @@ import { Server, Socket } from "socket.io";
 import { Logger } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
 import { GameService } from "./game.service";
-import { JoinRoom } from "./game.interface"; 
-import { RoomService } from "src/room/room.service";
 // import { WsGuard } from "src/common/guards/ws.guard";
 
 @WebSocketGateway(8081)
@@ -21,7 +19,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private gameService: GameService,
     private userService: UserService,
-    private roomService: RoomService,
   ) {}
 
   @WebSocketServer()
@@ -58,7 +55,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
     this.logger.log("onMessage");
     this.logger.debug("body: ", body, "ConnectedSocket: ", client.id);
-    this.gameService.createMessage(body.message, body.room.id, body.user.id);
     this.server.to(body.room.name).emit("servMessage", {
       user: body.user,
       message: body.message,
@@ -66,21 +62,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  // @UseGuards(WsThrottlerGuard)
-  // @UsePipes(new ZodValidationPipe(JoinRoomSchema))
-  // @UseGuards(WsGuard)
-  @SubscribeMessage("join_room")
-  async onJoinRoom(
-    @MessageBody()
-    payload: JoinRoom,
-  ): Promise<boolean> {
-    this.logger.log(`${payload.user.username} is joining ${payload.room.name}`);
-    const user = await this.userService.findById(payload.user.id);
-    if (!user) throw new Error("onJoinRoom no user found");
-    let room = await this.roomService.findById(payload.room.id);
-    if (!room) room = await this.roomService.createRoom(payload.room);
-    this.server.in(user.gameSocket).socketsJoin(room.name);
-    await this.roomService.addUser(room.id, user.id);
-    return true;
-  }
+//   // @UseGuards(WsThrottlerGuard)
+//   // @UsePipes(new ZodValidationPipe(JoinRoomSchema))
+//   // @UseGuards(WsGuard)
+//   @SubscribeMessage("join_room")
+//   async onJoinRoom(
+//     @MessageBody()
+//     payload: JoinRoom,
+//   ): Promise<boolean> {
+//     this.logger.log(`${payload.user.username} is joining ${payload.room.name}`);
+//     const user = await this.userService.findById(payload.user.id);
+//     if (!user) throw new Error("onJoinRoom no user found");
+//     let room = await this.roomService.findById(payload.room.id);
+//     if (!room) room = await this.roomService.createRoom(payload.room);
+//     this.server.in(user.gameSocket).socketsJoin(room.name);
+//     await this.roomService.addUser(room.id, user.id);
+//     return true;
+//   }
 }

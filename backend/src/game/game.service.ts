@@ -1,24 +1,24 @@
 /* eslint-disable prettier/prettier */
 import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { Historic } from "@prisma/client";
+import { Game } from "@prisma/client";
 
 @Injectable()
-export class HistoricService {
-  private logger: Logger = new Logger("HistoricService");
+export class GameService {
+  private logger: Logger = new Logger("GameService");
   constructor(private prisma: PrismaService) {}
   
-  async getGamesByPlayerId(body: any) : Promise<Historic[]> {
-    let userId : number = 0;
+  async getGamesByPlayerId(body: any) : Promise<Game[]> {
+    let userId = 0;
     userId = + body.id;
-    const messages = await this.prisma.historic.findMany({
+    const messages = await this.prisma.game.findMany({
       where: {
         OR: [
             {
-                winnerID: userId,
+                player1Id: userId,
             },
             {
-                looserID: userId,
+                player2Id: userId,
             },
         ],
       }
@@ -27,10 +27,10 @@ export class HistoricService {
     return messages;
   }
 
-  async getGameByGameId(body: any) : Promise<Historic> {
-      let id : number = 0;
+  async getGameByGameId(body: any) : Promise<Game> {
+      let id = 0;
       id = + body.id;
-    const message = await this.prisma.historic.findUnique({
+    const message = await this.prisma.game.findUnique({
       where: {
         id: id ,
       }
@@ -40,22 +40,29 @@ export class HistoricService {
   }
 
   async setGameByGameId(body: any) : Promise<void> {
-    let winnerID : number = 0;
+    let winnerID = 0;
     winnerID = + body.winnerID;
-    let looserID : number = 0;
+    let looserID = 0;
     looserID = + body.looserID;
 
-    await this.prisma.historic
+    await this.prisma.game
       .create({
         data: {
-          winnerID: winnerID,
-          looserID: looserID,
-          score : body.score,
+			name: "Game data",
+          player1: {
+            connect: {
+              id: winnerID,
+            },
+          },
+          player2: {
+            connect: {
+              id: looserID,
+            },
+          },
         },
       })
       .catch((error: any) => {
         this.logger.log("", error)
       });
     }
-    
 }

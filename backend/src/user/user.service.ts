@@ -18,9 +18,25 @@ export class UserService {
 
   async findById(id: number): Promise<User> {
     this.logger.log(`findById user: ${id}`);
-    return await this.prisma.user.findUnique({
-      where: { id: id },
+    return await this.prisma.user
+      .findUnique({
+        where: { id: id },
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async findPrivate(userId: number): Promise<User[]> {
+    this.logger.log(`findPrivate user: ${userId}`);
+    const users = await this.prisma.user.findMany({
+      where: {
+        NOT: {
+          id: userId,
+        },
+      },
     });
+    return users;
   }
 
   async findByChatSocket(socket: string): Promise<User> {
@@ -50,6 +66,7 @@ export class UserService {
       })
       .catch((error) => {
         this.logger.error("User update error: ", error);
+        throw new Error(error);
       });
   }
 
@@ -69,6 +86,7 @@ export class UserService {
       })
       .catch((error) => {
         this.logger.error("chatSocket update error: ", error);
+        throw new Error(error);
       });
   }
 

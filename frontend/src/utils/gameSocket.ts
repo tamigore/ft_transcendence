@@ -1,42 +1,32 @@
-import { io, Socket  } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { server } from "@/utils/helper";
-import store from "@/store";
-import { User, Message, Room } from "./interfaces"
+import { User, Game } from "./interfaces"
 
 export interface ServerToClientEvents {
-  up: (e: {user: User, room: Room}) => void;
-  down: (e: {user: User, room: Room}) => void;
-  upNo: (e: {user: User, room: Room}) => void;
-  downNo: (e: {user: User, room: Room}) => void;
+  up: (e: { user: User, game: Game }) => void;
+  down: (e: { user: User, game: Game }) => void;
+  upNo: (e: { user: User, game: Game }) => void;
+  downNo: (e: { user: User, game: Game }) => void;
 }
 
 export interface ClientToServerEvents {
-  up: (e: {user: User, room: Room}) => void;
-  down: (e: {user: User, room: Room}) => void;
-  upNo: (e: {user: User, room: Room}) => void;
-  downNo: (e: {user: User, room: Room}) => void;
-  join_room: (e: { user: User; room: Room }) => void;
+  up: (e: { user: User, game: Game }) => void;
+  down: (e: { user: User, game: Game }) => void;
+  upNo: (e: { user: User, game: Game }) => void;
+  downNo: (e: { user: User, game: Game }) => void;
+  join_game: (e: { user: User; game: Game }) => void;
 }
 
 class SocketioGame {
   socket: Socket<ServerToClientEvents, ClientToServerEvents>;
-	constructor()
-	{
-		const auth: string = "Bearer " + store.state.user.hash;
-		const userId: string = store.state.user.id.toString();
-		this.socket = io(server.gameUrl,
-		  {
-			transports : ['websocket'],
-			autoConnect: false,
-			auth: {
-			  token: auth,
-			},
-			query: {
-			  "userId": userId,
-			},
-		  }
-		);
-	};
+  constructor() {
+    this.socket = io(server.gameUrl,
+      {
+        transports: ['websocket'],
+        autoConnect: false,
+      }
+    );
+  }
 }
 
 const socket = new SocketioGame().socket;

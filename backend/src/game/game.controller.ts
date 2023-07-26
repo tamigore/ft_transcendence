@@ -6,7 +6,7 @@ import {
   Post,
   Get,
 } from "@nestjs/common";
-import { HistoricService } from "./game.service";
+import { HistoricService } from "./historic.service";
 import { Public } from "../common/decorators";
 import { Historic } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";

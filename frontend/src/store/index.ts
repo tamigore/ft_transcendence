@@ -1,14 +1,16 @@
 import { createStore } from 'vuex';
-import { User, Room, Message } from '../utils/interfaces';
+import { User, Room, Message, Game } from '../utils/interfaces';
 
 const store = createStore({
     state: {
         user: {} as User,
+		game: {} as Game,
         messages: [{}] as Message[],
         rooms: [{}] as Room[],
         connected: false as boolean,
         ingame: false as boolean,
         last_room: {} as Room,
+        last_message: {} as Message,
     },
     mutations: {
         setChatConnect : function (state, chatConnect: boolean) {
@@ -86,6 +88,9 @@ const store = createStore({
         },
         setMessages : function (state, chatMessages: Message[]) {
             state.messages = chatMessages;
+        },
+        setLastMessage : function (state, chatMessages: Message) {
+            state.last_message = chatMessages;
         },
     },
 })
