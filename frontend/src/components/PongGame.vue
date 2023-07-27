@@ -258,7 +258,7 @@ class BallClass {
   hp: number;
   pong: PongGameClass;
 
-  constructor(pong: PongGameClass, x: number, y: number, veloX: number, veloY: number, radius: number, color: string, hp?: number) {
+  constructor(pong: PongGameClass, hitSound, x: number, y: number, veloX: number, veloY: number, radius: number, color: string, hp?: number) {
     this.x = x;
     this.y = y;
     this.veloX = veloX;
@@ -314,6 +314,7 @@ class BallClass {
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         if (this.veloY > 0)
           console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2) + "\n");
+        this.hitSound();
         return true;
       }
     }
@@ -457,9 +458,17 @@ export class PongGameClass {
   inertie: number[];
   wallIsUp: boolean;
   veloDiv: number;
+  audioContext: AudioContext;
+  audioBuffer: null;
 
 
-  constructor() {
+  constructor(hitSound) {
+
+    //AUDIO
+
+    this.audioContext = new window.AudioContext();
+    this.audioBuffer = null;
+    //GAME PARAMETERS
     this.width = SetPongWidth;
     this.height = SetPongHeight;
 
@@ -542,7 +551,8 @@ export class PongGameClass {
 
     this.veloDiv = setVeloDiv;
 
-    this.theBall = new BallClass(this, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
+
+    this.theBall = new BallClass(this, hitSound, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
   }
 
 
@@ -888,8 +898,8 @@ export class PongGameClass {
   removeBlock = (blockId: number) => {
     this.myBlocks = this.myBlocks.filter(block => block.id !== blockId);
   }
-}
 
+}
 
 
 
@@ -901,9 +911,19 @@ export default defineComponent({
   setup() {
     const myCanvas = ref<(HTMLCanvasElement | null)>(null);
     let ctx: CanvasRenderingContext2D | null = null;
-    const Pong = ref(new PongGameClass());
-
     const { fps } = useFPS();
+    
+    const hitSound = ref(null);
+    const Pong = ref(new PongGameClass(hitSound));
+
+    const loadSound = (url) => {
+    return new Promise((resolve, reject) => {
+    const audio = new Audio(url);
+    audio.addEventListener("canplaythrough", () => resolve(audio));
+    audio.addEventListener("error", (error) => reject(error));
+  });
+}
+    
 
     /*******************Game Loop*******************/
     
@@ -927,6 +947,7 @@ export default defineComponent({
       }
     }
     
+
     /*******************Draw Functions*******************/
     
     const drawBall = () => {
@@ -970,9 +991,16 @@ export default defineComponent({
       }
     }
 
+
     /*******************Mounted and unMounted*******************/
 
-    onMounted(() => {
+    onMounted(async () => {
+      try {
+        hitSound.value = await loadSound("@/assets/sounds/hitSound.wav");
+      } catch (error) {
+        console.error("Error loading sound:", error);
+      }
+
       if (myCanvas.value) {
         ctx = myCanvas.value.getContext('2d');
         if (ctx) {
@@ -1007,6 +1035,7 @@ export default defineComponent({
       myCanvas,
       computedCanvasStyle,
       fps,
+      hitSound,
     };
   }
 });
