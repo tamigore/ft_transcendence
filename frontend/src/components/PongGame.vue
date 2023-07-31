@@ -41,7 +41,14 @@
   </div>
 </template>
 
+
+
+
+
+
+
 <style>
+
 .gameCanvasStyle {
   z-index: 1;
   display: block;
@@ -131,9 +138,19 @@
   background-color: #2b222e;
   overflow: hidden;
 }
+
 </style>
 
+
+
+
+
+
+
+
+
 <script lang="ts">
+
 import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import store from "@/store";
@@ -227,6 +244,8 @@ class EffectBlock {
 }
 
 
+
+
 /******************* BallClass *******************/
 class BallClass {
   public x: number;
@@ -239,7 +258,7 @@ class BallClass {
   hp: number;
   pong: PongGameClass;
 
-  constructor(pong: PongGameClass, x: number, y: number, veloX: number, veloY: number, radius: number, color: string, hp?: number) {
+  constructor(pong: PongGameClass, hitSound, x: number, y: number, veloX: number, veloY: number, radius: number, color: string, hp?: number) {
     this.x = x;
     this.y = y;
     this.veloX = veloX;
@@ -295,6 +314,7 @@ class BallClass {
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         if (this.veloY > 0)
           console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2) + "\n");
+        this.hitSound();
         return true;
       }
     }
@@ -379,7 +399,9 @@ class BallClass {
 }
 
 
+
 /*******************PongGameClass*******************/
+
 export class PongGameClass {
   width: number;
   height: number;
@@ -436,9 +458,17 @@ export class PongGameClass {
   inertie: number[];
   wallIsUp: boolean;
   veloDiv: number;
+  audioContext: AudioContext;
+  audioBuffer: null;
 
 
-  constructor() {
+  constructor(hitSound) {
+
+    //AUDIO
+
+    this.audioContext = new window.AudioContext();
+    this.audioBuffer = null;
+    //GAME PARAMETERS
     this.width = SetPongWidth;
     this.height = SetPongHeight;
 
@@ -521,10 +551,14 @@ export class PongGameClass {
 
     this.veloDiv = setVeloDiv;
 
-    this.theBall = new BallClass(this, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
+
+    this.theBall = new BallClass(this, hitSound, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
   }
 
-  /***********************START GAME***********************/
+
+
+  /***********************re-START GAME***********************/
+  
   startMatchSolo() {
     this.restartMatch(true, true);
   }
@@ -630,6 +664,8 @@ export class PongGameClass {
     }
   }
 
+
+
   /*******************Bots*******************/
 
   boting = (paddleY: number, paddleX: number, paddleHeight: number, player: number): number => {
@@ -667,7 +703,7 @@ export class PongGameClass {
         || (this.inertie[player] < 0 && paddleY > this.height - paddleHeight - 1))
         this.inertie[player] = 0;
     }
-    console.log("paleyr : " + player + " inerites : " + this.inertie[player]);
+    console.log("palyer : " + player + " inerites : " + this.inertie[player]);
 
     return paddleY;
   }
@@ -680,7 +716,9 @@ export class PongGameClass {
       this.rightPaddleY = this.boting(this.rightPaddleY, this.rightPaddleX, this.rightPaddleHeight, 1);
   }
 
-  /*******************Keys handelers*******************/
+
+
+  /*******************Paddles Movements*******************/
 
   moovePaddles() {
     if (this.leftArrowUp && this.leftPaddleY > 1 - this.leftPaddleHeight) {
@@ -697,6 +735,24 @@ export class PongGameClass {
     else if (this.rightArrowDown && this.rightPaddleY < this.height - 1)
       this.rightPaddleY += this.rightPaddleSpeed * this.rightArrowDown;
   }
+
+
+
+  /*******************Keys handelers*******************/
+
+  handleKeyUp = (event: KeyboardEvent) => {
+    if (store.state.game && store.state.game.name)
+      this.onlineKeyUp(event);
+    else
+      this.offlineKeyUp(event);
+  };
+
+  handleKeyDown = (event: KeyboardEvent) => {
+    if (store.state.game && store.state.game.name)
+      this.onlineKeyDown(event);
+    else
+      this.offlineKeyDown(event);
+  };
 
   offlineKeyDown = (event: KeyboardEvent) => {
     if (event.key === this.leftPlayerKeyUp)
@@ -721,13 +777,6 @@ export class PongGameClass {
       this.rightArrowDown = 1;
     });
   }
-
-  handleKeyDown = (event: KeyboardEvent) => {
-    if (store.state.game && store.state.game.name)
-      this.onlineKeyDown(event);
-    else
-      this.offlineKeyDown(event);
-  };
 
   offlineKeyUp = (event: KeyboardEvent) => {
     if (event.key === this.leftPlayerKeyUp)
@@ -754,15 +803,9 @@ export class PongGameClass {
     });
   }
 
-  handleKeyUp = (event: KeyboardEvent) => {
-    if (store.state.game && store.state.game.name)
-      this.onlineKeyUp(event);
-    else
-      this.offlineKeyUp(event);
-  };
+  
 
-
-  /*******************Blocks*******************/
+  /*******************Blocks Functions*******************/
 
   checkBlockColi = (genX: number, genY: number, block: EffectBlock): boolean => {
     if (Math.abs(genX - block.x) < (this.blockWidth) && Math.abs(genY - block.y) < (this.blockHeight))
@@ -789,6 +832,7 @@ export class PongGameClass {
     }
   }
 
+    /*******************Blocks Generation*******************/
 
   generateBlocks() {
     let genX = 0;
@@ -854,7 +898,10 @@ export class PongGameClass {
   removeBlock = (blockId: number) => {
     this.myBlocks = this.myBlocks.filter(block => block.id !== blockId);
   }
+
 }
+
+
 
 /*******************End PongGameClass*******************/
 
@@ -864,10 +911,45 @@ export default defineComponent({
   setup() {
     const myCanvas = ref<(HTMLCanvasElement | null)>(null);
     let ctx: CanvasRenderingContext2D | null = null;
-    const Pong = ref(new PongGameClass());
-
     const { fps } = useFPS();
+    
+    const hitSound = ref(null);
+    const Pong = ref(new PongGameClass(hitSound));
 
+    const loadSound = (url) => {
+    return new Promise((resolve, reject) => {
+    const audio = new Audio(url);
+    audio.addEventListener("canplaythrough", () => resolve(audio));
+    audio.addEventListener("error", (error) => reject(error));
+  });
+}
+    
+
+    /*******************Game Loop*******************/
+    
+    const gameLoop = () => {
+      if (!ctx)
+        return;
+      ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
+      // Pong.value.generateBlocks();
+      Pong.value.bot();
+      Pong.value.moovePaddles();
+      Pong.value.theBall.ballColision();
+      for (const ball of Pong.value.myBalls) {
+        ball.ballColision();
+      }
+      drawBlocks();
+      drawBall();
+      drawPaddle(Pong.value.paddleOffset, Pong.value.leftPaddleY, Pong.value.leftPaddleWidth, Pong.value.leftPaddleHeight, Pong.value.leftPaddleColor);
+      drawPaddle(Pong.value.width - Pong.value.paddleOffset - Pong.value.rightPaddleWidth, Pong.value.rightPaddleY, Pong.value.rightPaddleWidth, Pong.value.rightPaddleHeight, Pong.value.rightPaddleColor);
+      for (const ball of Pong.value.myBalls) {
+        ball.ballColision();
+      }
+    }
+    
+
+    /*******************Draw Functions*******************/
+    
     const drawBall = () => {
       if (!ctx)
         return;
@@ -909,29 +991,17 @@ export default defineComponent({
       }
     }
 
-    const gameLoop = () => {
-      if (!ctx)
-        return;
-      ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
-      // Pong.value.generateBlocks();
-      Pong.value.bot();
-      Pong.value.moovePaddles();
-      Pong.value.theBall.ballColision();
-      for (const ball of Pong.value.myBalls) {
-        ball.ballColision();
-      }
-      drawBlocks();
-      drawBall();
-      drawPaddle(Pong.value.paddleOffset, Pong.value.leftPaddleY, Pong.value.leftPaddleWidth, Pong.value.leftPaddleHeight, Pong.value.leftPaddleColor);
-      drawPaddle(Pong.value.width - Pong.value.paddleOffset - Pong.value.rightPaddleWidth, Pong.value.rightPaddleY, Pong.value.rightPaddleWidth, Pong.value.rightPaddleHeight, Pong.value.rightPaddleColor);
-      for (const ball of Pong.value.myBalls) {
-        ball.ballColision();
-      }
-    }
 
-    onMounted(() => {
+    /*******************Mounted and unMounted*******************/
+
+    onMounted(async () => {
+      try {
+        hitSound.value = await loadSound("@/assets/sounds/hitSound.wav");
+      } catch (error) {
+        console.error("Error loading sound:", error);
+      }
+
       if (myCanvas.value) {
-        // socket.setupSocketConnection();
         ctx = myCanvas.value.getContext('2d');
         if (ctx) {
           window.addEventListener('keydown', Pong.value.handleKeyDown);
@@ -945,6 +1015,8 @@ export default defineComponent({
       window.removeEventListener('keydown', Pong.value.handleKeyDown);
       window.removeEventListener('keyup', Pong.value.handleKeyUp);
     });
+
+    /*******************Computed values*******************/
 
     const pongStyle = computed(() => ({
       '--width': `${Pong.value.width * 3}px`,
@@ -963,6 +1035,7 @@ export default defineComponent({
       myCanvas,
       computedCanvasStyle,
       fps,
+      hitSound,
     };
   }
 });
