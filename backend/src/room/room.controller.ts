@@ -54,11 +54,11 @@ export class RoomController {
     this.roomService.remove(userId, dto.id);
   }
 
-  @Post("delUser")
+  @Post("delete/user")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   removeUser(@Body() dto: AddDelUserDto) {
-    this.roomService.delUser(dto.roomId, dto.userId);
+    this.roomService.removeUser(dto.roomId, dto.userId);
   }
 
   // @Public()
@@ -67,6 +67,13 @@ export class RoomController {
   @HttpCode(HttpStatus.OK)
   findRooms(): Promise<Room[]> {
     return this.roomService.findAll();
+  }
+
+  @Get("all")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  findRoomsIncludes(): Promise<Room[]> {
+    return this.roomService.findAllIncludes();
   }
 
   // @Public()
@@ -84,11 +91,8 @@ export class RoomController {
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  deleteUser(
-    @GetCurrentUserId() userId: number,
-    @Param("id") param: string,
-  ): Promise<Room> {
+  deleteUser(@GetCurrentUserId() userId: number, @Param("id") param: string) {
     const id: number = parseInt(param);
-    return this.roomService.remove(userId, id);
+    this.roomService.remove(userId, id);
   }
 }

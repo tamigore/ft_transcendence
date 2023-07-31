@@ -16,7 +16,7 @@ model User {
   updated_at DateTime @updatedAt
 
   email       String   @unique
-  username    String?  @unique
+  username    String   @unique
   hash        String   @unique
   hashRt      String?
   chatSocket  String?
@@ -81,14 +81,15 @@ model Message {
 }
 
 model Room {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
+  id         Int        @id @default(autoincrement())
+  created_at DateTime   @default(now())
 
   name        String
+  private     Boolean   @default(false)
   ownerId     Int?
-  owner       User?    @relation(name: "owner", fields: [ownerId], references: [id])
-  admins      User[]   @relation(name: "admin")
-  users       User[]   @relation(name: "users")
+  owner       User?     @relation(name: "owner", fields: [ownerId], references: [id])
+  admins      User[]    @relation(name: "admin")
+  users       User[]    @relation(name: "users")
   messages    Message[]
   description String?
   @@map("rooms")

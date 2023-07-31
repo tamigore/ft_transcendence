@@ -74,6 +74,9 @@ const store = createStore({
         addMessage : function (state, chatMessage: Message) {
             state.messages.push(chatMessage);
         },
+        // addMessageToRoom : function (state, chatMessage: Message) {
+        //     state.rooms.find(room => room.id === chatMessage.room.id)?.messages.push(chatMessage);
+        // },
         setMessages : function (state, chatMessages: Message[]) {
             state.messages = chatMessages;
         },

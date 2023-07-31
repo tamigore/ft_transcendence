@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
-import { Room } from "@prisma/client";
+import { Room, User } from "@prisma/client";
 
 @Injectable()
 export class RoomService implements OnModuleInit {
@@ -25,17 +25,27 @@ export class RoomService implements OnModuleInit {
           },
         })
         .then((user) => {
-          this.logger.log("addUser success: ", user);
+          this.logger.log("onModuleInit addUser success: ", user);
         })
         .catch((error) => {
-          this.logger.error("addUser error: ", error);
+          this.logger.error("onModuleInit addUser error: ", error);
         });
     }
   }
 
   async findAll(): Promise<Room[]> {
-    this.logger.log(`findAll rooms`);
+    this.logger.log("findAll rooms");
     return await this.prisma.room.findMany();
+  }
+
+  async findAllIncludes(): Promise<Room[]> {
+    this.logger.log("findAll rooms");
+    return await this.prisma.room.findMany({
+      include: {
+        users: true,
+        messages: true,
+      },
+    });
   }
 
   async findById(id: number): Promise<Room> {
@@ -67,6 +77,42 @@ export class RoomService implements OnModuleInit {
         this.logger.error("createRoom error: ", error);
         throw new Error(error);
       });
+  }
+
+  async getPrivateRoom(user1: User, user2: User): Promise<Room> {
+    this.logger.log(
+      `getPrivateRoom of ${user1.username} and ${user2.username}`,
+    );
+    await this.prisma.room
+      .findMany({
+        where: {
+          name: `${user1.username} & ${user2.username} Room`,
+        },
+      })
+      .then((res) => {
+        this.logger.log("getPrivateRoom findMany success");
+        return res;
+      })
+      .catch(async (error) => {
+        this.logger.log("getPrivateRoom findMany failed with error: " + error);
+        await this.prisma.room
+          .create({
+            data: {
+              name: `${user1.username} & ${user2.username} Room`,
+              description: `User ${user1.username} and ${user2.username} private room`,
+              users: {
+                connect: [{ id: user1.id }, { id: user2.id }],
+              },
+            },
+          })
+          .then((res) => {
+            return res;
+          })
+          .catch((err) => {
+            throw err;
+          });
+      });
+    return {} as Room;
   }
 
   async update(userId: number, roomDto: Room) {
@@ -135,47 +181,49 @@ export class RoomService implements OnModuleInit {
         },
       })
       .then((room) => {
-        this.logger.log("addUser success: ", room);
+        this.logger.log("addAdmin success: ", room);
       })
       .catch((error) => {
-        this.logger.error("addUser error: ", error);
+        this.logger.error("addAdmin error: ", error);
         throw new Error(error);
       });
   }
 
-  async remove(userId: number, roomId: number): Promise<Room> {
+  async remove(userId: number, roomId: number) {
     this.logger.log(`user id : ${userId} wants to removeById: ${roomId}`);
-    await this.prisma.room
-      .update({
-        where: { id: roomId },
-        data: {
-          users: {
-            set: [],
+    await this.prisma
+      .$transaction([
+        this.prisma.room.update({
+          where: { id: roomId },
+          data: {
+            users: {
+              set: [],
+            },
+            admins: {
+              set: [],
+            },
+            owner: {
+              disconnect: true,
+            },
+            messages: {
+              set: [], // TODO: remove without "The change you are trying to make would violate the required relation 'MessageToRoom' between the `Message` and `Room` models."
+            },
           },
-          admins: {
-            set: [],
-          },
-          owner: {
-            disconnect: true,
-          },
-          messages: {
-            set: [],
-          },
-        },
-      })
+        }),
+        this.prisma.room.delete({
+          where: { id: roomId },
+        }),
+      ])
       .then((user) => {
-        this.logger.log("remove update success: ", user);
+        this.logger.log("remove success: ", user);
       })
       .catch((error) => {
-        this.logger.error("remove update error: ", error);
+        this.logger.error("remove error: ", error);
         throw new Error(error);
       });
-    return await this.prisma.room.delete({
-      where: { id: roomId },
-    });
   }
 
-  async delUser(roomId: number, userId: number) {
+  async removeUser(roomId: number, userId: number) {
     this.logger.log(`del user: ${userId} from room: ${roomId}`);
     return await this.prisma.room
       .update({

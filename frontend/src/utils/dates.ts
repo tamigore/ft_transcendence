@@ -3,6 +3,7 @@ const zeroPad = (num: number, pad: number) => {
 }
 
 const isSameDay = (d1: Date, d2: Date) => {
+	console.log(`${typeof(d1)} is same to ${typeof(d2)}`);
 	return (
 		d1.getFullYear() === d2.getFullYear() &&
 		d1.getMonth() === d2.getMonth() &&

@@ -1,16 +1,18 @@
 import { io, Socket  } from "socket.io-client";
 import { server } from "@/utils/helper";
-import { User, Message } from "./interfaces"
+import { User, Message, Room } from "./interfaces"
+import store from "@/store";
 
 export interface ServerToClientEvents {
-  servMessage: (e: {message: Message}) => void;
+  servMessage: (e: Message) => void;
 }
 
 export interface ClientToServerEvents {
-  join_room: (e: { user: User; roomName: string }) => void;
-  kick_user: (e: { user: User; user_to_kick: User; roomName: string }) => void;
-  cliMessage: (e: {message: Message}) => void;
-  privMessage: (e: {message: Message}) => void;
+  join_room: (e: { user: User; room: Room }) => void;
+  leave_room: (e: { user: User; room: Room }) => void;
+  kick_user: (e: { user: User; user_to_kick: User; room: Room }) => void;
+  cliMessage: (e: Message) => void;
+  privMessage: (e: { user1: User, user2: User, message: Message }) => void;
 }
 
 class SocketioChat {
@@ -23,6 +25,10 @@ class SocketioChat {
         autoConnect: false,
       }
     );
+    this.socket.on('servMessage', (msg: Message) => {
+      console.log(msg);
+      store.commit("setLastMessage", msg);
+    });
   }
 }
 

@@ -31,54 +31,45 @@
       <div class="flex flex-row flex-wrap col">
         <TabView>
           <TabPanel header="Romms">
-            <div class="flex flex-column flex-wrap col-4">
+            <div class="flex flex-column flex-wrap col-4 w-full" style="height: 70vh;">
               <div v-for="Room in Rooms" :key="Room.id" class="p-2">
-                <div class="flex flex-row box-shadow-dark" v-on:click="selectSet(Room)">
+                <div class="flex flex-row" v-bind:class="[Room.id == selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']" v-on:click="selectSet(Room)">
                   <div class="flex flex-row">
                     {{ Room.name }}
                   </div>
                   <div class="flex flex-row">
-                    <Button label="Delete" severity="danger" v-if="owner(Room)" @click="deleteRoom(Room)" />
+                    <Button label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
+                    <Button label="Join" severity="success" raised v-if="!isUserInRoom(Room)" @click="joinRoom(Room)" />
+                    <Button label="Leave" severity="warning" raised v-if="isUserInRoom(Room)" @click="leaveRoom(Room)" />
                   </div>
                 </div>
               </div>
             </div>
           </TabPanel>
           <TabPanel header="Users">
-            <div class="flex flex-column flex-wrap col-4">
+            <div class="flex flex-column flex-wrap col-4 w-full"  style="height: 70vh;">
               <div v-for="User in Users" :key="User.id" class="p-2">
-                <div class="flex flex-row box-shadow-dark" v-on:click="selectUser(User)">
+                <div class="flex flex-row" v-bind:class="[User.id == selectedUser.id  ? 'box-shadow' : 'box-shadow-dark']" v-on:click="selectUser(User)">
                   <div class="flex flex-row">
                     {{ User.username }}
                   </div>
-                  <!-- <div class="flex flex-row">
-                    <Button label="Leave" severity="danger" @click="deleteRoom(Room)" />
-                  </div> -->
                 </div>
               </div>
             </div>
           </TabPanel>
       </TabView>
-        <div class="flex flex-row flex-wrap col-8">
-          <div class="flex flex-column col box-shadow-dark">
+        <div class="flex flex-row flex-wrap col-8" style="height: 70vh;">
+          <div class="flex flex-column col" v-bind:class="[ selectedRoom && selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
             <div v-for="Room in Rooms" :key="Room.id">
               <div v-if="Room.name == selectedRoom.name">
-                <div v-for="msg in Messages" :key="msg.id">
-                  <div class="col-6" :class="{ ' col-offset-6 ': msg.userId === userId }">
-                    <!-- <Message :closable="false" severity="success">{{ msg.text }}</Message> -->
-                    <Message
-                      :style="{
-                          border: 'solid #696cff',
-                          borderWidth: '0 0 0 0px',
-                          color: '#696cff'
-                      }"
-                      class="border-primary w-full justify-content-start"
-                      severity="info" :closable="false" :icon=undefined>
-                      <div class="flex align-items-center">
-                        <font-awesome-icon icon="fa-solid fa-message" />
-                        <div class="ml-2">{{ msg.text }}</div>
+                <div v-for="msg in Messages" :key="msg.id"> 
+                  <div v-bind:class="[msg.userId === userId  ? 'col-offset-6 right-100' : 'col-6']">
+                    <div class="flex flex-wrap">
+                      <div class="grid bubble" v-bind:class="[msg.userId === userId  ? 'right' : 'left']">
+                        <div v-if="msg.userId != userId && msg.user && msg.user.username" class="col-2">{{ msg.user.username }}</div>
+                        <div class="col-8">{{ msg.text }}</div>
                       </div>
-                    </Message>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -118,36 +109,25 @@ export default defineComponent({
       roomName: "" as string,
       roomDescription: "" as string,
       Rooms: store.state.rooms as Room[],
-      Messages: [{}] as Message[],
+      Messages: store.state.messages as Message[],
       selectedRoom: {} as Room,
       selectedUser: {} as User,
+      last_message: store.state.last_message as Message,
       text: "" as string,
       Users: [{}] as User[],
       connected: socket.connected as boolean,
       userId: store.state.user.id,
-      usernamePM: "" as string,
     };
   },
   updated() {
-    this.connected = socket.connected;
-    console.log("updated");
+    console.log("ChatDisplay updated");
+    console.log("last_message: " + this.last_message);
   },
-  mounted() {
+  created() {
+    console.log("ChatDisplay created");
     this.getRooms();
     this.getUsers();
-    socket.on("servMessage", (e: {message: Message}) => {
-      console.log("servMessage");
-      if (socket.connected) {
-        if (e && e.message && e.message.room.name && e.message.room.name === store.state.last_room.name) {
-          console.log("add message to room");
-          this.Messages.push(e.message);
-        }
-        else {
-          console.log("add message to room");
-          this.toast.add({ severity: 'success', summary: 'New Message', detail: `From ${e.message.room.name}`, life: 3000 });
-        }
-      }
-    });
+    this.connected = socket.connected;
   },
   methods: {
     onSubmit() {
@@ -162,22 +142,24 @@ export default defineComponent({
         userId: store.state.user.id,
         user: store.state.user,
       } as Message;
-      socket.emit("cliMessage", { message: message });
+      socket.emit("cliMessage", message);
       this.text = "";
+      this.getMessages(this.selectedRoom);
     },
     privateMessage() {
-      if (!this.selectedRoom || !this.selectedRoom.name || !this.text || this.text === "")
+      if (!this.selectedUser)
         return ;
       const message: Message = {
         id: 0,
         created_at: new Date(),
+        name: `${store.state.user.username} & ${this.selectedUser.username} Room`,
         text: this.text,
         roomId: this.selectedRoom.id,
         room: this.selectedRoom,
         userId: store.state.user.id,
         user: store.state.user,
       } as Message;
-      socket.emit("privMessage", { message: message });
+      socket.emit("privMessage", {user1: store.state.user, user2: this.selectedUser, message: message});
       this.text = "";
     },
     async getUsers() {
@@ -193,7 +175,7 @@ export default defineComponent({
     },
     async getRooms() {
       axios.defaults.baseURL = server.nestUrl;
-      await axios.get("api/room", {
+      await axios.get("api/room/all", {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
@@ -225,6 +207,7 @@ export default defineComponent({
       })
         .then((response: AxiosResponse) => {
           console.log("createRoom success: " + response);
+          socket.emit("join_room", { user: store.state.user, room: this.selectedRoom })
         })
         .catch((error: AxiosError) => { throw error; });
         this.getRooms();
@@ -238,6 +221,34 @@ export default defineComponent({
         })
         .catch((error: AxiosError) => { throw error; });
         this.getRooms();
+    },
+    joinRoom(room: Room) {
+      const payload = {
+        user: store.state.user,
+        room: room,
+      };
+      socket.emit("join_room", payload);
+    },
+    leaveRoom(room: Room) {
+      const payload = {
+        user: store.state.user,
+        room: room,
+      };
+      socket.emit("leave_room", payload);
+    },
+    isUserInRoom(room: Room) {
+      try {
+        if (!room || !room.users)
+          return false;
+        const user = room.users.find(user => user.id == store.state.user.id);
+        if (user)
+          return true;
+        return false;
+      }
+      catch (e) {
+        console.log(e);
+        return false;
+      }
     },
     selectSet(value: Room) {
       this.selectedRoom = value;
@@ -259,5 +270,33 @@ export default defineComponent({
 <style>
 body {
   color: white;
+}
+
+.bubble {
+  --r: 25px; /* the radius */
+  --t: 30px; /* the size of the tail */
+  
+  padding: calc(2*var(--r)/3);
+  -webkit-mask: 
+    radial-gradient(var(--t) at var(--_d) 0,#0000 98%,#000 102%) 
+      var(--_d) 100%/calc(100% - var(--r)) var(--t) no-repeat,
+    conic-gradient(at var(--r) var(--r),#000 75%,#0000 0) 
+      calc(var(--r)/-2) calc(var(--r)/-2) padding-box, 
+    radial-gradient(50% 50%,#000 98%,#0000 101%) 
+      0 0/var(--r) var(--r) space padding-box;
+  background: linear-gradient(135deg,#ba00fe,#3d6ced) border-box;
+  color: #fff;
+}
+.left {
+  --_d: 0%;
+  border-left: var(--t) solid #0000;
+  margin-right: var(--t);
+  place-self: start;
+}
+.right {
+  --_d: 100%;
+  border-right: var(--t) solid #0000;
+  margin-left: var(--t);
+  place-self: end;
 }
 </style>

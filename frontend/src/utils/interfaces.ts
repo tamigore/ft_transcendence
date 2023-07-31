@@ -4,7 +4,7 @@ export interface User {
   updated_at: Date,
   
   email: string,
-  username: string | null,
+  username: string,
   hash: string,
   hashRt: string | null,
   chatSocket: string | null,

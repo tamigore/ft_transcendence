@@ -27,8 +27,8 @@ export class UserService {
       });
   }
 
-  async findPrivate(userId: number): Promise<User[]> {
-    this.logger.log(`findPrivate user: ${userId}`);
+  async findAllButSelf(userId: number): Promise<User[]> {
+    this.logger.log(`findAllButSelf user: ${userId}`);
     const users = await this.prisma.user.findMany({
       where: {
         NOT: {
@@ -65,7 +65,6 @@ export class UserService {
         this.logger.log("User update success: ", user);
       })
       .catch((error) => {
-        this.logger.error("User update error: ", error);
         throw new Error(error);
       });
   }
@@ -85,75 +84,99 @@ export class UserService {
         this.logger.log("chatSocket update success: ", user);
       })
       .catch((error) => {
-        this.logger.error("chatSocket update error: ", error);
         throw new Error(error);
       });
   }
 
-  // async remove(userId: number, id: number) {
-  //   this.logger.log(`user id : ${userId} wants to removeById: ${id}`);
-  //   await this.prisma.user
-  //     .update({
-  //       where: { id: id },
-  //       data: {
-  //         friend: {
-  //           set: [],
-  //         },
-  //         friendBy: {
-  //           set: [],
-  //         },
-  //         blocked: {
-  //           set: [],
-  //         },
-  //         blockedBy: {
-  //           set: [],
-  //         },
-  //         owner: {
-  //           set: [],
-  //         },
-  //         admin: {
-  //           set: [],
-  //         },
-  //         rooms: {
-  //           set: [],
-  //         },
-  //         messages: {
-  //           set: [],
-  //         },
-  //         player1: {
-  //           set: [],
-  //         },
-  //         player2: {
-  //           set: [],
-  //         },
-  //         spectator: {
-  //           set: [],
-  //         },
-  //         win: {
-  //           set: [],
-  //         },
-  //         loose: {
-  //           set: [],
-  //         },
-  //       },
-  //     })
-  //     .then(() => {
-  //       console.log(`user ${userId} removed successfully...`);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //       throw new Error(error);
-  //     });
-  //   await this.prisma.user
-  //     .delete({
-  //       where: { id: id },
-  //     })
-  //     .then(() => {
-  //       console.log(`user ${userId} removed successfully...`);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //       throw new Error(error);
-  //     });
-  // }
+  async addFriends(userId: number, friendId: number) {
+    this.logger.log(
+      `user id : ${userId} wants to update chatSocket: ${friendId}`,
+    );
+    await this.prisma
+      .$transaction([
+        this.prisma.user.update({
+          where: { id: userId },
+          data: { friend: { connect: { id: friendId } } },
+        }),
+        this.prisma.user.update({
+          where: { id: friendId },
+          data: { friend: { connect: { id: userId } } },
+        }),
+      ])
+      .then((user) => {
+        this.logger.log("addFriends success: ", user);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async removeFriends(userId: number, friendId: number) {
+    this.logger.log(
+      `user id : ${userId} wants to update chatSocket: ${friendId}`,
+    );
+    await this.prisma
+      .$transaction([
+        this.prisma.user.update({
+          where: { id: userId },
+          data: { friend: { disconnect: { id: friendId } } },
+        }),
+        this.prisma.user.update({
+          where: { id: friendId },
+          data: { friend: { disconnect: { id: userId } } },
+        }),
+      ])
+      .then((user) => {
+        this.logger.log("addFriends success: ", user);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async addBlocked(userId: number, blockedId: number) {
+    this.logger.log(
+      `user id : ${userId} wants to update chatSocket: ${blockedId}`,
+    );
+    await this.prisma
+      .$transaction([
+        this.prisma.user.update({
+          where: { id: userId },
+          data: { blocked: { connect: { id: blockedId } } },
+        }),
+        this.prisma.user.update({
+          where: { id: blockedId },
+          data: { blocked: { connect: { id: userId } } },
+        }),
+      ])
+      .then((user) => {
+        this.logger.log("addBlocked success: ", user);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async removeBlocked(userId: number, blockedId: number) {
+    this.logger.log(
+      `user id : ${userId} wants to update chatSocket: ${blockedId}`,
+    );
+    await this.prisma
+      .$transaction([
+        this.prisma.user.update({
+          where: { id: userId },
+          data: { blocked: { disconnect: { id: blockedId } } },
+        }),
+        this.prisma.user.update({
+          where: { id: blockedId },
+          data: { blocked: { disconnect: { id: userId } } },
+        }),
+      ])
+      .then((user) => {
+        this.logger.log("addBlocked success: ", user);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
 }

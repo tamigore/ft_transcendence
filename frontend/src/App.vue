@@ -110,10 +110,9 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { server } from "@/utils/helper";
 import router from './router';
 import { useToast } from 'primevue/usetoast';
+import socket from './utils/socket';
 
 export default defineComponent({
-  components: {
-  },
   data() {
     return {
       items : ref([
@@ -149,9 +148,6 @@ export default defineComponent({
       toast: useToast(),
     };
   },
-  mounted() {
-    console.log("APP mounted");
-  },
   methods : {
     async LogoutPost() {
         axios.defaults.baseURL = server.nestUrl;
@@ -182,10 +178,14 @@ export default defineComponent({
     if (store_item) {
       store.replaceState(Object.assign({}, store.state, JSON.parse(store_item)));
     }
-    window.addEventListener('beforeunload', () => { sessionStorage.setItem('store', JSON.stringify(store.state)); });
-  },
-  unmounted() {
-    console.log("App unmounted, user is log ? ", store.state.user.loggedIn);
+    window.addEventListener('beforeunload', () => {
+      sessionStorage.setItem('store', JSON.stringify(store.state));
+      socket.disconnect();
+    });
+    if (!socket.connected && store.state.user.loggedIn) {
+      socket.connect();
+      store.commit("setChatSocket", socket.id);
+    }
   },
 });
 </script>

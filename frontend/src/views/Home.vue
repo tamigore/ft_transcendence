@@ -1,6 +1,6 @@
 <template>
-  <div class="flex h-screen w-screen">
-    <div class="grid h-screen w-screen grid-nogutter surface-section text-800">
+  <div class="flex h-screen w-screen myBackground">
+    <div class="grid h-full w-full grid-nogutter surface-section text-800 myBackground">
       <div class="h-screen col-12 md:col-6 p-6 text-center md:text-left flex align-items-center myBackground">
         <section class="box-shadow" style="margin: 12%;">
           <section class="flex flex-column">

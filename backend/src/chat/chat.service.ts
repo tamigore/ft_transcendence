@@ -57,6 +57,9 @@ export class ChatService {
       where: {
         roomId: roomId,
       },
+      include: {
+        user: true,
+      },
     });
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;

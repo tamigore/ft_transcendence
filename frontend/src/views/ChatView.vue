@@ -1,7 +1,5 @@
 <template>
-	<div>
-		<ChatDisplay/>
-	</div>
+	<ChatDisplay/>
 </template>
 
 <script lang="ts">

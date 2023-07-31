@@ -2,7 +2,6 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import Home from '@/views/Home.vue';
 import Profile from '@/views/Profile.vue';
 import Pong from '@/views/Pong.vue';
-// import NotFound from '@/views/404notFound.vue';
 import Chat from '@/views/ChatView.vue';
 import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
@@ -49,6 +48,7 @@ router.beforeEach(async (to, from) => {
       store.commit("setUser", response.data);
       if (!socket.connected) {
         socket.connect();
+        store.commit("setChatSocket", socket.id);
       }
     })
     .catch((error: AxiosError) => {
@@ -56,22 +56,10 @@ router.beforeEach(async (to, from) => {
       throw new Error("router get user failed: " + error);
     })
   }
-  // if (to.name === 'home' && store.state.user.loggedIn)
-  //   console.log("going to home (localhost:8080/) and stil connected...");
-  // if (to.name === 'home' && !store.state.user.loggedIn)
-  // {
-  //   if (socket.connected)
-  //   {
-  //     console.log("Should not be connected");
-  //     socket.disconnect();
-  //   }
-  //   console.log("going to home (localhost:8080/) and not connected !");
-  // }
   if (
     !store.state.user.loggedIn &&
     to.name !== 'home'
   ) {
-    // redirect the user to the login page
     return { path: '/' };
   }
 })

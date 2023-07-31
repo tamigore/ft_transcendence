@@ -53,9 +53,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   findUser(@Param("id") param: string): Promise<User> {
-    console.log(param);
     const id = parseInt(param);
-    console.log(id);
     return this.userService.findById(id);
   }
 
@@ -63,11 +61,9 @@ export class UserController {
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  findPrivate(@Param("id") param: string): Promise<User[]> {
-    console.log(param);
+  findAllButSelf(@Param("id") param: string): Promise<User[]> {
     const id = parseInt(param);
-    console.log(id);
-    return this.userService.findPrivate(id);
+    return this.userService.findAllButSelf(id);
   }
 
   // // @Public()
