@@ -61,22 +61,4 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room: body.room,
     });
   }
-
-//   // @UseGuards(WsThrottlerGuard)
-//   // @UsePipes(new ZodValidationPipe(JoinRoomSchema))
-//   // @UseGuards(WsGuard)
-//   @SubscribeMessage("join_room")
-//   async onJoinRoom(
-//     @MessageBody()
-//     payload: JoinRoom,
-//   ): Promise<boolean> {
-//     this.logger.log(`${payload.user.username} is joining ${payload.room.name}`);
-//     const user = await this.userService.findById(payload.user.id);
-//     if (!user) throw new Error("onJoinRoom no user found");
-//     let room = await this.roomService.findById(payload.room.id);
-//     if (!room) room = await this.roomService.createRoom(payload.room);
-//     this.server.in(user.gameSocket).socketsJoin(room.name);
-//     await this.roomService.addUser(room.id, user.id);
-//     return true;
-//   }
 }

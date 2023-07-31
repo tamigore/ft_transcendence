@@ -5,37 +5,27 @@ import {
   HttpStatus,
   Post,
   Get,
+  Param,
 } from "@nestjs/common";
-import { HistoricService } from "./historic.service";
+import { HistoricService } from "../historic/historic.service";
+import { GameService } from "./game.service";
 import { Public } from "../common/decorators";
-import { Historic } from "@prisma/client";
+import { Historic, Game } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { Matchamker } from "./dto";
 
-@Controller("historic")
+@Controller("game")
 export class GameController {
   constructor(
     private historicService: HistoricService,
+    private gameService: GameService,
     private prismaService: PrismaService,
   ) {}
 
   @Public()
-  @Get("ID")
+  @Post("matchmaker")
   @HttpCode(HttpStatus.OK)
-  getGameFromId(@Body() dto: Historic) {
-    return this.historicService.getGameByGameId(dto);
-  }
-
-  @Public()
-  @Post("ID")
-  @HttpCode(HttpStatus.OK)
-  setGameFromId(@Body() dto: Historic) {
-    return this.historicService.setGameByGameId(dto);
-  }
-
-  @Public()
-  @Get("Games")
-  @HttpCode(HttpStatus.OK)
-  getGamesHistoric(@Body() dto: Historic): Promise<Historic[]> {
-    return this.historicService.getGamesByPlayerId(dto);
+  setGameFromId(@Body() dto: Matchamker): Promise<Game> {
+    return this.gameService.matchMaker(dto);
   }
 }

@@ -182,7 +182,7 @@ export default defineComponent({
     if (store_item) {
       store.replaceState(Object.assign({}, store.state, JSON.parse(store_item)));
     }
-    window.addEventListener('beforeunload', () => { sessionStorage.setItem('store', JSON.stringify(store.state)); });
+    window.addEventListener('beforeunload', () => { sessionStorage.setItem('store', JSON.stringify(store.state));});
   },
   unmounted() {
     console.log("App unmounted, user is log ? ", store.state.user.loggedIn);

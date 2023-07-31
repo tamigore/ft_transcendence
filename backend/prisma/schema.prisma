@@ -64,8 +64,8 @@ model Game {
   name        String
   player1Id   Int
   player1     User      @relation(name: "player1", fields: [player1Id], references: [id])
-  player2Id   Int
-  player2     User      @relation(name: "player2", fields: [player2Id], references: [id])
+  player2Id   Int?
+  player2     User?     @relation(name: "player2", fields: [player2Id], references: [id])
   spectator   User[]    @relation(name: "spectator")
   historic    Historic?
   @@map("games")

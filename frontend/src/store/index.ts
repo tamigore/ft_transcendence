@@ -9,10 +9,41 @@ const store = createStore({
         rooms: [{}] as Room[],
         connected: false as boolean,
         ingame: false as boolean,
+        gameParam: {
+            multi: false as boolean,
+            boxe: false as boolean,
+            solo: false as boolean,
+            wall: false as boolean,
+            noPlayer: false as boolean,
+            score: [0, 0] as number[],
+        },
         last_room: {} as Room,
         last_message: {} as Message,
     },
     mutations: {
+        setGame : function (state, game: Game) {
+            state.game = game;
+        },
+        setGameParam : function (state, gameParam: {
+            multi: boolean,
+            boxe: boolean,
+            solo: boolean,
+            wall: boolean,
+            noPlayer: boolean,
+            score: number[],
+        }) {
+            state.gameParam = gameParam;
+        },
+        resetGameParam : function (state) {
+            state.gameParam = {
+                multi: false as boolean,
+                boxe: false as boolean,
+                solo: false as boolean,
+                wall: false as boolean,
+                noPlayer: false as boolean,
+                score: [0, 0] as number[],
+            }
+        },
         setChatConnect : function (state, chatConnect: boolean) {
             state.connected = chatConnect;
         },

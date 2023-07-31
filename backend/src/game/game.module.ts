@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { HistoricService } from "./historic.service";
+import { HistoricService } from "../historic/historic.service";
 import { GameController } from "./game.controller";
 import { GameGateway } from "./game.gateway"
 import { GameService } from "./game.service"

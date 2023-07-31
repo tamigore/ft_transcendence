@@ -1,68 +1,68 @@
 /* eslint-disable prettier/prettier */
-import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { Game } from "@prisma/client";
+import { Matchamker } from "./dto";
 
 @Injectable()
 export class GameService {
   private logger: Logger = new Logger("GameService");
   constructor(private prisma: PrismaService) {}
   
-  async getGamesByPlayerId(body: any) : Promise<Game[]> {
-    let userId = 0;
-    userId = + body.id;
-    const messages = await this.prisma.game.findMany({
-      where: {
-        OR: [
-            {
-                player1Id: userId,
-            },
-            {
-                player2Id: userId,
-            },
-        ],
-      }
-    });
-    if (!messages) throw new ForbiddenException("Access Denied");
-    return messages;
-  }
-
-  async getGameByGameId(body: any) : Promise<Game> {
-      let id = 0;
-      id = + body.id;
-    const message = await this.prisma.game.findUnique({
-      where: {
-        id: id ,
-      }
-    });
-    if (!message) throw new ForbiddenException("Access Denied");
-    return message;
-  }
-
-  async setGameByGameId(body: any) : Promise<void> {
-    let winnerID = 0;
-    winnerID = + body.winnerID;
-    let looserID = 0;
-    looserID = + body.looserID;
-
-    await this.prisma.game
-      .create({
-        data: {
-			name: "Game data",
-          player1: {
-            connect: {
-              id: winnerID,
-            },
-          },
-          player2: {
-            connect: {
-              id: looserID,
-            },
-          },
+  async matchMaker(dto: Matchamker): Promise<Game>
+  {
+    console.log(`typeof ${typeof(dto.userId)}`);
+    const game = await this.prisma.$transaction(async () => {
+      const game = await this.prisma.game.findFirst({
+        where: {
+          player2: { is: null },
         },
       })
-      .catch((error: any) => {
-        this.logger.log("", error)
-      });
-    }
+      if (!game) {
+        this.logger.log(`no game found creating game: ${dto.userId} ... type ${typeof(dto.userId)}`);
+        return await this.prisma.game.create({
+          data: {
+            name: "game",
+            player1: {
+              connect: {
+                id: parseInt(dto.userId),
+              }
+            }
+          },
+          include: {
+            player1: true,
+            player2: true,
+          }
+        })
+      }
+      else {
+        return await this.prisma.game.update({
+          where: {
+            id: game.id,
+          },
+          data: {
+            player2: {
+              connect: {
+                id: parseInt(dto.userId),
+              }
+            }
+          },
+          include: {
+            player1: true,
+            player2: true,
+          }
+        })
+      }
+    })
+    .then((game) => {
+      this.logger.log(game)
+      return game;
+    })
+    .catch((error) => {
+      throw error;
+    });
+    return game;
+  }
+
+  
 }
