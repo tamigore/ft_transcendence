@@ -205,9 +205,6 @@ export class RoomService implements OnModuleInit {
             owner: {
               disconnect: true,
             },
-            messages: {
-              set: [], // TODO: remove without "The change you are trying to make would violate the required relation 'MessageToRoom' between the `Message` and `Room` models."
-            },
           },
         }),
         this.prisma.room.delete({

@@ -15,42 +15,44 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  email       String   @unique
-  username    String   @unique
-  hash        String   @unique
-  hashRt      String?
-  chatSocket  String?
-  gameSocket  String?
-  loggedIn    Boolean   @default(false)
-  bio         String?
-  img         String? //Path to img src
-  friend      User[]    @relation("UserFriend")
-  friendBy    User[]    @relation("UserFriend")
-  blocked     User[]    @relation("UserBlocked")
-  blockedBy   User[]    @relation("UserBlocked")
-  owner       Room[]    @relation(name: "owner")
-  admin       Room[]    @relation(name: "admin")
-  rooms       Room[]    @relation(name: "users")
-  messages    Message[]
-  player1     Game[]     @relation(name: "player1")
-  player2     Game[]     @relation(name: "player2")
-  spectator   Game[]     @relation(name: "spectator")
-  win         Historic[] @relation(name: "winner")
-  loose       Historic[] @relation(name: "looser")
+  email      String     @unique
+  username   String     @unique
+  hash       String     @unique
+  hashRt     String?
+  chatSocket String?
+  gameSocket String?
+  loggedIn   Boolean    @default(false)
+  bio        String?
+  img        String? //Path to img src
+  friend     User[]     @relation("UserFriend")
+  friendBy   User[]     @relation("UserFriend")
+  blocked    User[]     @relation("UserBlocked")
+  blockedBy  User[]     @relation("UserBlocked")
+  owner      Room[]     @relation(name: "owner")
+  admin      Room[]     @relation(name: "admin")
+  rooms      Room[]     @relation(name: "users")
+  messages   Message[]
+  player1    Game[]     @relation(name: "player1")
+  player2    Game[]     @relation(name: "player2")
+  spectator  Game[]     @relation(name: "spectator")
+  win        Historic[] @relation(name: "winner")
+  loose      Historic[] @relation(name: "looser")
+
   @@map("users")
 }
 
 model Historic {
-  id          Int      @id @default(autoincrement())
-  created_at  DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
 
-  winnerID    Int
-  winner      User     @relation(name: "winner", fields: [winnerID], references: [id])
-  looserID    Int
-  looser      User     @relation(name: "looser", fields: [looserID], references: [id])
-  score       String
-  gameId      Int      @unique
-  game        Game     @relation(fields: [gameId], references: [id])
+  winnerID Int
+  winner   User   @relation(name: "winner", fields: [winnerID], references: [id])
+  looserID Int
+  looser   User   @relation(name: "looser", fields: [looserID], references: [id])
+  score    String
+  gameId   Int    @unique
+  game     Game   @relation(fields: [gameId], references: [id])
+
   @@map("historics")
 }
 
@@ -58,13 +60,14 @@ model Game {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  name        String
-  player1Id   Int
-  player1     User      @relation(name: "player1", fields: [player1Id], references: [id])
-  player2Id   Int
-  player2     User      @relation(name: "player2", fields: [player2Id], references: [id])
-  spectator   User[]    @relation(name: "spectator")
-  historic    Historic?
+  name      String
+  player1Id Int
+  player1   User      @relation(name: "player1", fields: [player1Id], references: [id])
+  player2Id Int
+  player2   User      @relation(name: "player2", fields: [player2Id], references: [id])
+  spectator User[]    @relation(name: "spectator")
+  historic  Historic?
+
   @@map("games")
 }
 
@@ -72,25 +75,27 @@ model Message {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  text      String
-  roomId    Int
-  room      Room     @relation(fields: [roomId], references: [id])
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  text   String
+  roomId Int
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("messages")
 }
 
 model Room {
-  id         Int        @id @default(autoincrement())
-  created_at DateTime   @default(now())
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
 
   name        String
   private     Boolean   @default(false)
   ownerId     Int?
-  owner       User?     @relation(name: "owner", fields: [ownerId], references: [id])
+  owner       User?     @relation(name: "owner", fields: [ownerId], references: [id], onDelete: SetNull)
   admins      User[]    @relation(name: "admin")
   users       User[]    @relation(name: "users")
   messages    Message[]
   description String?
+
   @@map("rooms")
 }

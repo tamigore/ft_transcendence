@@ -30,23 +30,26 @@
       </div>
       <div class="flex flex-row flex-wrap col">
         <TabView>
-          <TabPanel header="Romms">
+          <TabPanel header="Rooms">
             <div class="flex flex-column flex-wrap col-4 w-full" style="height: 70vh;">
               <div v-for="Room in Rooms" :key="Room.id" class="p-2">
-                <div class="flex flex-row" v-bind:class="[Room.id == selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']" v-on:click="selectSet(Room)">
-                  <div class="flex flex-row">
-                    {{ Room.name }}
-                  </div>
-                  <div class="flex flex-row">
-                    <Button label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
-                    <Button label="Join" severity="success" raised v-if="!isUserInRoom(Room)" @click="joinRoom(Room)" />
-                    <Button label="Leave" severity="warning" raised v-if="isUserInRoom(Room)" @click="leaveRoom(Room)" />
+                <div class="flex flex-row flex-grow-1" v-bind:class="[Room.id == selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']" v-on:click="selectSet(Room)">
+                  <div class="grid">
+                    <div class="col-4">
+                      {{ Room.name }}
+                    </div>
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                      <Button label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
+                      <Button label="Join" severity="success" raised v-if="!isUserInRoom(Room)" @click="joinRoom(Room)" />
+                      <Button label="Leave" severity="warning" raised v-if="isUserInRoom(Room)" @click="leaveRoom(Room)" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </TabPanel>
-          <TabPanel header="Users">
+          <TabPanel header="Private Message">
             <div class="flex flex-column flex-wrap col-4 w-full"  style="height: 70vh;">
               <div v-for="User in Users" :key="User.id" class="p-2">
                 <div class="flex flex-row" v-bind:class="[User.id == selectedUser.id  ? 'box-shadow' : 'box-shadow-dark']" v-on:click="selectUser(User)">
@@ -240,7 +243,7 @@ export default defineComponent({
       try {
         if (!room || !room.users)
           return false;
-        const user = room.users.find(user => user.id == store.state.user.id);
+        const user = room.users.find(user => user.id === store.state.user.id);
         if (user)
           return true;
         return false;
