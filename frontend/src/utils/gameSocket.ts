@@ -1,11 +1,12 @@
 import { io, Socket } from "socket.io-client";
 import { server } from "@/utils/helper";
-import { User, Game , GameMove} from "./interfaces"
+import { User, Game , GameMove, BallState, PaddleState} from "./interfaces"
 
 export interface ServerToClientEvents {
 
 
   servMessage(e: GameMove): void;
+  pongMessage(e: {ballInfo: BallState; PaddleInfo: PaddleState}): void;
 
 }
 
@@ -13,7 +14,7 @@ export interface ClientToServerEvents {
 
 
   gameMessage(e: GameMove): void;
-
+  pingMessage((e: {ballInfo: BallState; PaddleInfo: PaddleState}): void;
   join_game: (e: { user: User; game: Game }) => void;
 }
 

@@ -157,7 +157,7 @@ import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import store from "@/store";
 import socket from "@/utils/gameSocket"
-import { GameMove } from "@/utils/interfaces"
+import { GameMove, BallState, PaddleState } from "@/utils/interfaces"
 import {
   SetPongWidth,
   SetPongHeight,
@@ -318,10 +318,34 @@ class BallClass {
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         if (this.veloY > 0)
           console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2) + "\n");
+        // this.sendBallPaddle(paddleY, player);
         return true;
       }
     }
     return false;
+  }
+
+  sendBallPaddle = (paddleY: number) => {
+    if (store.state.ingame)
+      {
+        console.log("OKKKKKK gameLoop socket = ", socket.id);
+        socket.emit("gameMessage",
+        {
+         BallState:
+          {
+            ballX: this.x,
+            ballY: this.y,
+            ballVeloX: this.veloX,
+            ballVeloY: this.veloY,
+          } as BallState,
+          PaddleState:
+          {
+            player: 0,
+            posY: paddleY,
+          } as PaddleState,
+                  
+        });
+      }
   }
 
   ballBlockColision = () => {
@@ -398,6 +422,8 @@ class BallClass {
     //  this.pong.alreadyComputed = this.preColision();
     return this;
   }
+
+
 
 }
 
@@ -751,7 +777,7 @@ export class PongGameClass {
   handleKeyOnline = (player:number, up:boolean, key:number) =>
   {
     if (up)
-      this.onlineKeyDown(player, key);
+      this.onlineKeyUp(player, key);
     else
       this.onlineKeyDown(player, key);
   }

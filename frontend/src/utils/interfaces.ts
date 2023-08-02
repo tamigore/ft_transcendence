@@ -40,6 +40,20 @@ export interface GameMove {
   key: number;
 }
 
+export interface BallState
+  {
+    ballX: number,
+    ballY: number,
+    ballVeloX: number,
+    ballVeloY: number,
+  }
+
+  export interface PaddleState
+  {
+    player: number,
+    posY: number,
+  }
+
 export interface Play {
 	player1up: boolean;
 	player1down: boolean;

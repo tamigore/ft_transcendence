@@ -42,13 +42,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
     this.logger.log("onMessage");
     this.logger.debug("ICI body: ", body, "ConnectedSocket: ", client.id);
-    console.log("EMIIIIIIT");
-    this.server.emit("servMessage", 
-      {
-        player: 0,
-        up: 0,
-        key: 1,
-      } as GameMove
-    );
+    this.server.emit("servMessage", body);
+  }
+
+  @SubscribeMessage("pingMessage")
+  async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
+    this.logger.log("onMessage");
+    this.logger.debug("HitMEssage body: ", body, "ConnectedSocket: ", client.id);
+    this.server.emit("pongMessage", body);
   }
 }
