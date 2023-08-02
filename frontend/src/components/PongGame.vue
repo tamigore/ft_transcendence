@@ -157,7 +157,7 @@ import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import store from "@/store";
 import socket from "@/utils/gameSocket"
-import { GameMove, BallState, PaddleState } from "@/utils/interfaces"
+import { GameMove, /* BallState, PaddleState */} from "@/utils/interfaces"
 import {
   SetPongWidth,
   SetPongHeight,
