@@ -34,8 +34,10 @@ export interface Game {
 }
 
 export interface GameMove {
-  player1: number,
-  player2: number,
+  player: number,
+
+  up: boolean;
+  key: number;
 }
 
 export interface Play {

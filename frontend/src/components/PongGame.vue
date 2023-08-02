@@ -746,93 +746,113 @@ export class PongGameClass {
 
   /*******************Keys handelers*******************/
 
-  handleKeyUp = (event: KeyboardEvent) => {
-    if (store.state.ingame && store.state.game.name)
-      this.onlineKeyUp(event);
-    this.offlineKeyUp(event);
-  };
+  
 
-  handleKeyDown = (event: KeyboardEvent) => {
-    if (store.state.ingame && store.state.game.name)
-      this.onlineKeyDown(event);
-    this.offlineKeyDown(event);
-  };
+  handleKeyOnline = (player:number, up:boolean, key:number) =>
+  {
+    if (up)
+      this.onlineKeyDown(player, key);
+    else
+      this.onlineKeyDown(player, key);
+  }
 
-  handleKeyDownOnline = (player1:number, player2:number) => {
-    console.log("YSplayer1 : " + player1 + " YSplayer2 : " + player2);
-    if (player1 != 0)
+  onlineKeyDown = (player:number, key:number) => {
+    if (player == 0)
     {
-      if (player1 == 1)
+      if (key == 1)
         this.leftArrowUp = 1;
-      else if (player1 == 2)
+      else if (key == 0)
         this.leftArrowDown = 1;
     }
-    else if (player2 != 0)
+    else if (player == 1)
     {
-      if (player2 == 1)
-        this.rightArrowUp = 1;
-      else if (player2 == 2)
-        this.rightArrowDown = 1;
+      if (key == 1)
+        this.leftArrowUp = 1;
+      else if (key == 0)
+        this.leftArrowDown = 1;
     }
   }
 
-  offlineKeyDown = (event: KeyboardEvent) => {
+  onlineKeyUp = (player:number, key:number) => {
+    if (player == 0)
+    {
+      if (key == 1)
+        this.leftArrowUp = 0;
+      else if (key == 0)
+        this.leftArrowDown = 0;
+    }
+    else if (player == 1)
+    {
+      if (key == 1)
+        this.leftArrowUp = 0;
+      else if (key == 0)
+        this.leftArrowDown = 0;
+    }
+  }
+
+  sendKey = (_player:number, _up:boolean, _key:number) =>
+  {
     if (store.state.ingame)
       {
         console.log("OKKKKKK gameLoop socket = ", socket.id);
         socket.emit("gameMessage",  {
-            player1: 1,
-            player2: -1,
+            player: _player,
+            up: _up,
+            key: _key,
           } as  GameMove);
       }
+  }
+
+  handleKeyDown = (event: KeyboardEvent) => {
+   
     if (event.key === this.leftPlayerKeyUp)
+    {
       this.leftArrowUp = 1;
+      this.sendKey(0, false, 1);
+    }
     else if (event.key === this.leftPlayerKeyDown)
+    {
       this.leftArrowDown = 1;
+      this.sendKey(0, false, 0);
+    }
     else if (event.key === this.rightPlayerKeyUp)
+     { 
       this.rightArrowUp = 1;
+      this.sendKey(1, false, 1);
+     }
     else if (event.key === this.rightPlayerKeyDown)
-      this.rightArrowDown = 1;
+    {
+        this.rightArrowDown = 1;
+        this.sendKey(1, false, 0);
+    }
   }
 
-  onlineKeyDown = (event: KeyboardEvent) => {
-    console.log("onlineKeyDown");
-    if (event.key === this.leftPlayerKeyUp)
-      socket.emit("up", { user: store.state.user, game: store.state.game[0] });
-    else if (event.key === this.leftPlayerKeyDown)
-      socket.emit("down", { user: store.state.user, game: store.state.game[0] });
-    socket.on("up", () => {
-      this.rightArrowUp = 1;
-    });
-    socket.on("down", () => {
-      this.rightArrowDown = 1;
-    });
-  }
 
-  offlineKeyUp = (event: KeyboardEvent) => {
+
+  handleKeyUp = (event: KeyboardEvent) => {
     if (event.key === this.leftPlayerKeyUp)
+    {
       this.leftArrowUp = 0;
+      this.sendKey(0, true, 1);
+    }
     else if (event.key === this.leftPlayerKeyDown)
+    {
       this.leftArrowDown = 0;
-
+      this.sendKey(0, true, 0);
+    }
     if (event.key === this.rightPlayerKeyUp)
+    {
       this.rightArrowUp = 0;
-    else if (event.key === this.rightPlayerKeyDown)
+      this.sendKey(1, true, 1);
+    }
+      else if (event.key === this.rightPlayerKeyDown)
+    {
       this.rightArrowDown = 0;
+      this.sendKey(1, true, 0);
+    }
   }
 
-  onlineKeyUp = (event: KeyboardEvent) => {
-    if (event.key === this.leftPlayerKeyUp)
-      socket.emit("upNo", { user: store.state.user, game: store.state.game });
-    else if (event.key === this.leftPlayerKeyDown)
-      socket.emit("downNo", { user: store.state.user, game: store.state.game });
-    socket.on("upNo", () => {
-      this.rightArrowUp = 0;
-    });
-    socket.on("downNo", () => {
-      this.rightArrowDown = 0;
-    });
-  }
+ 
 
   
 
@@ -1038,7 +1058,7 @@ export default defineComponent({
         console.log("ingame de socket on");
         socket.on("servMessage", (e:GameMove ) => {
           console.log("aaaaaaaaaservMessage socket = ", socket.id);
-          Pong.value.handleKeyDownOnline(e.player1, e.player2);
+          Pong.value.handleKeyOnline(e.player, e.up, e.key);
         });
         
     }

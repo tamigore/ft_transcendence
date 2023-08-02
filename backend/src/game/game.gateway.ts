@@ -45,8 +45,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log("EMIIIIIIT");
     this.server.emit("servMessage", 
       {
-        player1: 1,
-        player2: -1,
+        player: 0,
+        up: 0,
+        key: 1,
       } as GameMove
     );
   }
