@@ -14,7 +14,7 @@ export interface ClientToServerEvents {
 
 
   gameMessage(e: GameMove): void;
-  pingMessage((e: {ballInfo: BallState; PaddleInfo: PaddleState}): void;
+  pingMessage(e: {ballInfo: BallState; PaddleInfo: PaddleState}): void;
   join_game: (e: { user: User; game: Game }) => void;
 }
 
