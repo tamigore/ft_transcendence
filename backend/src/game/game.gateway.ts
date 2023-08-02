@@ -46,7 +46,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage("pingMessage")
-  async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
+  async onPong(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
     this.logger.log("onMessage");
     this.logger.debug("HitMEssage body: ", body, "ConnectedSocket: ", client.id);
     this.server.emit("pongMessage", body);

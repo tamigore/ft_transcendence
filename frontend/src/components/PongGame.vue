@@ -318,7 +318,7 @@ class BallClass {
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         if (this.veloY > 0)
           console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2) + "\n");
-        // this.sendBallPaddle(paddleY, player);
+        this.sendBallPaddle(paddleY, player);
         return true;
       }
     }
@@ -329,7 +329,7 @@ class BallClass {
     if (store.state.ingame)
       {
         console.log("OKKKKKK gameLoop socket = ", socket.id);
-        socket.emit("gameMessage",
+        socket.emit("pingMessage"
         {
          BallState:
           {
