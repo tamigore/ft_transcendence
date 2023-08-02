@@ -793,9 +793,9 @@ export class PongGameClass {
     else if (player == 1)
     {
       if (key == 1)
-        this.leftArrowUp = 1;
+        this.rightArrowUp = 1;
       else if (key == 0)
-        this.leftArrowDown = 1;
+        this.rightArrowDown = 1;
     }
   }
 
