@@ -18,6 +18,8 @@
       <button @click="Pong.startWall" :disabled="Pong.gameIsRunning">WALL</button>
       <button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</button>
       <button @click="Pong.setBlocks" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</button>
+
+      
     </div>
     <div class="pong-container">
 
@@ -155,6 +157,7 @@ import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import store from "@/store";
 import socket from "@/utils/gameSocket"
+import { GameMove } from "@/utils/interfaces"
 import {
   SetPongWidth,
   SetPongHeight,
@@ -188,6 +191,7 @@ import {
   setLeftPaddleColor,
 
 } from './PongSettings';
+
 
 
 /*******************EffectBlock*******************/
@@ -258,7 +262,7 @@ class BallClass {
   hp: number;
   pong: PongGameClass;
 
-  constructor(pong: PongGameClass, hitSound, x: number, y: number, veloX: number, veloY: number, radius: number, color: string, hp?: number) {
+  constructor(pong: PongGameClass, x: number, y: number, veloX: number, veloY: number, radius: number, color: string, hp?: number) {
     this.x = x;
     this.y = y;
     this.veloX = veloX;
@@ -314,7 +318,6 @@ class BallClass {
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         if (this.veloY > 0)
           console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2) + "\n");
-        this.hitSound();
         return true;
       }
     }
@@ -458,16 +461,16 @@ export class PongGameClass {
   inertie: number[];
   wallIsUp: boolean;
   veloDiv: number;
-  audioContext: AudioContext;
-  audioBuffer: null;
+  // audioContext: AudioContext;
+  // audioBuffer: null;
 
 
-  constructor(hitSound) {
+  constructor() {
 
     //AUDIO
 
-    this.audioContext = new window.AudioContext();
-    this.audioBuffer = null;
+    // this.audioContext = new window.AudioContext();
+    // this.audioBuffer = null;
     //GAME PARAMETERS
     this.width = SetPongWidth;
     this.height = SetPongHeight;
@@ -552,13 +555,16 @@ export class PongGameClass {
     this.veloDiv = setVeloDiv;
 
 
-    this.theBall = new BallClass(this, hitSound, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
+    this.theBall = new BallClass(this, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
   }
 
 
 
   /***********************re-START GAME***********************/
-  
+    LeaveGame() {
+      store.commit("setGameConnect", false);
+    }
+    
   startMatchSolo() {
     this.restartMatch(true, true);
   }
@@ -741,20 +747,44 @@ export class PongGameClass {
   /*******************Keys handelers*******************/
 
   handleKeyUp = (event: KeyboardEvent) => {
-    if (store.state.game && store.state.game.name)
+    if (store.state.ingame && store.state.game.name)
       this.onlineKeyUp(event);
-    else
-      this.offlineKeyUp(event);
+    this.offlineKeyUp(event);
   };
 
   handleKeyDown = (event: KeyboardEvent) => {
-    if (store.state.game && store.state.game.name)
+    if (store.state.ingame && store.state.game.name)
       this.onlineKeyDown(event);
-    else
-      this.offlineKeyDown(event);
+    this.offlineKeyDown(event);
   };
 
+  handleKeyDownOnline = (player1:number, player2:number) => {
+    console.log("YSplayer1 : " + player1 + " YSplayer2 : " + player2);
+    if (player1 != 0)
+    {
+      if (player1 == 1)
+        this.leftArrowUp = 1;
+      else if (player1 == 2)
+        this.leftArrowDown = 1;
+    }
+    else if (player2 != 0)
+    {
+      if (player2 == 1)
+        this.rightArrowUp = 1;
+      else if (player2 == 2)
+        this.rightArrowDown = 1;
+    }
+  }
+
   offlineKeyDown = (event: KeyboardEvent) => {
+    if (store.state.ingame)
+      {
+        console.log("OKKKKKK gameLoop socket = ", socket.id);
+        socket.emit("gameMessage",  {
+            player1: 1,
+            player2: -1,
+          } as  GameMove);
+      }
     if (event.key === this.leftPlayerKeyUp)
       this.leftArrowUp = 1;
     else if (event.key === this.leftPlayerKeyDown)
@@ -766,6 +796,7 @@ export class PongGameClass {
   }
 
   onlineKeyDown = (event: KeyboardEvent) => {
+    console.log("onlineKeyDown");
     if (event.key === this.leftPlayerKeyUp)
       socket.emit("up", { user: store.state.user, game: store.state.game[0] });
     else if (event.key === this.leftPlayerKeyDown)
@@ -914,15 +945,15 @@ export default defineComponent({
     const { fps } = useFPS();
     
     const hitSound = ref(null);
-    const Pong = ref(new PongGameClass(hitSound));
+    const Pong = ref(new PongGameClass());
 
-    const loadSound = (url) => {
-    return new Promise((resolve, reject) => {
-    const audio = new Audio(url);
-    audio.addEventListener("canplaythrough", () => resolve(audio));
-    audio.addEventListener("error", (error) => reject(error));
-  });
-}
+//     const loadSound = (url) => {
+//     return new Promise((resolve, reject) => {
+//     const audio = new Audio(url);
+//     audio.addEventListener("canplaythrough", () => resolve(audio));
+//     audio.addEventListener("error", (error) => reject(error));
+//   });
+// }
     
 
     /*******************Game Loop*******************/
@@ -946,6 +977,8 @@ export default defineComponent({
         ball.ballColision();
       }
     }
+
+
     
 
     /*******************Draw Functions*******************/
@@ -994,13 +1027,21 @@ export default defineComponent({
 
     /*******************Mounted and unMounted*******************/
 
-    onMounted(async () => {
-      try {
-        hitSound.value = await loadSound("@/assets/sounds/hitSound.wav");
-      } catch (error) {
-        console.error("Error loading sound:", error);
-      }
-
+    onMounted(() => {
+    //   try {
+    //     hitSound.value = await loadSound("@/assets/sounds/hitSound.wav");
+    //   } catch (error) {
+    //     console.error("Error loading sound:", error);
+    //   }
+      if (store.state.ingame)
+      {
+        console.log("ingame de socket on");
+        socket.on("servMessage", (e:GameMove ) => {
+          console.log("aaaaaaaaaservMessage socket = ", socket.id);
+          Pong.value.handleKeyDownOnline(e.player1, e.player2);
+        });
+        
+    }
       if (myCanvas.value) {
         ctx = myCanvas.value.getContext('2d');
         if (ctx) {
@@ -1037,6 +1078,7 @@ export default defineComponent({
       fps,
       hitSound,
     };
-  }
+  },
+
 });
 </script>

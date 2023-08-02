@@ -33,6 +33,11 @@ export interface Game {
 	historic: Historic,
 }
 
+export interface GameMove {
+  player1: number,
+  player2: number,
+}
+
 export interface Play {
 	player1up: boolean;
 	player1down: boolean;

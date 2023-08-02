@@ -8,6 +8,7 @@
     <div>
       <Button @click="SearchGame()"> Multiplayer </Button>
       <Button @click="LaunchSingle()"> Single Player </Button>
+      <Button @click="LeaveGame()"> Leave game </Button>
 
       <div class="flex align-items-center justify-content-between mb-6">
         <div class="flex align-items-center text-indigo-300">
@@ -28,6 +29,7 @@ import { defineComponent } from 'vue';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import store from '@/store';
 import { server } from "@/utils/helper";
+import socket from '@/utils/gameSocket';
 
 export default defineComponent({
   name: "MatchMaking",
@@ -51,6 +53,7 @@ export default defineComponent({
           }
         })
         .then((response: AxiosResponse) => {
+          socket.connect();
           console.log(response);
           store.commit("setGameParam", {
             multi: true as boolean,
@@ -60,7 +63,8 @@ export default defineComponent({
             noPlayer: false as boolean,
             score: [0, 0] as number[],
           });
-          store.commit("setGameConnect", true);
+          if (response.data.player2)
+            store.commit("setGameConnect", true);
           store.commit("setGame", response.data);
         })
         .catch((error: AxiosError) => {
@@ -69,7 +73,10 @@ export default defineComponent({
     },
     LaunchSingle() {
       store.commit("setGameConnect", true);
-    }
+    },
+    LeaveGame() {
+      store.commit("setGameConnect", false);
+    },
   },
 });
 </script>

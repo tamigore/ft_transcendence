@@ -56,22 +56,11 @@ router.beforeEach(async (to, from) => {
       throw new Error("router get user failed: " + error);
     })
   }
-  // if (to.name === 'home' && store.state.user.loggedIn)
-  //   console.log("going to home (localhost:8080/) and stil connected...");
-  // if (to.name === 'home' && !store.state.user.loggedIn)
-  // {
-  //   if (socket.connected)
-  //   {
-  //     console.log("Should not be connected");
-  //     socket.disconnect();
-  //   }
-  //   console.log("going to home (localhost:8080/) and not connected !");
-  // }
   if (
+    store.state.user &&
     !store.state.user.loggedIn &&
     to.name !== 'home'
   ) {
-    // redirect the user to the login page
     return { path: '/' };
   }
 })

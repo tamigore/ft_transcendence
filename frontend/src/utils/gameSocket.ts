@@ -1,12 +1,15 @@
 import { io, Socket } from "socket.io-client";
 import { server } from "@/utils/helper";
-import { User, Game } from "./interfaces"
+import { User, Game , GameMove} from "./interfaces"
 
 export interface ServerToClientEvents {
   up: (e: { user: User, game: Game }) => void;
   down: (e: { user: User, game: Game }) => void;
   upNo: (e: { user: User, game: Game }) => void;
   downNo: (e: { user: User, game: Game }) => void;
+
+  servMessage(e: GameMove): void;
+
 }
 
 export interface ClientToServerEvents {
@@ -14,6 +17,9 @@ export interface ClientToServerEvents {
   down: (e: { user: User, game: Game }) => void;
   upNo: (e: { user: User, game: Game }) => void;
   downNo: (e: { user: User, game: Game }) => void;
+
+  gameMessage(e: GameMove): void;
+
   join_game: (e: { user: User; game: Game }) => void;
 }
 
