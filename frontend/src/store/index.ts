@@ -4,18 +4,36 @@ import { User, Room, Message } from '../utils/interfaces';
 const store = createStore({
     state: {
         user: {} as User,
-        messages: [{}] as Message[],
-        rooms: [{}] as Room[],
-        last_room: {} as Room,
-        last_message: {} as Message,
+        messages: [] as Message[],
+        rooms: [] as Room[],
+        private: [] as Room[],
+        lastRoom: {} as Room,
+        lastPrivate: {} as Room,
+        lastMessage: {} as Message,
     },
     mutations: {
+        addMessage : function (state, chatMessage: Message) {
+            state.messages.push(chatMessage);
+        },
+        setMessages : function (state, chatMessages: Message[]) {
+            state.messages = chatMessages;
+        },
+        setLastMessage : function (state, chatMessages: Message) {
+            state.lastMessage = chatMessages;
+        },
+        setLastPrivate: function (state, room: Room) {
+            console.log('setLastPrivate: ', room);
+            state.lastPrivate.id = room.id;
+            state.lastPrivate.name = room.name;
+            state.lastPrivate.ownerId = room.ownerId;
+            state.lastPrivate.description = room.description;
+        },
         setLastRoom: function (state, room: Room) {
             console.log('setLastRoom: ', room);
-            state.last_room.id = room.id;
-            state.last_room.name = room.name;
-            state.last_room.ownerId = room.ownerId;
-            state.last_room.description = room.description;
+            state.lastRoom.id = room.id;
+            state.lastRoom.name = room.name;
+            state.lastRoom.ownerId = room.ownerId;
+            state.lastRoom.description = room.description;
         },
         setRooms: function (state, rooms: Room[]) {
             console.log('setRooms: ', rooms);
@@ -25,6 +43,14 @@ const store = createStore({
             console.log('addRoom: ', room);
             state.rooms.push(room);
         },
+        setPrivate: function (state, rooms: Room[]) {
+            console.log('setRooms: ', rooms);
+            state.private = rooms;
+        },
+        addPrivate: function (state, room: Room) {
+            console.log('addRoom: ', room);
+            state.private.push(room);
+        },
         setUser: function (state, user: User) {
             console.log('setUser: ', user);
             state.user.id = user.id;
@@ -32,8 +58,6 @@ const store = createStore({
             state.user.updated_at = user.updated_at;
             state.user.email = user.email;
             state.user.username = user.username;
-            // state.user.hash = user.hash;
-            // state.user.hashRt = user.hashRt;
             state.user.chatSocket = user.chatSocket;
             state.user.gameSocket = user.gameSocket;
             state.user.loggedIn = user.loggedIn;
@@ -70,18 +94,6 @@ const store = createStore({
         },
         setBio : function (state, description: string) {
             state.user.bio = description;
-        },
-        addMessage : function (state, chatMessage: Message) {
-            state.messages.push(chatMessage);
-        },
-        // addMessageToRoom : function (state, chatMessage: Message) {
-        //     state.rooms.find(room => room.id === chatMessage.room.id)?.messages.push(chatMessage);
-        // },
-        setMessages : function (state, chatMessages: Message[]) {
-            state.messages = chatMessages;
-        },
-        setLastMessage : function (state, chatMessages: Message) {
-            state.last_message = chatMessages;
         },
     },
 })

@@ -38,12 +38,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("disconnecting")
   handleDisconnecting(@ConnectedSocket() client: Socket) {
-    // let message = {};
     client.rooms.forEach((room) => {
-      // message = {
-      //   text: `user ${client.id} left ${room}`,
-      // };
-      // this.server.to(room).emit("servMessage", message);
       this.logger.log(`disconnecting user ${client.id} from room ${room}`);
     });
   }
@@ -110,7 +105,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let room = await this.roomService.findById(payload.room.id);
     if (!room) room = await this.roomService.createRoom(payload.room);
     this.server.in(user.chatSocket).socketsLeave(room.name);
-    await this.roomService.removeUser(room.id, user.id);
+    await this.roomService.removeUser(room.id, user.id, user.id);
     return true;
   }
 }

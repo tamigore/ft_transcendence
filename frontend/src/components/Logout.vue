@@ -23,7 +23,8 @@ export default defineComponent ({
           store.commit("setLogged", false);
           store.commit("setUsername", "");
           store.commit("delUser", false);
-          socket.disconnect();
+          if (socket.connected)
+            socket.disconnect();
           console.log(store.state.user) // -> empty
           router.push("/");
       })

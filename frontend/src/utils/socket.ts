@@ -26,8 +26,10 @@ class SocketioChat {
       }
     );
     this.socket.on('servMessage', (msg: Message) => {
-      console.log(msg);
-      store.commit("setLastMessage", msg);
+      if (store.state.lastRoom.id === msg.room.id)
+        store.commit("addMessage", msg);
+      else
+        store.commit("setLastMessage", msg);
     });
   }
 }

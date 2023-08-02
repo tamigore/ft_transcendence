@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 import { Room, User } from "@prisma/client";
+import * as RoomTypes from "./dto/types";
 
 @Injectable()
 export class RoomService implements OnModuleInit {
@@ -25,12 +26,102 @@ export class RoomService implements OnModuleInit {
           },
         })
         .then((user) => {
-          this.logger.log("onModuleInit addUser success: ", user);
+          this.logger.log("onModuleInit create success: ", user);
         })
         .catch((error) => {
-          this.logger.error("onModuleInit addUser error: ", error);
+          this.logger.error("onModuleInit create error: ", error);
         });
     }
+  }
+
+  higherRights(
+    room: RoomTypes.RoomWithAll,
+    userId: number,
+    pawnId: number,
+  ): boolean {
+    if (
+      typeof room != "undefined" &&
+      room &&
+      typeof room.users != "undefined" &&
+      room.users &&
+      room.users.length &&
+      room.users.find((x: User) => x.id === pawnId) &&
+      ((room.owner && room.owner.id === userId) ||
+        (typeof room.admins != "undefined" &&
+          room.admins &&
+          room.admins.length &&
+          room.admins.find((x: User) => x.id == userId) &&
+          room.owner &&
+          room.owner.id &&
+          room.owner.id !== pawnId))
+    )
+      return true;
+    return false;
+  }
+
+  isOwner(room: RoomTypes.RoomWihtOwner, userId: number): boolean {
+    if (
+      typeof room != "undefined" &&
+      room &&
+      typeof room.owner != "undefined" &&
+      room.owner &&
+      room.owner.id &&
+      room.owner.id === userId
+    )
+      return true;
+    return false;
+  }
+
+  isAdmin(room: RoomTypes.RoomWithAdmins, userId: number): boolean {
+    if (
+      typeof room != "undefined" &&
+      room &&
+      typeof room.admins != "undefined" &&
+      room.admins &&
+      room.admins.length &&
+      room.admins.find((x: User) => x.id === userId)
+    )
+      return true;
+    return false;
+  }
+
+  isUser(room: RoomTypes.RoomWithUsers, userId: number): boolean {
+    if (
+      typeof room != "undefined" &&
+      room &&
+      typeof room.users != "undefined" &&
+      room.users &&
+      room.users.length &&
+      room.users.find((x: User) => x.id === userId)
+    )
+      return true;
+    return false;
+  }
+
+  isBan(room: RoomTypes.RoomWithBan, userId: number): boolean {
+    if (
+      typeof room != "undefined" &&
+      room &&
+      typeof room.ban != "undefined" &&
+      room.ban &&
+      room.ban.length &&
+      room.ban.find((x: User) => x.id === userId)
+    )
+      return true;
+    return false;
+  }
+
+  isMute(room: RoomTypes.RoomWithMute, userId: number): boolean {
+    if (
+      typeof room != "undefined" &&
+      room &&
+      typeof room.mute != "undefined" &&
+      room.mute &&
+      room.mute.length &&
+      room.mute.find((x: User) => x.id === userId)
+    )
+      return true;
+    return false;
   }
 
   async findAll(): Promise<Room[]> {
@@ -39,11 +130,34 @@ export class RoomService implements OnModuleInit {
   }
 
   async findAllIncludes(): Promise<Room[]> {
-    this.logger.log("findAll rooms");
+    this.logger.log("findAll Include rooms");
     return await this.prisma.room.findMany({
       include: {
-        users: true,
-        messages: true,
+        owner: {
+          select: {
+            id: true,
+          },
+        },
+        admins: {
+          select: {
+            id: true,
+          },
+        },
+        users: {
+          select: {
+            id: true,
+          },
+        },
+        ban: {
+          select: {
+            id: true,
+          },
+        },
+        messages: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
   }
@@ -62,6 +176,11 @@ export class RoomService implements OnModuleInit {
         data: {
           name: room.name,
           owner: {
+            connect: {
+              id: room.ownerId,
+            },
+          },
+          users: {
             connect: {
               id: room.ownerId,
             },
@@ -116,7 +235,7 @@ export class RoomService implements OnModuleInit {
   }
 
   async update(userId: number, roomDto: Room) {
-    this.logger.log(`user id : ${userId} wants to room: ${roomDto}`);
+    this.logger.log(`user id : ${userId} wants to update room: ${roomDto}`);
     await this.prisma.room
       .update({
         where: { id: roomDto.id },
@@ -130,70 +249,179 @@ export class RoomService implements OnModuleInit {
         return updatedRoom;
       })
       .catch((error) => {
-        this.logger.error("Room update error: ", error);
         throw new Error(error);
       });
   }
 
   async addUser(roomId: number, userId: number) {
-    this.logger.log(`Add user: ${userId} to room: ${roomId}`);
-    await this.prisma.room
-      .update({
-        where: { id: roomId },
-        data: {
-          users: {
-            connect: [
-              {
-                id: userId,
-              },
-            ],
+    this.logger.log(`addUser: ${userId} to room: ${roomId}`);
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: {
+            ban: true,
           },
-        },
-        include: {
-          users: true,
-        },
+        });
+        if (this.isBan(room, userId))
+          throw new Error(
+            `User ${userId} donesn't have rights on room ${roomId}`,
+          );
+        return await this.prisma.room.update({
+          where: { id: roomId },
+          data: {
+            users: {
+              connect: [
+                {
+                  id: userId,
+                },
+              ],
+            },
+          },
+          include: {
+            users: true,
+          },
+        });
       })
       .then((room) => {
         this.logger.log("addUser success: ", room);
       })
       .catch((error) => {
-        this.logger.error("addUser error: ", error);
-        throw new Error(error);
+        throw new Error(`addUser failure: ${error}`);
       });
   }
 
-  async addAdmin(roomId: number, userId: number) {
-    this.logger.log(`Add user: ${userId} to room: ${roomId}`);
-    await this.prisma.room
-      .update({
-        where: { id: roomId },
-        data: {
-          admins: {
-            connect: [
-              {
-                id: userId,
-              },
-            ],
+  async addAdmin(roomId: number, userId: number, adminId: number) {
+    this.logger.log(`addAdmin: ${userId} to room: ${roomId}`);
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: { owner: true },
+        });
+        if (!this.isOwner(room, userId))
+          throw new Error(`User ${userId} doesn't own room ${roomId}`);
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            admins: {
+              connect: [
+                {
+                  id: adminId,
+                },
+              ],
+            },
           },
-        },
-        include: {
-          admins: true,
-        },
+          include: {
+            admins: true,
+          },
+        });
       })
       .then((room) => {
         this.logger.log("addAdmin success: ", room);
       })
       .catch((error) => {
-        this.logger.error("addAdmin error: ", error);
+        throw new Error(error);
+      });
+  }
+
+  async addBan(roomId: number, userId: number, banId: number) {
+    this.logger.log(`addBan: ${userId} to room: ${roomId}`);
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: {
+            owner: true,
+            admins: true,
+            users: true,
+            ban: true,
+            mute: true,
+            messages: true,
+          },
+        });
+        if (!this.higherRights(room, userId, banId))
+          throw new Error(
+            `User ${userId} donesn't have rights on room ${roomId}`,
+          );
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            ban: {
+              connect: [
+                {
+                  id: banId,
+                },
+              ],
+            },
+          },
+          include: {
+            ban: true,
+          },
+        });
+      })
+      .then((room) => {
+        this.logger.log("addBan success: ", room);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async addMute(roomId: number, userId: number, muteId: number) {
+    this.logger.log(`addMute: ${userId} to room: ${roomId}`);
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: {
+            owner: true,
+            admins: true,
+            users: true,
+            ban: true,
+            mute: true,
+            messages: true,
+          },
+        });
+        if (!this.higherRights(room, userId, muteId))
+          throw new Error(
+            `User ${userId} donesn't have rights on room ${roomId}`,
+          );
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            mute: {
+              connect: [
+                {
+                  id: muteId,
+                },
+              ],
+            },
+          },
+          include: {
+            mute: true,
+          },
+        });
+      })
+      .then((room) => {
+        this.logger.log("addMute success: ", room);
+      })
+      .catch((error) => {
         throw new Error(error);
       });
   }
 
   async remove(userId: number, roomId: number) {
-    this.logger.log(`user id : ${userId} wants to removeById: ${roomId}`);
+    this.logger.log(`user id : ${userId} wants to removeById room: ${roomId}`);
     await this.prisma
-      .$transaction([
-        this.prisma.room.update({
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: { owner: true },
+        });
+        if (userId !== room.owner.id)
+          throw new Error(`User ${userId} doesn't own room ${roomId}`);
+        prisma.room.update({
           where: { id: roomId },
           data: {
             users: {
@@ -202,44 +430,199 @@ export class RoomService implements OnModuleInit {
             admins: {
               set: [],
             },
+            ban: {
+              set: [],
+            },
+            mute: {
+              set: [],
+            },
             owner: {
               disconnect: true,
             },
           },
-        }),
-        this.prisma.room.delete({
+        });
+        prisma.room.delete({
           where: { id: roomId },
-        }),
-      ])
+        });
+      })
       .then((user) => {
         this.logger.log("remove success: ", user);
       })
       .catch((error) => {
-        this.logger.error("remove error: ", error);
         throw new Error(error);
       });
   }
 
-  async removeUser(roomId: number, userId: number) {
+  async removeUser(roomId: number, userId: number, removeId: number) {
     this.logger.log(`del user: ${userId} from room: ${roomId}`);
-    return await this.prisma.room
-      .update({
-        where: { id: roomId },
-        data: {
-          users: {
-            disconnect: [
-              {
-                id: userId,
-              },
-            ],
+    await this.prisma
+      .$transaction(async (prisma) => {
+        if (userId !== removeId) {
+          const room = await prisma.room.findUnique({
+            where: { id: roomId },
+            include: {
+              owner: true,
+              admins: true,
+              users: true,
+              ban: true,
+              mute: true,
+              messages: true,
+            },
+          });
+          if (!this.higherRights(room, userId, removeId))
+            throw new Error(
+              `User ${userId} donesn't have rights on room ${roomId}`,
+            );
+        }
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            users: {
+              disconnect: [
+                {
+                  id: removeId,
+                },
+              ],
+            },
           },
-        },
+          include: {
+            users: true,
+          },
+        });
       })
-      .then((user) => {
-        this.logger.log("removeUser success: ", user);
+      .then((room) => {
+        this.logger.log("removeUser success: ", room);
       })
       .catch((error) => {
-        this.logger.error("removeUser error: ", error);
+        throw new Error(error);
+      });
+  }
+
+  async removeAdmin(roomId: number, userId: number, removeId: number) {
+    this.logger.log(`del admin: ${userId} from room: ${roomId}`);
+    await this.prisma
+      .$transaction(async (prisma) => {
+        if (userId !== removeId) {
+          const room = await prisma.room.findUnique({
+            where: { id: roomId },
+            include: {
+              owner: true,
+            },
+          });
+          if (!this.isOwner(room, userId))
+            throw new Error(
+              `User ${userId} donesn't have rights on room ${roomId}`,
+            );
+        }
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            admins: {
+              disconnect: [
+                {
+                  id: removeId,
+                },
+              ],
+            },
+          },
+          include: {
+            admins: true,
+          },
+        });
+      })
+      .then((room) => {
+        this.logger.log("removeAdmin success: ", room);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async removeBan(roomId: number, userId: number, banId: number) {
+    this.logger.log(`del ban: ${userId} from room: ${roomId}`);
+    if (userId === banId) return;
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: {
+            owner: true,
+            admins: true,
+            users: true,
+            ban: true,
+            mute: true,
+            messages: true,
+          },
+        });
+        if (!this.higherRights(room, userId, banId))
+          throw new Error(
+            `User ${userId} donesn't have rights on room ${roomId}`,
+          );
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            ban: {
+              disconnect: [
+                {
+                  id: banId,
+                },
+              ],
+            },
+          },
+          include: {
+            ban: true,
+          },
+        });
+      })
+      .then((room) => {
+        this.logger.log("removeBan success: ", room);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async removeMute(roomId: number, userId: number, muteId: number) {
+    this.logger.log(`del user: ${userId} from room: ${roomId}`);
+    if (userId === muteId) return;
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: {
+            owner: true,
+            admins: true,
+            users: true,
+            ban: true,
+            mute: true,
+            messages: true,
+          },
+        });
+        if (!this.higherRights(room, userId, muteId))
+          throw new Error(
+            `User ${userId} donesn't have rights on room ${roomId}`,
+          );
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            mute: {
+              disconnect: [
+                {
+                  id: muteId,
+                },
+              ],
+            },
+          },
+          include: {
+            mute: true,
+          },
+        });
+      })
+      .then((room) => {
+        this.logger.log("removeMute success: ", room);
+      })
+      .catch((error) => {
+        throw new Error(error);
       });
   }
 }

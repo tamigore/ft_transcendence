@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from "class-validator";
 
-export class AddDelUserDto {
+export class ModifySelfDto {
   @IsNotEmpty()
   @IsString()
   userId: number;
@@ -10,12 +10,16 @@ export class AddDelUserDto {
   roomId: number;
 }
 
-export class RemmoveUserDto {
+export class ModifyOtherDto {
   @IsNotEmpty()
   @IsString()
-  userID: string;
+  userId: number;
 
   @IsNotEmpty()
   @IsString()
-  roomId: string;
+  otherId: number;
+
+  @IsNotEmpty()
+  @IsString()
+  roomId: number;
 }

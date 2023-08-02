@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import { GetCurrentUserId } from "../common/decorators";
 import { Room } from "@prisma/client";
-import { AddDelUserDto } from "./dto/room.dto";
+import { ModifySelfDto, ModifyOtherDto } from "./dto/room.dto";
 import { RoomService } from "./room.service";
 
 @Controller("room")
@@ -29,15 +29,15 @@ export class RoomController {
   @Post("addUser")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  addUser(@Body() dto: AddDelUserDto) {
+  addUser(@Body() dto: ModifySelfDto) {
     this.roomService.addUser(dto.roomId, dto.userId);
   }
 
   @Post("addAdmin")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  addAdmin(@Body() dto: AddDelUserDto) {
-    this.roomService.addAdmin(dto.roomId, dto.userId);
+  addAdmin(@Body() dto: ModifyOtherDto) {
+    this.roomService.addAdmin(dto.roomId, dto.userId, dto.otherId);
   }
 
   @Post("create")
@@ -50,15 +50,15 @@ export class RoomController {
   @Post("delete")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  deleteRoom(@GetCurrentUserId() userId: number, @Body() dto: Room) {
-    this.roomService.remove(userId, dto.id);
+  deleteRoom(@GetCurrentUserId() userId: number, @Body() dto: ModifyOtherDto) {
+    this.roomService.remove(userId, dto.roomId);
   }
 
   @Post("delete/user")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  removeUser(@Body() dto: AddDelUserDto) {
-    this.roomService.removeUser(dto.roomId, dto.userId);
+  removeUser(@Body() dto: ModifyOtherDto) {
+    this.roomService.removeUser(dto.roomId, dto.userId, dto.otherId);
   }
 
   // @Public()
@@ -72,8 +72,10 @@ export class RoomController {
   @Get("all")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  findRoomsIncludes(): Promise<Room[]> {
-    return this.roomService.findAllIncludes();
+  async findRoomsIncludes(): Promise<Room[]> {
+    const rooms = await this.roomService.findAllIncludes();
+    console.debug(rooms);
+    return rooms;
   }
 
   // @Public()

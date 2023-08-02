@@ -33,9 +33,10 @@
           <TabPanel header="Rooms">
             <div class="flex flex-column flex-wrap col-4 w-full" style="height: 70vh;">
               <div v-for="Room in Rooms" :key="Room.id" class="p-2">
-                <div class="flex flex-row flex-grow-1" v-bind:class="[Room.id == selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']" v-on:click="selectSet(Room)">
+                <div class="flex flex-row flex-grow-1" v-bind:class="[Room.id == selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
                   <div class="grid">
                     <div class="col-4">
+                      <a href='#' v-if="isUserInRoom(Room)" @click.prevent="selectSet(Room)"></a>
                       {{ Room.name }}
                     </div>
                     <div class="col-4"></div>
@@ -49,27 +50,29 @@
               </div>
             </div>
           </TabPanel>
-          <TabPanel header="Private Message">
+          <!-- <TabPanel header="Private Message">
             <div class="flex flex-column flex-wrap col-4 w-full"  style="height: 70vh;">
-              <div v-for="User in Users" :key="User.id" class="p-2">
-                <div class="flex flex-row" v-bind:class="[User.id == selectedUser.id  ? 'box-shadow' : 'box-shadow-dark']" v-on:click="selectUser(User)">
+              <div v-for="room in Private" :key="room.id" class="p-2">
+                <div class="flex flex-row" v-bind:class="[room.id == selectedPrivate.id  ? 'box-shadow' : 'box-shadow-dark']">
                   <div class="flex flex-row">
-                    {{ User.username }}
+                    <a href='#' @click.prevent="selectPrivate(room)">
+                        {{ room.name }}
+                      </a>
                   </div>
                 </div>
               </div>
             </div>
-          </TabPanel>
+          </TabPanel> -->
       </TabView>
         <div class="flex flex-row flex-wrap col-8" style="height: 70vh;">
           <div class="flex flex-column col" v-bind:class="[ selectedRoom && selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
             <div v-for="Room in Rooms" :key="Room.id">
               <div v-if="Room.name == selectedRoom.name">
                 <div v-for="msg in Messages" :key="msg.id"> 
-                  <div v-bind:class="[msg.userId === userId  ? 'col-offset-6 right-100' : 'col-6']">
+                  <div v-bind:class="[msg.userId === User.id  ? 'col-offset-6 right-100' : 'col-6']">
                     <div class="flex flex-wrap">
-                      <div class="grid bubble" v-bind:class="[msg.userId === userId  ? 'right' : 'left']">
-                        <div v-if="msg.userId != userId && msg.user && msg.user.username" class="col-2">{{ msg.user.username }}</div>
+                      <div class="grid bubble" v-bind:class="[msg.userId === User.id  ? 'right' : 'left']">
+                        <div v-if="msg.userId != User.id && msg.user && msg.user.username" class="col-2">{{ msg.user.username }}</div>
                         <div class="col-8">{{ msg.text }}</div>
                       </div>
                     </div>
@@ -111,26 +114,35 @@ export default defineComponent({
       toast: useToast(),
       roomName: "" as string,
       roomDescription: "" as string,
-      Rooms: store.state.rooms as Room[],
-      Messages: store.state.messages as Message[],
       selectedRoom: {} as Room,
-      selectedUser: {} as User,
-      last_message: store.state.last_message as Message,
+      selectedPrivate: {} as Room,
       text: "" as string,
-      Users: [{}] as User[],
-      connected: socket.connected as boolean,
-      userId: store.state.user.id,
-    };
+   };
   },
-  updated() {
-    console.log("ChatDisplay updated");
-    console.log("last_message: " + this.last_message);
+  computed: {
+    Rooms () {
+      return store.state.rooms as Room[];
+    },
+    Messages () {
+      return store.state.messages as Message[];
+    },
+    lastMessage () {
+      return store.state.lastMessage as Message;
+    },
+    connected () {
+      return socket.connected as boolean;
+    },
+    User () {
+      return store.state.user as User;
+    },
+    // Private () {
+    //   return store.state.private as Room[];
+    // }
   },
   created() {
     console.log("ChatDisplay created");
     this.getRooms();
-    this.getUsers();
-    this.connected = socket.connected;
+    // this.getPrivate();
   },
   methods: {
     onSubmit() {
@@ -147,35 +159,18 @@ export default defineComponent({
       } as Message;
       socket.emit("cliMessage", message);
       this.text = "";
-      this.getMessages(this.selectedRoom);
     },
-    privateMessage() {
-      if (!this.selectedUser)
-        return ;
-      const message: Message = {
-        id: 0,
-        created_at: new Date(),
-        name: `${store.state.user.username} & ${this.selectedUser.username} Room`,
-        text: this.text,
-        roomId: this.selectedRoom.id,
-        room: this.selectedRoom,
-        userId: store.state.user.id,
-        user: store.state.user,
-      } as Message;
-      socket.emit("privMessage", {user1: store.state.user, user2: this.selectedUser, message: message});
-      this.text = "";
-    },
-    async getUsers() {
-      axios.defaults.baseURL = server.nestUrl;
-      await axios.get(`api/user/private/${store.state.user.id}`, {
-        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
-      })
-        .then((response: AxiosResponse) => {
-          console.log(response);
-          this.Users = response.data;
-        })
-        .catch((error: AxiosError) => { throw error; });
-    },
+    // async getPrivate() {
+    //   axios.defaults.baseURL = server.nestUrl;
+    //   await axios.get(`api/user/private/${store.state.user.id}`, {
+    //     headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+    //   })
+    //     .then((response: AxiosResponse) => {
+    //       console.log(response);
+    //       store.commit("setPrivate", response.data);
+    //     })
+    //     .catch((error: AxiosError) => { throw error; });
+    // },
     async getRooms() {
       axios.defaults.baseURL = server.nestUrl;
       await axios.get("api/room/all", {
@@ -183,8 +178,7 @@ export default defineComponent({
       })
         .then((response: AxiosResponse) => {
           console.log(response);
-          this.Rooms = response.data;
-          store.commit("setRooms", this.Rooms);
+          store.commit("setRooms", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
     },
@@ -194,8 +188,7 @@ export default defineComponent({
       })
         .then((response: AxiosResponse) => {
           console.log(response);
-          this.Messages = response.data;
-          store.commit("setRooms", this.Rooms);
+          store.commit("setMessages", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
     },
@@ -243,8 +236,8 @@ export default defineComponent({
       try {
         if (!room || !room.users)
           return false;
-        const user = room.users.find(user => user.id === store.state.user.id);
-        if (user)
+        const user = room.users.find((user) => user.id === store.state.user.id);
+        if (typeof(user) !== "undefined" && user)
           return true;
         return false;
       }
@@ -256,13 +249,15 @@ export default defineComponent({
     selectSet(value: Room) {
       this.selectedRoom = value;
       console.log(this.selectedRoom);
+      store.commit("setLastRoom", this.selectedRoom);
       this.getMessages(this.selectedRoom);
     },
-    selectUser(value: User) {
-      this.selectedUser = value;
-      console.log(this.selectedUser);
-      this.getUsers();
-    },
+    // selectPrivate(value: Room) {
+    //   this.selectedPrivate = value;
+    //   console.log(this.selectedPrivate);
+    //   store.commit("setLastPrivate", this.selectedRoom);
+    //   this.getPrivate();
+    // },
     owner(value: Room): boolean {
       return store.state.user.id === value.ownerId;
     }
@@ -277,15 +272,21 @@ body {
 
 .bubble {
   --r: 25px; /* the radius */
-  --t: 30px; /* the size of the tail */
+  --t: 25px; /* the size of the tail */
   
   padding: calc(2*var(--r)/3);
+  mask: radial-gradient(var(--t) at var(--_d) 0,#0000 98%,#000 102%) 
+      var(--_d) 100%/calc(100% - var(--r)) var(--t) no-repeat,
+    conic-gradient(at var(--r) var(--r),#000 75%,#0000 0) 
+      calc(var(--r)/-2) calc(var(--r)/-2) padding-box, 
+    radial-gradient(50% 50%, #000 98%,#0000 101%) 
+      0 0/var(--r) var(--r) space padding-box;
   -webkit-mask: 
     radial-gradient(var(--t) at var(--_d) 0,#0000 98%,#000 102%) 
       var(--_d) 100%/calc(100% - var(--r)) var(--t) no-repeat,
     conic-gradient(at var(--r) var(--r),#000 75%,#0000 0) 
       calc(var(--r)/-2) calc(var(--r)/-2) padding-box, 
-    radial-gradient(50% 50%,#000 98%,#0000 101%) 
+    radial-gradient(50% 50%, #000 98%,#0000 101%) 
       0 0/var(--r) var(--r) space padding-box;
   background: linear-gradient(135deg,#ba00fe,#3d6ced) border-box;
   color: #fff;

@@ -31,6 +31,8 @@ model User {
   owner      Room[]     @relation(name: "owner")
   admin      Room[]     @relation(name: "admin")
   rooms      Room[]     @relation(name: "users")
+  ban        Room[]    @relation(name: "ban")
+  mute       Room[]    @relation(name: "mute")
   messages   Message[]
   player1    Game[]     @relation(name: "player1")
   player2    Game[]     @relation(name: "player2")
@@ -91,9 +93,12 @@ model Room {
   name        String
   private     Boolean   @default(false)
   ownerId     Int?
+  hash        String?   @unique
   owner       User?     @relation(name: "owner", fields: [ownerId], references: [id], onDelete: SetNull)
   admins      User[]    @relation(name: "admin")
   users       User[]    @relation(name: "users")
+  ban         User[]    @relation(name: "ban")
+  mute        User[]    @relation(name: "mute")
   messages    Message[]
   description String?
 
