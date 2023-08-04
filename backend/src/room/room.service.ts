@@ -133,31 +133,11 @@ export class RoomService implements OnModuleInit {
     this.logger.log("findAll Include rooms");
     return await this.prisma.room.findMany({
       include: {
-        owner: {
-          select: {
-            id: true,
-          },
-        },
-        admins: {
-          select: {
-            id: true,
-          },
-        },
-        users: {
-          select: {
-            id: true,
-          },
-        },
-        ban: {
-          select: {
-            id: true,
-          },
-        },
-        messages: {
-          select: {
-            id: true,
-          },
-        },
+        owner: true,
+        admins: true,
+        users: true,
+        ban: true,
+        messages: true,
       },
     });
   }
@@ -198,38 +178,66 @@ export class RoomService implements OnModuleInit {
       });
   }
 
+  async findPrivateRooms(userId: number): Promise<Room[]> {
+    await this.prisma.room
+      .findMany({
+        where: {
+          private: true,
+          users: {
+            every: {
+              id: userId,
+            },
+          },
+        },
+      })
+      .then((rooms) => {
+        this.logger.log("findPrivateRooms success");
+        return rooms;
+      })
+      .catch((error) => {
+        throw error;
+      });
+    return [];
+  }
+
   async getPrivateRoom(user1: User, user2: User): Promise<Room> {
     this.logger.log(
       `getPrivateRoom of ${user1.username} and ${user2.username}`,
     );
-    await this.prisma.room
-      .findMany({
-        where: {
-          name: `${user1.username} & ${user2.username} Room`,
-        },
-      })
-      .then((res) => {
-        this.logger.log("getPrivateRoom findMany success");
-        return res;
-      })
-      .catch(async (error) => {
-        this.logger.log("getPrivateRoom findMany failed with error: " + error);
-        await this.prisma.room
-          .create({
-            data: {
+    await this.prisma
+      .$transaction(async (prisma) => {
+        await prisma.room
+          .findMany({
+            where: {
               name: `${user1.username} & ${user2.username} Room`,
-              description: `User ${user1.username} and ${user2.username} private room`,
-              users: {
-                connect: [{ id: user1.id }, { id: user2.id }],
-              },
             },
           })
           .then((res) => {
+            this.logger.log("getPrivateRoom findMany success");
             return res;
           })
-          .catch((err) => {
-            throw err;
+          .catch(async (error) => {
+            this.logger.log(
+              "getPrivateRoom findMany failed with error: " + error,
+            );
+            return await prisma.room.create({
+              data: {
+                name: `${user1.username} & ${user2.username} Room`,
+                description: `User ${user1.username} and ${user2.username} private room`,
+                private: true,
+                users: {
+                  connect: [{ id: user1.id }, { id: user2.id }],
+                },
+              },
+            });
           });
+      })
+      .then((room) => {
+        this.logger.log("getPrivateRoom success: ", room);
+        return room;
+      })
+      .catch((error) => {
+        throw new Error(`getPrivateRoom failure: ${error}`);
       });
     return {} as Room;
   }

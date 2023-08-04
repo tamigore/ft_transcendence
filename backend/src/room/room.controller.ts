@@ -88,6 +88,15 @@ export class RoomController {
     return this.roomService.findById(id);
   }
 
+  @Get("private/:id")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  findPrivateRooms(@Param("id") param: string): Promise<Room[]> {
+    const id: number = parseInt(param);
+    return this.roomService.findPrivateRooms(id);
+  }
+
   // @Public()
   @Delete(":id")
   // @UseGuards(AtGuard)

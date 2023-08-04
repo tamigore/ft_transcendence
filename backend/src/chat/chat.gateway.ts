@@ -48,6 +48,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
     this.logger.log("onMessage");
     this.logger.debug("body: ", body, "ConnectedSocket: ", client.id);
+    const user = await this.userService.findById(body.user.id);
+    if (!user) throw new Error("onMessage no user found");
+    const room = await this.roomService.findById(body.room.id);
+    if (!room) throw new Error("onMessage no room found");
     this.chatService.createMessage(body);
     this.server.to(body.room.name).emit("servMessage", body);
   }
@@ -101,9 +105,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ): Promise<boolean> {
     this.logger.log(`${payload.user.username} is leaving ${payload.room.name}`);
     const user = await this.userService.findById(payload.user.id);
-    if (!user) throw new Error("onJoinRoom no user found");
-    let room = await this.roomService.findById(payload.room.id);
-    if (!room) room = await this.roomService.createRoom(payload.room);
+    if (!user) throw new Error("onLeaveRoom no user found");
+    const room = await this.roomService.findById(payload.room.id);
+    if (!room) throw new Error("onLeaveRoom no room found");
     this.server.in(user.chatSocket).socketsLeave(room.name);
     await this.roomService.removeUser(room.id, user.id, user.id);
     return true;

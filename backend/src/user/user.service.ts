@@ -134,6 +134,19 @@ export class UserService {
       });
   }
 
+  async findFriendsById(userId: number) {
+    this.logger.log(`findFriendById user: ${userId}`);
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: userId,
+      },
+      include: {
+        friend: true,
+      },
+    });
+    return users;
+  }
+
   async addBlocked(userId: number, blockedId: number) {
     this.logger.log(
       `user id : ${userId} wants to update chatSocket: ${blockedId}`,

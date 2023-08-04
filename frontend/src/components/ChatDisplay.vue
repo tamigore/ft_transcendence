@@ -50,7 +50,7 @@
               </div>
             </div>
           </TabPanel>
-          <!-- <TabPanel header="Private Message">
+          <TabPanel header="Private Message">
             <div class="flex flex-column flex-wrap col-4 w-full"  style="height: 70vh;">
               <div v-for="room in Private" :key="room.id" class="p-2">
                 <div class="flex flex-row" v-bind:class="[room.id == selectedPrivate.id  ? 'box-shadow' : 'box-shadow-dark']">
@@ -62,15 +62,15 @@
                 </div>
               </div>
             </div>
-          </TabPanel> -->
-      </TabView>
+          </TabPanel>
+        </TabView>
         <div class="flex flex-row flex-wrap col-8" style="height: 70vh;">
           <div class="flex flex-column col" v-bind:class="[ selectedRoom && selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
             <div v-for="Room in Rooms" :key="Room.id">
               <div v-if="Room.name == selectedRoom.name">
                 <div v-for="msg in Messages" :key="msg.id"> 
                   <div v-bind:class="[msg.userId === User.id  ? 'col-offset-6 right-100' : 'col-6']">
-                    <div class="flex flex-wrap">
+                    <div class="flex">
                       <div class="grid bubble" v-bind:class="[msg.userId === User.id  ? 'right' : 'left']">
                         <div v-if="msg.userId != User.id && msg.user && msg.user.username" class="col-2">{{ msg.user.username }}</div>
                         <div class="col-8">{{ msg.text }}</div>
@@ -135,14 +135,14 @@ export default defineComponent({
     User () {
       return store.state.user as User;
     },
-    // Private () {
-    //   return store.state.private as Room[];
-    // }
+    Private () {
+      return store.state.private as Room[];
+    }
   },
   created() {
     console.log("ChatDisplay created");
     this.getRooms();
-    // this.getPrivate();
+    this.getPrivate();
   },
   methods: {
     onSubmit() {
@@ -160,17 +160,17 @@ export default defineComponent({
       socket.emit("cliMessage", message);
       this.text = "";
     },
-    // async getPrivate() {
-    //   axios.defaults.baseURL = server.nestUrl;
-    //   await axios.get(`api/user/private/${store.state.user.id}`, {
-    //     headers: { "Authorization": `Bearer ${store.state.user.hash}` }
-    //   })
-    //     .then((response: AxiosResponse) => {
-    //       console.log(response);
-    //       store.commit("setPrivate", response.data);
-    //     })
-    //     .catch((error: AxiosError) => { throw error; });
-    // },
+    async getPrivate() {
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.get(`api/room/private/${store.state.user.id}`, {
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+      })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          store.commit("setPrivate", response.data);
+        })
+        .catch((error: AxiosError) => { throw error; });
+    },
     async getRooms() {
       axios.defaults.baseURL = server.nestUrl;
       await axios.get("api/room/all", {
@@ -252,12 +252,12 @@ export default defineComponent({
       store.commit("setLastRoom", this.selectedRoom);
       this.getMessages(this.selectedRoom);
     },
-    // selectPrivate(value: Room) {
-    //   this.selectedPrivate = value;
-    //   console.log(this.selectedPrivate);
-    //   store.commit("setLastPrivate", this.selectedRoom);
-    //   this.getPrivate();
-    // },
+    selectPrivate(value: Room) {
+      this.selectedPrivate = value;
+      console.log(this.selectedPrivate);
+      store.commit("setLastPrivate", this.selectedRoom);
+      this.getPrivate();
+    },
     owner(value: Room): boolean {
       return store.state.user.id === value.ownerId;
     }

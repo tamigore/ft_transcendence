@@ -2,7 +2,7 @@ import { io, Socket  } from "socket.io-client";
 import { server } from "@/utils/helper";
 import { User, Message, Room } from "./interfaces"
 import store from "@/store";
-
+import axios from "axios";
 export interface ServerToClientEvents {
   servMessage: (e: Message) => void;
 }
@@ -30,6 +30,14 @@ class SocketioChat {
         store.commit("addMessage", msg);
       else
         store.commit("setLastMessage", msg);
+    });
+    this.socket.on("connect", () => {
+      axios.post("/api/user/chatsocket", socket.id, {
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+      });
+    });
+    this.socket.on("connect_error", () => {
+      console.log("Ws connect failed");
     });
   }
 }

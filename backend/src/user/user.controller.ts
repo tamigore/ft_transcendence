@@ -28,6 +28,34 @@ export class UserController {
     this.userService.update(userId, updateUserDto);
   }
 
+  // @Public()
+  @Post("friends/add")
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  addFriend(@GetCurrentUserId() userId: number, @Body() friend: User) {
+    this.userService.addFriends(userId, friend.id);
+  }
+
+  // @Public()
+  @Post("friends/del")
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  delFriend(@GetCurrentUserId() userId: number, @Body() friend: User) {
+    this.userService.removeFriends(userId, friend.id);
+  }
+
+  // @Public()
+  @Get("friends/:id")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  findFriends(@Param("id") param: string): Promise<User[]> {
+    const id = parseInt(param);
+    return this.userService.findFriendsById(id);
+  }
+
   @Post("chatsocket")
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   // @UseGuards(AtGuard)
@@ -36,6 +64,7 @@ export class UserController {
     @GetCurrentUserId() userId: number,
     @Body() chatSocket: any,
   ) {
+    console.log(chatSocket.socket);
     this.userService.updateChatSocket(userId, chatSocket.socket);
   }
 
@@ -57,7 +86,7 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  @Get("private/:id")
+  @Get("!self")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
