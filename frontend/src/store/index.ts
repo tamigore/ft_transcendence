@@ -9,6 +9,7 @@ const store = createStore({
         rooms: [{}] as Room[],
         connected: false as boolean,
         ingame: false as boolean,
+        playerNum: 0 as number,
         gameParam: {
             multi: false as boolean,
             boxe: false as boolean,

@@ -1,12 +1,12 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { Game } from "@prisma/client";
+import { Game, User, Room } from "@prisma/client";
 import { Matchamker } from "./dto";
 
 export interface GameMove {
     player: number,
   
-    up: boolean,
+    notPressed: boolean,
     key: number,
   }
 
@@ -28,4 +28,10 @@ export interface GameMove {
   {
     scoreA: number,
     scoreB: number,
+  }
+
+  export interface JoinGameRoom {
+    user: User;
+    room: Room;
+    event: string;
   }

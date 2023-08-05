@@ -36,12 +36,13 @@ export interface Game {
 export interface GameMove {
   player: number,
 
-  up: boolean;
+  notPressed: boolean;
   key: number;
 }
 
 export interface BallState
   {
+    ballId: number,
     ballX: number,
     ballY: number,
     ballVeloX: number,
@@ -54,12 +55,7 @@ export interface BallState
     posY: number,
   }
 
-export interface Play {
-	player1up: boolean;
-	player1down: boolean;
-	player2up: boolean;
-	player2down: boolean;
-}
+
 
 export interface Historic {
   id: number,

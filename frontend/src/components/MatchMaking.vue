@@ -64,7 +64,13 @@ export default defineComponent({
             score: [0, 0] as number[],
           });
           if (response.data.player2)
+          {
             store.commit("setGameConnect", true);
+            if (store.state.user.id == response.data.player1.id)
+              store.commit("playerNum", 1);
+            else  if (store.state.user.id == response.data.player2.id)
+              store.commit("playerNum", 2);
+          }
           store.commit("setGame", response.data);
         })
         .catch((error: AxiosError) => {

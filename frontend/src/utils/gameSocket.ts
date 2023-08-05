@@ -6,6 +6,7 @@ export interface ServerToClientEvents {
 
 
   servMessage(e: GameMove): void;
+  paddleStateMessage(e: PaddleState): void;
   pongMessage(e: {ballInfo: BallState; PaddleInfo: PaddleState}): void;
 
 }
@@ -14,6 +15,7 @@ export interface ClientToServerEvents {
 
 
   gameMessage(e: GameMove): void;
+  paddlePosMessage(e: PaddleState): void;
   pingMessage(e: {ballInfo: BallState; PaddleInfo: PaddleState}): void;
   join_game: (e: { user: User; game: Game }) => void;
 }

@@ -157,7 +157,7 @@ import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import store from "@/store";
 import socket from "@/utils/gameSocket"
-import { GameMove, /* BallState, PaddleState */} from "@/utils/interfaces"
+import { GameMove, BallState, PaddleState } from "@/utils/interfaces"
 import {
   SetPongWidth,
   SetPongHeight,
@@ -487,6 +487,8 @@ export class PongGameClass {
   inertie: number[];
   wallIsUp: boolean;
   veloDiv: number;
+
+  inMultiplayer: boolean;
   // audioContext: AudioContext;
   // audioBuffer: null;
 
@@ -582,6 +584,8 @@ export class PongGameClass {
 
 
     this.theBall = new BallClass(this, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
+
+    this.inMultiplayer = false;
   }
 
 
@@ -696,6 +700,27 @@ export class PongGameClass {
     }
   }
 
+  startMultiOnline() {
+    this.restartMatch(true);
+    this.inMultiplayer = true;
+    this.gameIsRunning = true;
+    this.leftPlayerKeyDown = '';
+    this.leftPlayerKeyUp = '';
+    this.rightPlayerKeyDown = '';
+    this.rightPlayerKeyUp = '';
+    if (store.state.playerNum == 1)
+    {
+      this.leftPlayerKeyDown = 's';
+      this.leftPlayerKeyUp = 'w';
+    }
+    if (store.state.playerNum == 2)
+    {
+      this.rightPlayerKeyDown = 's';
+      this.rightPlayerKeyUp = 'w';
+      
+    }
+  }
+
 
 
   /*******************Bots*******************/
@@ -774,23 +799,24 @@ export class PongGameClass {
 
   
 
-  handleKeyOnline = (player:number, up:boolean, key:number) =>
+  handleKeyOnline = (player:number, notPressed:boolean, key:number) =>
   {
-    if (up)
+    console.log("player : " + player + " up : " + notPressed + " key : " + key);
+    if (notPressed)
       this.onlineKeyUp(player, key);
     else
       this.onlineKeyDown(player, key);
   }
 
-  onlineKeyDown = (player:number, key:number) => {
-    if (player == 0)
+  onlineKeyDown = (playerN:number, key:number) => {
+    if (playerN != 2)
     {
       if (key == 1)
         this.leftArrowUp = 1;
       else if (key == 0)
         this.leftArrowDown = 1;
     }
-    else if (player == 1)
+    if (playerN != 1)
     {
       if (key == 1)
         this.rightArrowUp = 1;
@@ -799,15 +825,15 @@ export class PongGameClass {
     }
   }
 
-  onlineKeyUp = (player:number, key:number) => {
-    if (player == 0)
+  onlineKeyUp = (playerN:number, key:number) => {
+    if (playerN != 2)
     {
       if (key == 1)
         this.leftArrowUp = 0;
       else if (key == 0)
         this.leftArrowDown = 0;
     }
-    else if (player == 1)
+    if (playerN != 1)
     {
       if (key == 1)
         this.leftArrowUp = 0;
@@ -818,63 +844,75 @@ export class PongGameClass {
 
   sendKey = (_player:number, _up:boolean, _key:number) =>
   {
-    if (store.state.ingame)
+    if (store.state.ingame && this.inMultiplayer)
       {
         console.log("OKKKKKK gameLoop socket = ", socket.id);
         socket.emit("gameMessage",  {
             player: _player,
-            up: _up,
+            notPressed: _up,
             key: _key,
           } as  GameMove);
+        if (_up == true)
+        {
+          var _posY = 0;
+          if (_player == 1)
+            _posY = this.leftPaddleY;
+          else if (_player == 2)
+            _posY = this.rightPaddleY;
+          socket.emit("paddlePosMessage", {
+            player: _player,
+            posY: _posY,
+          } as PaddleState)
+        }
       }
   }
 
   handleKeyDown = (event: KeyboardEvent) => {
    
-    if (event.key === this.leftPlayerKeyUp)
+    if (event.key === this.leftPlayerKeyUp && this.leftArrowUp != 1)
     {
       this.leftArrowUp = 1;
-      this.sendKey(0, false, 1);
+      this.sendKey(1, false, 1);
     }
-    else if (event.key === this.leftPlayerKeyDown)
+    else if (event.key === this.leftPlayerKeyDown && this.leftArrowDown !=  1)
     {
       this.leftArrowDown = 1;
-      this.sendKey(0, false, 0);
+      this.sendKey(1, false, 0);
     }
-    else if (event.key === this.rightPlayerKeyUp)
+    else if (event.key === this.rightPlayerKeyUp && this.rightArrowUp != 1)
      { 
       this.rightArrowUp = 1;
-      this.sendKey(1, false, 1);
+      this.sendKey(2, false, 1);
      }
-    else if (event.key === this.rightPlayerKeyDown)
+    else if (event.key === this.rightPlayerKeyDown && this.rightArrowDown != 1)
     {
         this.rightArrowDown = 1;
-        this.sendKey(1, false, 0);
+        this.sendKey(2, false, 0);
     }
   }
 
 
 
   handleKeyUp = (event: KeyboardEvent) => {
-    if (event.key === this.leftPlayerKeyUp)
+    if (event.key === this.leftPlayerKeyUp && this.leftArrowUp != 0)
     {
       this.leftArrowUp = 0;
-      this.sendKey(0, true, 1);
-    }
-    else if (event.key === this.leftPlayerKeyDown)
-    {
-      this.leftArrowDown = 0;
-      this.sendKey(0, true, 0);
-    }
-    if (event.key === this.rightPlayerKeyUp)
-    {
-      this.rightArrowUp = 0;
       this.sendKey(1, true, 1);
     }
-      else if (event.key === this.rightPlayerKeyDown)
+    else if (event.key === this.leftPlayerKeyDown && this.leftArrowDown != 0)
+    {
+      this.leftArrowDown = 0;
+      this.sendKey(1, true, 0);
+    }
+    else if (event.key === this.rightPlayerKeyUp && this.rightArrowUp != 0)
+    {
+      this.rightArrowUp = 0;
+      this.sendKey(2, true, 1);
+    }
+      else if (event.key === this.rightPlayerKeyDown && this.rightArrowDown != 0)
     {
       this.rightArrowDown = 0;
-      this.sendKey(1, true, 0);
+      this.sendKey(2, true, 0);
     }
   }
 
@@ -1007,6 +1045,11 @@ export default defineComponent({
     const gameLoop = () => {
       if (!ctx)
         return;
+      if (store.state.ingame && !Pong.value.inMultiplayer)
+      {
+        console.log("LE MULTIwwwwwwwwwwwwwwwwww");
+        Pong.value.startMultiOnline();
+      }
       ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
       // Pong.value.generateBlocks();
       Pong.value.bot();
@@ -1084,7 +1127,7 @@ export default defineComponent({
         console.log("ingame de socket on");
         socket.on("servMessage", (e:GameMove ) => {
           console.log("aaaaaaaaaservMessage socket = ", socket.id);
-          Pong.value.handleKeyOnline(e.player, e.up, e.key);
+          Pong.value.handleKeyOnline(e.player, e.notPressed, e.key);
         });
         
     }
