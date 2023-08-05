@@ -157,7 +157,7 @@ import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import store from "@/store";
 import socket from "@/utils/gameSocket"
-import { GameMove, BallState, PaddleState } from "@/utils/interfaces"
+import { GameMove, PaddleState } from "@/utils/interfaces"
 import {
   SetPongWidth,
   SetPongHeight,
@@ -317,7 +317,6 @@ class BallClass {
           this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         if (this.veloY > 0)
-          console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2) + "\n");
         // this.sendBallPaddle(paddleY, player);
         return true;
       }
@@ -678,7 +677,6 @@ export class PongGameClass {
 
     this.wallIsUp = false;
     if (gameIsRunnig != undefined && gameIsRunnig) {
-      this.gameIsRunning = true;
       this.theBall.veloX = this.randStartSpeedX() * Math.sign(Math.random() - 0.5);
       this.theBall.veloY = this.randStartSpeedY() * Math.sign(Math.random() - 0.5);
       if (rightBot != undefined && rightBot) {
@@ -692,6 +690,7 @@ export class PongGameClass {
         this.rightPaddleY = this.height + 1000;
       }
       if (bothBot != undefined && bothBot) {
+        console.log("both bot");
         this.rightPlayerKeyDown = '';
         this.rightPlayerKeyUp = '';
         this.leftPlayerKeyDown = '';
@@ -704,6 +703,7 @@ export class PongGameClass {
     this.restartMatch(true);
     this.inMultiplayer = true;
     this.gameIsRunning = true;
+    console.log("startMultiOnline");
     this.leftPlayerKeyDown = '';
     this.leftPlayerKeyUp = '';
     this.rightPlayerKeyDown = '';
@@ -760,16 +760,15 @@ export class PongGameClass {
         || (this.inertie[player] < 0 && paddleY > this.height - paddleHeight - 1))
         this.inertie[player] = 0;
     }
-    console.log("palyer : " + player + " inerites : " + this.inertie[player]);
 
     return paddleY;
   }
 
   bot() {
-    if (this.leftPlayerKeyDown == '')
+    if (this.leftPlayerKeyDown == '' && !this.inMultiplayer)
       this.leftPaddleY = this.boting(this.leftPaddleY, this.leftPaddleX + this.leftPaddleWidth, this.leftPaddleHeight, 0);
 
-    if (this.rightPlayerKeyDown == '')
+    if (this.rightPlayerKeyDown == '' && !this.inMultiplayer)
       this.rightPaddleY = this.boting(this.rightPaddleY, this.rightPaddleX, this.rightPaddleHeight, 1);
   }
 
@@ -801,7 +800,7 @@ export class PongGameClass {
 
   handleKeyOnline = (player:number, notPressed:boolean, key:number) =>
   {
-    console.log("player : " + player + " up : " + notPressed + " key : " + key);
+    console.log("handleKeyOnline");
     if (notPressed)
       this.onlineKeyUp(player, key);
     else
@@ -846,25 +845,31 @@ export class PongGameClass {
   {
     if (store.state.ingame && this.inMultiplayer)
       {
-        console.log("OKKKKKK gameLoop socket = ", socket.id);
-        socket.emit("gameMessage",  {
-            player: _player,
-            notPressed: _up,
-            key: _key,
-          } as  GameMove);
-        if (_up == true)
-        {
-          var _posY = 0;
-          if (_player == 1)
-            _posY = this.leftPaddleY;
-          else if (_player == 2)
-            _posY = this.rightPaddleY;
-          socket.emit("paddlePosMessage", {
-            player: _player,
-            posY: _posY,
-          } as PaddleState)
-        }
-      }
+
+        const gameMoveData = {
+        player: _player,
+        notPressed: _up,
+        key: _key,
+      } as GameMove;
+
+        socket.emit("gameMessage", { moove: gameMoveData, room: store.state.gameRoom});
+    }
+    if (_up == true)
+    {
+      let _posY = 0;
+      if (_player == 1)
+        _posY = this.leftPaddleY;
+      else if (_player == 2)
+        _posY = this.rightPaddleY;
+
+      const paddleStateData = {
+        player: _player,
+        posY: _posY,
+      } as PaddleState;
+
+
+      socket.emit("paddlePosMessage", {state: paddleStateData, room: store.state.gameRoom })
+    }
   }
 
   handleKeyDown = (event: KeyboardEvent) => {
@@ -1043,13 +1048,13 @@ export default defineComponent({
     /*******************Game Loop*******************/
     
     const gameLoop = () => {
-      if (!ctx)
-        return;
-      if (store.state.ingame && !Pong.value.inMultiplayer)
+      if (store.state.ingame && !Pong.value.gameIsRunning)
       {
-        console.log("LE MULTIwwwwwwwwwwwwwwwwww");
+        console.log(Pong.value.gameIsRunning);
         Pong.value.startMultiOnline();
       }
+      if (!ctx)
+        return;
       ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
       // Pong.value.generateBlocks();
       Pong.value.bot();
@@ -1122,15 +1127,28 @@ export default defineComponent({
     //   } catch (error) {
     //     console.error("Error loading sound:", error);
     //   }
+
+    socket.on("gameRoomJoiner", (data) => {
+      console.log("GameRoomJoiner", data.room);
+      store.commit("setGameRoom", data.room);
+      if (data.user.id == store.state.user.id)
+      {
+        store.commit("setGameConnect", true);
+        store.commit("setInQueue", false);
+        Pong.value.startMultiOnline();
+      }
+    })
+
       if (store.state.ingame)
       {
         console.log("ingame de socket on");
         socket.on("servMessage", (e:GameMove ) => {
           console.log("aaaaaaaaaservMessage socket = ", socket.id);
           Pong.value.handleKeyOnline(e.player, e.notPressed, e.key);
-        });
-        
-    }
+        }); 
+      }
+      
+
       if (myCanvas.value) {
         ctx = myCanvas.value.getContext('2d');
         if (ctx) {

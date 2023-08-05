@@ -8,6 +8,7 @@ export interface GameMove {
   
     notPressed: boolean,
     key: number,
+    gameRoom: string,
   }
 
   export interface BallState
@@ -30,8 +31,3 @@ export interface GameMove {
     scoreB: number,
   }
 
-  export interface JoinGameRoom {
-    user: User;
-    room: Room;
-    event: string;
-  }

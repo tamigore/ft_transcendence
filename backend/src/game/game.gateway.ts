@@ -7,12 +7,13 @@ import {
   WebSocketServer,
   ConnectedSocket,
 } from "@nestjs/websockets";
+import { User } from "@prisma/client";
 import { Server, Socket } from "socket.io";
 import { Logger } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
 import { GameService } from "./game.service";
-import { JoinGameRoom } from "./game.interfaces";
 import { RoomService } from "src/room/room.service";
+import {GameMove, BallState, PaddleState} from "./game.interfaces";
 // import { WsGuard } from "src/common/guards/ws.guard";
 
 @WebSocketGateway(8081)
@@ -40,38 +41,36 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // @UseGuards(WsGuard)
   @SubscribeMessage("gameMessage")
-  async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
-    this.logger.log("onMessage");
+  async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: { moove: GameMove, room: string}) {
+    this.logger.log("gameMessage");
     this.logger.debug("ICI body: ", body, "ConnectedSocket: ", client.id);
-    this.server.emit("servMessage", body);
+    this.server.to(body.room).emit("servMessage", body.moove);
   }
 
   @SubscribeMessage("paddlePosMessage")
-  async onPaddlePos(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
-    this.logger.log("onMessage");
-    this.logger.debug("ICI body: ", body, "ConnectedSocket: ", client.id);
-    this.server.emit("paddleStateMessage", body);
+  async onPaddlePos(@ConnectedSocket() client: Socket, @MessageBody() body: { state: PaddleState, room: string}) {
+    this.logger.log("paddlePosMessage");
+    this.logger.debug("ICI bodyyyy: ", body, "ConnectedSocket: ", client.id);
+    const str = body.room;
+    this.logger.debug("teast ROOM ", str);
+
+    this.server.to(body.room).emit("paddleStateMessage", body.state);
   }
 
   @SubscribeMessage("pingMessage")
-  async onPong(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
-    this.logger.log("onMessage");
-    this.logger.debug("HitMEssage body: ", body, "ConnectedSocket: ", client.id);
-    this.server.emit("pongMessage", body);
+  async onPong(@ConnectedSocket() client: Socket, @MessageBody() body: {ballInfo: BallState, room: string}) {
+    this.logger.log("pingMessage");
+    this.logger.debug("HitMEssage bodyy: ", body, "ConnectedSocket: ", client.id);
+    this.server.to(body.room).emit("pongMessage", body.ballInfo);
   }
 
-  @SubscribeMessage("join_room")
+  @SubscribeMessage("joinGameRoom")
   async onJoinRoom(
-    @MessageBody()
-    payload: JoinGameRoom,
+    @MessageBody() e: { user: User; room: string },
   ): Promise<boolean> {
-    // this.logger.log(`${payload.user.username} is joining ${payload.room.name}`);
-    // const user = await this.userService.findById(payload.user.id);
-    // if (!user) throw new Error("onJoinRoom no user found");
-    // let room = await this.roomService.findById(payload.room.id);
-    // if (!room) room = await this.roomService.createRoom(payload.room);
-    this.server.in(payload.user.chatSocket).socketsJoin(payload.room.name);
-    // await this.roomService.addUser(room.id, user.id);
+    this.logger.log("---joinGameRoom------");
+    this.server.in(e.user.gameSocket).socketsJoin(e.room);
+    this.server.to(e.room).emit("gameRoomJoiner", e);
     return true;
   }
 }

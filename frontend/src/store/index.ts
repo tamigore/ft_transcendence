@@ -5,10 +5,12 @@ const store = createStore({
     state: {
         user: {} as User,
 		game: {} as Game,
+        gameRoom: "" as string,
         messages: [{}] as Message[],
         rooms: [{}] as Room[],
         connected: false as boolean,
         ingame: false as boolean,
+        inQueue: false as boolean,
         playerNum: 0 as number,
         gameParam: {
             multi: false as boolean,
@@ -22,6 +24,15 @@ const store = createStore({
         last_message: {} as Message,
     },
     mutations: {
+        setGameRoom : function (state, gameRoom: string) {
+            state.gameRoom = gameRoom;
+        },
+        setInQueue : function (state, inQueue: boolean) {
+            state.inQueue = inQueue;
+        },
+        setPlayerNum : function (state, num: number) {
+        state.playerNum = num;
+        },
         setGame : function (state, game: Game) {
             state.game = game;
         },

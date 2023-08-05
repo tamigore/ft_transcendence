@@ -31,6 +31,7 @@ import store from '@/store';
 import { server } from "@/utils/helper";
 import socket from '@/utils/gameSocket';
 
+
 export default defineComponent({
   name: "MatchMaking",
   data() {
@@ -53,7 +54,12 @@ export default defineComponent({
           }
         })
         .then((response: AxiosResponse) => {
+          console.log("response from Mathmaker : ", response.data.name);
           socket.connect();
+          socket.emit("joinGameRoom", {
+          user : store.state.user,
+          room : response.data.player1.name,
+          });
           console.log(response);
           store.commit("setGameParam", {
             multi: true as boolean,
@@ -63,13 +69,22 @@ export default defineComponent({
             noPlayer: false as boolean,
             score: [0, 0] as number[],
           });
+          store.commit("setGameRoom", response.data.player1);
           if (response.data.player2)
           {
-            store.commit("setGameConnect", true);
             if (store.state.user.id == response.data.player1.id)
-              store.commit("playerNum", 1);
+              store.commit("setPlayerNum", 1);
             else  if (store.state.user.id == response.data.player2.id)
-              store.commit("playerNum", 2);
+              store.commit("setPlayerNum", 2);
+
+          
+            store.commit("setGameConnect", true);
+          }
+          else
+          {
+            store.commit("setPlayerNum", 1);
+            store.commit("setGameConnect", false);
+            store.commit("setInQueue", true);
           }
           store.commit("setGame", response.data);
         })

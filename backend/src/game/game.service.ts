@@ -22,7 +22,7 @@ export class GameService {
         this.logger.log(`no game found creating game: ${dto.userId} ... type ${typeof(dto.userId)}`);
         return await this.prisma.game.create({
           data: {
-            name: "game",
+            name: dto.userId,
             player1: {
               connect: {
                 id: parseInt(dto.userId),
@@ -31,7 +31,7 @@ export class GameService {
           },
           include: {
             player1: true,
-            player2: true,
+            player2: false,
           }
         })
       }

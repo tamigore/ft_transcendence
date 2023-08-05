@@ -38,7 +38,10 @@ export interface GameMove {
 
   notPressed: boolean;
   key: number;
+  gameRoom: string,
 }
+
+
 
 export interface BallState
   {

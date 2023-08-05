@@ -1,23 +1,23 @@
 import { io, Socket } from "socket.io-client";
 import { server } from "@/utils/helper";
-import { User, Game , GameMove, BallState, PaddleState} from "./interfaces"
+import { User , GameMove, BallState, PaddleState} from "./interfaces"
 
 export interface ServerToClientEvents {
 
 
   servMessage(e: GameMove): void;
   paddleStateMessage(e: PaddleState): void;
-  pongMessage(e: {ballInfo: BallState; PaddleInfo: PaddleState}): void;
+  pongMessage(e: {ballInfo: BallState, PaddleInfo: PaddleState}): void;
+  gameRoomJoiner(e: { user : User, room : string }): void;
 
 }
 
 export interface ClientToServerEvents {
 
-
-  gameMessage(e: GameMove): void;
-  paddlePosMessage(e: PaddleState): void;
-  pingMessage(e: {ballInfo: BallState; PaddleInfo: PaddleState}): void;
-  join_game: (e: { user: User; game: Game }) => void;
+  gameMessage(e: { moove: GameMove, room: string}): void;
+  paddlePosMessage(e: { state: PaddleState, room: string}): void;
+  pingMessage(e: {ballInfo: BallState, room: string}): void;
+  joinGameRoom (e: { user: User; room : string }): void;
 }
 
 class SocketioGame {
