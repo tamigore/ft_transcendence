@@ -56,6 +56,7 @@ export default defineComponent({
         .then((response: AxiosResponse) => {
           console.log("response from Mathmaker : ", response.data.name);
           socket.connect();
+          console.log("socket connecting room : ", response.data.player1.name);
           socket.emit("joinGameRoom", {
           user : store.state.user,
           room : response.data.player1.name,

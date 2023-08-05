@@ -31,7 +31,7 @@ export class GameService {
           },
           include: {
             player1: true,
-            player2: false,
+            player2: true,
           }
         })
       }
