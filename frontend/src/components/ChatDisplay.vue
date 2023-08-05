@@ -33,10 +33,11 @@
           <TabPanel header="Rooms">
             <div class="flex flex-column flex-wrap col-4 w-full" style="height: 70vh;">
               <div v-for="Room in Rooms" :key="Room.id" class="p-2">
-                <div class="flex flex-row flex-grow-1" v-bind:class="[Room.id == selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
+                <div class="flex flex-row" v-bind:class="[Room.id == lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
                   <div class="grid">
                     <div class="col-4">
-                      <a href='#' v-if="isUserInRoom(Room)" @click.prevent="selectSet(Room)"></a>
+                      <a href='#' v-if="isUserInRoom(Room)" @click.prevent="selectRoom(Room)">
+                      </a>
                       {{ Room.name }}
                     </div>
                     <div class="col-4"></div>
@@ -53,11 +54,11 @@
           <TabPanel header="Private Message">
             <div class="flex flex-column flex-wrap col-4 w-full"  style="height: 70vh;">
               <div v-for="room in Private" :key="room.id" class="p-2">
-                <div class="flex flex-row" v-bind:class="[room.id == selectedPrivate.id  ? 'box-shadow' : 'box-shadow-dark']">
+                <div class="flex flex-row" v-bind:class="[room.id == lastPrivate.id  ? 'box-shadow' : 'box-shadow-dark']">
                   <div class="flex flex-row">
                     <a href='#' @click.prevent="selectPrivate(room)">
-                        {{ room.name }}
-                      </a>
+                      {{ room.name }}
+                    </a>
                   </div>
                 </div>
               </div>
@@ -65,16 +66,13 @@
           </TabPanel>
         </TabView>
         <div class="flex flex-row flex-wrap col-8" style="height: 70vh;">
-          <div class="flex flex-column col" v-bind:class="[ selectedRoom && selectedRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
+          <div class="flex flex-column col" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
             <div v-for="Room in Rooms" :key="Room.id">
-              <div v-if="Room.name == selectedRoom.name">
-                <div v-for="msg in Messages" :key="msg.id"> 
-                  <div v-bind:class="[msg.userId === User.id  ? 'col-offset-6 right-100' : 'col-6']">
+              <div v-if="Room.name == lastRoom.name">
+                <div class="scroll">
+                  <div v-for="msg in Messages" :key="msg.id">
                     <div class="flex">
-                      <div class="grid bubble" v-bind:class="[msg.userId === User.id  ? 'right' : 'left']">
-                        <div v-if="msg.userId != User.id && msg.user && msg.user.username" class="col-2">{{ msg.user.username }}</div>
-                        <div class="col-8">{{ msg.text }}</div>
-                      </div>
+                      <ChatBubble :message="msg" :owner="msg.userId == User.id" />
                     </div>
                   </div>
                 </div>
@@ -106,31 +104,39 @@ import { Room, Message, User } from "@/utils/interfaces";
 import store from "@/store";
 import { server } from "@/utils/helper";
 import { useToast } from "primevue/usetoast";
+import ChatBubble from "@/components/ChatBubble.vue"
 
 export default defineComponent({
   name: "ChatDisplay",
+  components: {
+    ChatBubble,
+  },
   data() {
     return {
       toast: useToast(),
       roomName: "" as string,
       roomDescription: "" as string,
-      selectedRoom: {} as Room,
-      selectedPrivate: {} as Room,
       text: "" as string,
    };
   },
   computed: {
+    connected () {
+      return socket.connected as boolean;
+    },
+    lastRoom() {
+      return store.state.lastRoom as Room;
+    },
+    lastPrivate() {
+      return store.state.lastPrivate as Room;
+    },
+    lastMessage () {
+      return store.state.lastMessage as Message;
+    },
     Rooms () {
       return store.state.rooms as Room[];
     },
     Messages () {
       return store.state.messages as Message[];
-    },
-    lastMessage () {
-      return store.state.lastMessage as Message;
-    },
-    connected () {
-      return socket.connected as boolean;
     },
     User () {
       return store.state.user as User;
@@ -146,14 +152,14 @@ export default defineComponent({
   },
   methods: {
     onSubmit() {
-      if (!this.selectedRoom || !this.selectedRoom.name || !this.text || this.text === "")
+      if (!this.lastRoom || !this.lastRoom.name || !this.text || this.text === "")
         return ;
       const message: Message = {
         id: 0,
         created_at: new Date(),
         text: this.text,
-        roomId: this.selectedRoom.id,
-        room: this.selectedRoom,
+        roomId: this.lastRoom.id,
+        room: this.lastRoom,
         userId: store.state.user.id,
         user: store.state.user,
       } as Message;
@@ -203,7 +209,7 @@ export default defineComponent({
       })
         .then((response: AxiosResponse) => {
           console.log("createRoom success: " + response);
-          socket.emit("join_room", { user: store.state.user, room: this.selectedRoom })
+          socket.emit("join_room", { user: store.state.user, room: this.lastRoom })
         })
         .catch((error: AxiosError) => { throw error; });
         this.getRooms();
@@ -224,6 +230,7 @@ export default defineComponent({
         room: room,
       };
       socket.emit("join_room", payload);
+      this.selectRoom(room);
     },
     leaveRoom(room: Room) {
       const payload = {
@@ -231,6 +238,10 @@ export default defineComponent({
         room: room,
       };
       socket.emit("leave_room", payload);
+      if (this.lastRoom && this.lastRoom.name == room.name)
+        this.lastRoom = {} as Room;
+      else if (this.lastPrivate && this.lastPrivate.name == room.name)
+        this.lastPrivate = {} as Room;
     },
     isUserInRoom(room: Room) {
       try {
@@ -246,17 +257,14 @@ export default defineComponent({
         return false;
       }
     },
-    selectSet(value: Room) {
-      this.selectedRoom = value;
-      console.log(this.selectedRoom);
-      store.commit("setLastRoom", this.selectedRoom);
-      this.getMessages(this.selectedRoom);
+    selectRoom(value: Room) {
+      store.commit("setLastRoom", value);
+      this.getMessages(this.lastRoom);
     },
     selectPrivate(value: Room) {
-      this.selectedPrivate = value;
-      console.log(this.selectedPrivate);
-      store.commit("setLastPrivate", this.selectedRoom);
-      this.getPrivate();
+      console.log(value);
+      store.commit("setLastPrivate", value);
+      this.getMessages(this.lastPrivate);
     },
     owner(value: Room): boolean {
       return store.state.user.id === value.ownerId;
@@ -270,6 +278,28 @@ body {
   color: white;
 }
 
+.scroll {
+  max-height: 900px;
+  padding: 1rem;
+  overflow-y: auto;
+  direction: ltr;
+}
+
+.scroll::-webkit-scrollbar {
+  width: 16px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background-color: #e4e4e434;
+  border-radius: 100px;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background-image: linear-gradient(180deg, #d0368a 0%, #708ad4 99%);
+  box-shadow: inset 2px 2px 5px 0 rgba(#fff, 0.5);
+  border-radius: 100px;
+}
+
 .bubble {
   --r: 25px; /* the radius */
   --t: 25px; /* the size of the tail */
@@ -279,14 +309,14 @@ body {
       var(--_d) 100%/calc(100% - var(--r)) var(--t) no-repeat,
     conic-gradient(at var(--r) var(--r),#000 75%,#0000 0) 
       calc(var(--r)/-2) calc(var(--r)/-2) padding-box, 
-    radial-gradient(50% 50%, #000 98%,#0000 101%) 
+    radial-gradient(50% 50% at 50% 50%, #000 98%,#0000 101%) 
       0 0/var(--r) var(--r) space padding-box;
   -webkit-mask: 
     radial-gradient(var(--t) at var(--_d) 0,#0000 98%,#000 102%) 
       var(--_d) 100%/calc(100% - var(--r)) var(--t) no-repeat,
     conic-gradient(at var(--r) var(--r),#000 75%,#0000 0) 
       calc(var(--r)/-2) calc(var(--r)/-2) padding-box, 
-    radial-gradient(50% 50%, #000 98%,#0000 101%) 
+    radial-gradient(50% 50% at 50% 50%, #000 98%,#0000 101%) 
       0 0/var(--r) var(--r) space padding-box;
   background: linear-gradient(135deg,#ba00fe,#3d6ced) border-box;
   color: #fff;

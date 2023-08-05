@@ -21,6 +21,7 @@ export class RoomController {
   // @Public()
   @Post("update")
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   updateRoom(@GetCurrentUserId() userId: number, @Body() updateRoomDto: Room) {
     this.roomService.update(userId, updateRoomDto);
@@ -28,6 +29,7 @@ export class RoomController {
 
   @Post("addUser")
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   addUser(@Body() dto: ModifySelfDto) {
     this.roomService.addUser(dto.roomId, dto.userId);
@@ -35,6 +37,7 @@ export class RoomController {
 
   @Post("addAdmin")
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   addAdmin(@Body() dto: ModifyOtherDto) {
     this.roomService.addAdmin(dto.roomId, dto.userId, dto.otherId);
@@ -42,6 +45,7 @@ export class RoomController {
 
   @Post("create")
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   createRoom(@Body() dto: Room) {
     this.roomService.createRoom(dto);
@@ -49,6 +53,7 @@ export class RoomController {
 
   @Post("delete")
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   deleteRoom(@GetCurrentUserId() userId: number, @Body() dto: ModifyOtherDto) {
     this.roomService.remove(userId, dto.roomId);
@@ -56,6 +61,7 @@ export class RoomController {
 
   @Post("delete/user")
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   removeUser(@Body() dto: ModifyOtherDto) {
     this.roomService.removeUser(dto.roomId, dto.userId, dto.otherId);
@@ -64,6 +70,7 @@ export class RoomController {
   // @Public()
   @Get()
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   findRooms(): Promise<Room[]> {
     return this.roomService.findAll();
@@ -71,6 +78,7 @@ export class RoomController {
 
   @Get("all")
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   async findRoomsIncludes(): Promise<Room[]> {
     const rooms = await this.roomService.findAllIncludes();

@@ -71,6 +71,7 @@ export class UserController {
   // @Public()
   @Get()
   // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   findUsers(): Promise<User[]> {
     return this.userService.findAll();

@@ -32,7 +32,7 @@ class SocketioChat {
         store.commit("setLastMessage", msg);
     });
     this.socket.on("connect", () => {
-      axios.post("/api/user/chatsocket", socket.id, {
+      axios.post("/api/user/chatsocket", { socket: socket.id }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       });
     });

@@ -18,6 +18,7 @@ async function bootstrap() {
       "http://localhost:8080/",
       "http://localhost:8080",
       "http://127.0.0.1:8080",
+      "*",
     ], // add ip address to access the server
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",

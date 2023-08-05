@@ -1,6 +1,6 @@
 <template>
   <div class="myBackground h-screen w-screen">
-    <nav v-if="isLogged()">
+    <nav v-if="isLogged">
       <div id="menuU" class="user-menu">
         <Menubar :model="items" class="p-menubar">
           <template #start>
@@ -148,7 +148,12 @@ export default defineComponent({
       toast: useToast(),
     };
   },
-  methods : {
+  computed: {
+    isLogged() { 
+      return store.state.user.loggedIn;
+    },
+  },
+  methods: {
     async LogoutPost() {
         axios.defaults.baseURL = server.nestUrl;
         await axios.post("api/auth/logout", {}, {
@@ -167,9 +172,6 @@ export default defineComponent({
           throw new Error("Logout failed: " + error);
         })
         router.push("/");
-    },
-    isLogged : () => { 
-      return store.state.user.loggedIn;
     },
   },
   created() {

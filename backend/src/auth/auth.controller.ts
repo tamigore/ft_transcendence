@@ -19,6 +19,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @Post("local/signup")
   @HttpCode(HttpStatus.CREATED)
   signupLocal(@Body() dto: SignUpDto): Promise<Tokens> {
@@ -26,6 +27,7 @@ export class AuthController {
   }
 
   @Public()
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @Post("local/signin")
   @HttpCode(HttpStatus.OK)
   signinLocal(@Body() dto: SignInDto): Promise<Tokens> {
@@ -41,6 +43,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(RtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
   refreshTokens(
