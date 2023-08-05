@@ -32,19 +32,16 @@
         <TabView>
           <TabPanel header="Rooms">
             <div class="flex flex-column flex-wrap col-4 w-full" style="height: 70vh;">
-              <div v-for="Room in Rooms" :key="Room.id" class="p-2">
+              <div v-for="Room in Rooms.values()" :key="Room.id" class="p-2">
                 <div class="flex flex-row" v-bind:class="[Room.id == lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
-                  <div class="grid">
-                    <div class="col-4">
-                      <a href='#' v-if="isUserInRoom(Room)" @click.prevent="selectRoom(Room)">
-                      </a>
+                  <div class="flex flex-row p-2 m-2">
+                    <div class="flex flex-row px-4 mx-4 cursor-pointer" @click="selectRoom(Room)">
                       {{ Room.name }}
                     </div>
-                    <div class="col-4"></div>
-                    <div class="col-4">
-                      <Button label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
-                      <Button label="Join" severity="success" raised v-if="!isUserInRoom(Room)" @click="joinRoom(Room)" />
-                      <Button label="Leave" severity="warning" raised v-if="isUserInRoom(Room)" @click="leaveRoom(Room)" />
+                    <div class="flex flex-row px-2 mx-2">
+                      <Button class="px-1 mx-1" label="Join" severity="success" raised v-if="!InRoom(Room)" @click="joinRoom(Room)" />
+                      <Button class="px-1 mx-1" label="Leave" severity="warning" raised v-if="InRoom(Room)" @click="leaveRoom(Room)" />
+                      <Button class="px-1 mx-1" label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
                     </div>
                   </div>
                 </div>
@@ -67,7 +64,7 @@
         </TabView>
         <div class="flex flex-row flex-wrap col-8" style="height: 70vh;">
           <div class="flex flex-column col" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
-            <div v-for="Room in Rooms" :key="Room.id">
+            <div v-for="Room in Rooms.values()" :key="Room.id">
               <div v-if="Room.name == lastRoom.name">
                 <div class="scroll">
                   <div v-for="msg in Messages" :key="msg.id">
@@ -143,7 +140,7 @@ export default defineComponent({
     },
     Private () {
       return store.state.private as Room[];
-    }
+    },
   },
   created() {
     console.log("ChatDisplay created");
@@ -151,6 +148,9 @@ export default defineComponent({
     this.getPrivate();
   },
   methods: {
+    InRoom (room: Room) {
+      return room.users.find(user => user.id === store.state.user.id) ? true : false;
+    },
     onSubmit() {
       if (!this.lastRoom || !this.lastRoom.name || !this.text || this.text === "")
         return ;
@@ -210,19 +210,19 @@ export default defineComponent({
         .then((response: AxiosResponse) => {
           console.log("createRoom success: " + response);
           socket.emit("join_room", { user: store.state.user, room: this.lastRoom })
+          this.getRooms();
         })
         .catch((error: AxiosError) => { throw error; });
-        this.getRooms();
     },
     async deleteRoom(room: Room) {
-      await axios.post(`api/room/delete`, room, {
+      await axios.delete(`api/room/${room.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
           console.log("deleteRoom success: " + response);
+          this.getRooms();
         })
         .catch((error: AxiosError) => { throw error; });
-        this.getRooms();
     },
     joinRoom(room: Room) {
       const payload = {
@@ -230,7 +230,8 @@ export default defineComponent({
         room: room,
       };
       socket.emit("join_room", payload);
-      this.selectRoom(room);
+      store.commit("setLastRoom", room);
+      this.getMessages(this.lastRoom);
     },
     leaveRoom(room: Room) {
       const payload = {
@@ -239,27 +240,17 @@ export default defineComponent({
       };
       socket.emit("leave_room", payload);
       if (this.lastRoom && this.lastRoom.name == room.name)
-        this.lastRoom = {} as Room;
+        store.commit("setLastRoom", {} as Room);
       else if (this.lastPrivate && this.lastPrivate.name == room.name)
-        this.lastPrivate = {} as Room;
-    },
-    isUserInRoom(room: Room) {
-      try {
-        if (!room || !room.users)
-          return false;
-        const user = room.users.find((user) => user.id === store.state.user.id);
-        if (typeof(user) !== "undefined" && user)
-          return true;
-        return false;
-      }
-      catch (e) {
-        console.log(e);
-        return false;
-      }
+        store.commit("setLastPrivate", {} as Room);
+      this.$forceUpdate;
     },
     selectRoom(value: Room) {
-      store.commit("setLastRoom", value);
-      this.getMessages(this.lastRoom);
+      if (value.users.find(user => user.id === store.state.user.id))
+      {
+        store.commit("setLastRoom", value);
+        this.getMessages(this.lastRoom);
+      }
     },
     selectPrivate(value: Room) {
       console.log(value);

@@ -2,7 +2,7 @@
   <div class="flex h-screen w-screen myBackground">
     <div class="grid h-full w-full grid-nogutter surface-section text-800 myBackground">
       <div class="h-screen col-12 md:col-6 p-6 text-center md:text-left flex align-items-center myBackground">
-        <section class="box-shadow" style="margin: 12%;">
+        <section class="box-shadow" style="margin: 12%; padding: 5em;">
           <section class="flex flex-column">
             <span class="block text-6xl font-bold mb-1">You want to play ?</span>
             <div class="text-6xl text-primary font-bold mb-3">Sign Up</div>
@@ -52,7 +52,6 @@
 .box-shadow {
   border: 0.2rem solid #fff;
   border-radius: 2rem;
-  padding: 5em;
   box-shadow: 0 0 .2rem #fff,
               0 0 .2rem #fff,
               0 0 2rem #bc13fe,
@@ -64,7 +63,6 @@
 .box-shadow-dark {
   border: 0.2rem solid #07004b;
   border-radius: 2rem;
-  padding: 5em;
   box-shadow: 0 0 .2rem #07004b,
               0 0 .2rem #07004b,
               0 0 2rem #8442ff,

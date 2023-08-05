@@ -51,14 +51,6 @@ export class RoomController {
     this.roomService.createRoom(dto);
   }
 
-  @Post("delete")
-  // @UseGuards(AtGuard)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  @HttpCode(HttpStatus.OK)
-  deleteRoom(@GetCurrentUserId() userId: number, @Body() dto: ModifyOtherDto) {
-    this.roomService.remove(userId, dto.roomId);
-  }
-
   @Post("delete/user")
   // @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost

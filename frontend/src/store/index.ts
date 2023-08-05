@@ -11,6 +11,11 @@ const store = createStore({
         lastPrivate: {} as Room,
         lastMessage: {} as Message,
     },
+    getters: {
+        userInRoom: function (state, room: Room) {
+            return room.users.find(user => user.id === state.user.id) ? true : false;
+        },
+    },
     mutations: {
         addMessage : function (state, chatMessage: Message) {
             state.messages.push(chatMessage);

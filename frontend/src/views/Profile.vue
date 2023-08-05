@@ -1,7 +1,7 @@
 <template>
 
       <div v-if="showPopup">
-        <div class="popup border-round box-shadow">
+        <div class="popup border-round box-shadow" style="padding: 5em;">
           <h2 class="popup-title">Choisir un avatar</h2>
           <div class="image-grid">
             <div v-for="image in imageGrid" :key="image.id" @click="selectImage(image)">
@@ -13,7 +13,7 @@
         </div>
       </div>
     
-    <div class="surface-section border-round box-shadow">
+    <div class="surface-section border-round box-shadow" style="padding: 5em;">
       <div class="grid-container">
         <div class="p-card p-component card" style="width: 29em;"><!---->
           <div class="p-card-body">

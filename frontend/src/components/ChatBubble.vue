@@ -1,10 +1,9 @@
 <template>
   <main class="msger-chat">
     <div class="msg" v-bind:class="[owner ? 'right-msg' : 'left-msg']"> 
-      <div
-       class="msg-img"
-       style="background-color: rgb(89, 151, 237);"
-      ></div>
+      <Menu v-if="toggle && !owner" :model="items" />
+      <div class="msg-img" @click="display">
+      </div>
 
       <div class="msg-bubble">
         <div class="msg-info">
@@ -99,6 +98,8 @@ body {
   background-position: center;
   background-size: cover;
   border-radius: 50%;
+  background-image: url("https://assets.codepen.io/6093409/sprocket.svg");
+  background-size: contain
 }
 .msg-bubble {
   max-width: 450px;
@@ -142,11 +143,24 @@ body {
 </style>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { Message } from "@/utils/interfaces"
 
 export default defineComponent({
   name: "ChatBubble",
+  data() {
+    return {
+      toggle: false,
+      items: ref([
+          { label: 'View Profile', icon: 'pi pi-fw pi-search' },
+          { label: 'Block', icon: 'pi pi-fw pi-lock' },
+          { label: 'Ban', icon: 'pi pi-fw pi-trash' },
+          { label: 'Mute', icon: 'pi pi-fw pi-eye-slash' },
+          { label: 'Invite Friend', icon: 'pi pi-fw pi-user' },
+          { label: 'Invite Pong', icon: 'pi pi-fw pi-circle-fill' },
+      ]),
+    }
+  },
   props: {
     message: {
       type: Object as () => Message,
@@ -166,6 +180,9 @@ export default defineComponent({
       if (day.length < 2) 
           day = '0' + day;
       return [year, month, day].join('-') + ` ${h.slice(-2)}:${m.slice(-2)}`;
+    },
+    display() {
+      this.toggle = !this.toggle;
     },
   }
 })

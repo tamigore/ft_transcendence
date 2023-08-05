@@ -449,12 +449,12 @@ export class RoomService implements OnModuleInit {
             },
           },
         });
-        prisma.room.delete({
+        return prisma.room.delete({
           where: { id: roomId },
         });
       })
-      .then((user) => {
-        this.logger.log("remove success: ", user);
+      .then((res) => {
+        this.logger.log("remove success: ", res);
       })
       .catch((error) => {
         throw new Error(error);
