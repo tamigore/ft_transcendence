@@ -1,7 +1,6 @@
 <template>
 
   <div v-if="showPopup">
-
     <div class="popup border-round box-shadow" style="padding: 5em;">
       <h2 class="popup-title">Choose an avatar</h2>
       <div class="image-grid">
@@ -131,7 +130,7 @@
 <AccordionTab header="Friends">
     
 
-  <div class="surface-section border-round box-shadow" style="padding: 5em;">
+  <div class="surface-section border-round box-shadow " style="padding: 5em">
         <div class="p-inputgroup flex-1 mb-4">
           <span class="p-inputgroup-addon">
             <i class="pi pi-user"></i>
@@ -151,6 +150,7 @@
                   >Add</Button>
         </div>
       <ul class="list-none p-0 m-0">
+
         <!-- New list tiles -->
       
       <li class="h-32 flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap"
@@ -169,8 +169,8 @@
       style="width: 100%; height: 100%; object-fit: cover;"
     />
   </div>
-  <div class="text-500 w-6 md:w-2 font-medium" style="overflow: hidden;"> 
-    <span style="display: block; margin-top: 5px;">{{ friend.username }}</span> 
+  <div class="text-500 w-6 md:w-2 font-medium" style="overflow: hidden;">
+    <span style="display: block; margin-top: 5px;">{{ friend.username }}</span>
   </div>
 </div>
 
@@ -251,8 +251,6 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { User } from '@/utils/interfaces';
 
 
-
-
 export default defineComponent({
 name: 'ProfileView',
 computed: {
@@ -315,10 +313,6 @@ methods:
 {
 openImagePicker() {
   this.showPopup = true;
-},
-
-closePopup() {
-  this.showPopup = false;
 },
 
 getImageById(id: string | null) {
@@ -385,6 +379,16 @@ async ModifyUserBio() {
 
     async ModifyUserEmail() {
   if (this.isEditingEmail) {
+    if (this.editedEmail !== null) {
+      if (this.editedEmail.trim() === '') {
+        alert("Email cannot be empty.");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.editedEmail)) {
+        alert("Invalid email format.");
+        return;
+      }
+    }
     this.ModifyStoreEmail();
     const user = store.state.user;
     axios.defaults.baseURL = server.nestUrl;
@@ -412,6 +416,20 @@ async ModifyUserBio() {
 
 async ModifyUserUsername() {
   if (this.isEditingUsername) {
+    if (this.editedUsername !== null) {
+      if (this.editedUsername.trim() === '') {
+        alert("Username cannot be empty.");
+        return;
+      }
+      if (this.editedUsername.length > 50) {
+        alert("Username cannot exceed 50 characters.");
+        return;
+      }
+      if (/\s/.test(this.editedUsername)) {
+        alert("Username cannot contain whitespace.");
+        return;
+      }
+    }
     this.ModifyStoreUsername();
     const user = store.state.user;
     axios.defaults.baseURL = server.nestUrl;
@@ -471,7 +489,7 @@ getAllUsernames() {
     if (searchQuery != '') {
       this.filteredUsernames = this.usernames.filter((username) =>
         username.toLowerCase().includes(searchQuery)
-      ).slice(0, 5);
+      ).slice(0, 4);
     } else {
       this.filteredUsernames = [];
     }
@@ -527,10 +545,10 @@ getAllUsernames() {
             this.showDeleteIcon.push(false);
             this.selectedFriend = '';
           } else {
-            alert('Cet ami est déjà dans votre liste.');
+            alert('This friend is already in your friends');
           }
         } else {
-          alert('Utilisateur avec l\'ID fourni introuvable.');
+          alert('The user with the provided ID not found.');
         }
       })
       .catch((error: AxiosError) => {
@@ -547,10 +565,10 @@ getAllUsernames() {
             this.showDeleteIcon.push(false);
             this.selectedFriend = '';
           } else {
-            alert('Cet ami est déjà dans votre liste.');
+            alert('This friend is already registered i your friends list.');
           }
         } else {
-          alert('Utilisateur avec le nom d\'utilisateur fourni introuvable.');
+          alert('User with provided username not found.');
         }
       })
       .catch((error: AxiosError) => {
@@ -565,9 +583,9 @@ getAllUsernames() {
 
   displayFriendsList() {
 if (this.userFriends.length > 0) {
-  console.log("Liste des amis : ", this.userFriends);
+  console.log("friends list : ", this.userFriends);
 } else {
-  console.log("Aucun ami enregistré.");
+  console.log("No friends registered.");
 }
 },
 
@@ -589,19 +607,6 @@ ModifyStoreBio() {
 },
 ModifyStoreAvatarId(image) {
   store.commit('setAvatarId', image.id );
-},
-
-addFriendToStore(friend: User) {
-  console.log(friend);
-  store.commit('addFriend', friend);
-},
-
-removeFriendFromStoreById(friendId: number) {
-  store.commit('removeFriendById', friendId);
-},
-
-removeFriendFromStoreByUsername(friendUsername: string) {
-  store.commit('removeFriendByUsername', friendUsername); 
 },
 },
 })
