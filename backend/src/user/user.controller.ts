@@ -105,4 +105,21 @@ export class UserController {
   //   const id = parseInt(param.split("=")[1]);
   //   return this.userService.remove(userId, id);
   // }
+
+  @Post("block/add")
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  addBlock(@GetCurrentUserId() userId: number, @Body() friend: User) {
+    this.userService.addBlocked(userId, friend.id);
+  }
+
+  // @Public()
+  @Post("block/del")
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  delBlock(@GetCurrentUserId() userId: number, @Body() friend: User) {
+    this.userService.removeBlocked(userId, friend.id);
+  }
 }

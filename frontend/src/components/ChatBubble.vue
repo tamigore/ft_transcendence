@@ -145,6 +145,7 @@ body {
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { Message } from "@/utils/interfaces"
+import axios from 'axios';
 
 export default defineComponent({
   name: "ChatBubble",
@@ -223,6 +224,13 @@ export default defineComponent({
     },
     blockUser() {
       console.log("blockUser");
+      axios.post('/api/user/block/add', {
+        id: this.message?.userId,
+      }, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
     },
     kickUser() {
       console.log("kickUser");
