@@ -1,93 +1,246 @@
 <template>
 
-      <div v-if="showPopup">
-        <div class="popup border-round box-shadow" style="padding: 5em;">
-          <h2 class="popup-title">Choisir un avatar</h2>
-          <div class="image-grid">
-            <div v-for="image in imageGrid" :key="image.id" @click="selectImage(image)">
-              <div class="image-frame">
-                <img :src="image.img" :alt="'Image ' + image.id" />
-              </div>
-            </div>
+  <div v-if="showPopup">
+    <div class="popup border-round box-shadow" style="padding: 5em;">
+      <h2 class="popup-title">Choose an avatar</h2>
+      <div class="image-grid">
+        <div v-for="image in imageGrid" :key="image.id" @click="ModifyUserAvatarId(image)">
+          <div class="image-frame">
+            <img :src="image.img" :alt="'Image ' + image.id" />
           </div>
         </div>
-      </div>
-    
-    <div class="surface-section border-round box-shadow" style="padding: 5em;">
-      <div class="grid-container">
-        <div class="p-card p-component card" style="width: 29em;"><!---->
-          <div class="p-card-body">
-            <div @click="openImagePicker" class="selected-image" :class="{ active: showPopup }">
-              <img :src="selectedImage.img" :alt="'Image ' + selectedImage.id" type="pointer"/>
-            </div>
-          </div>
-        </div>
-        
-        <div class="profile-details">
-        <div class="font-medium text-3xl text-900 mb-3">Profile</div>
-
-        <ul class="list-none p-0 m-0">
-          
-          <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 font-medium">Username</div>
-            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
-              <span v-if="!isEditingUsername">{{ username }}</span>
-              <input v-else type="text" v-model="editedUsername" @keyup.enter="ModifyUserUsername" />
-            </div>
-            <div class="w-6 md:w-2 flex justify-content-end">
-              <button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserUsername">
-                {{ isEditingUsername ? (isSavingUsername ? 'Saving...' : 'Save') : 'Edit' }}
-              </button>
-            </div>
-          </li>
-          
-          <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 font-medium">Email</div>
-            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
-              <span v-if="!isEditingEmail">{{ email }}</span>
-              <input v-else type="text" v-model="editedEmail" @keyup.enter="ModifyUserEmail" />
-            </div>
-            <div class="w-6 md:w-2 flex justify-content-end">
-              <button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserEmail">
-                {{ isEditingEmail ? (isSavingEmail ? 'Saving...' : 'Save') : 'Edit' }}
-              </button>
-            </div>
-          </li>
-          
-          <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 font-medium">Last game</div>
-            <div class="text-900 w-full md:w-8 md:flex-order-1 flex-order-1">
-              <Chip label="God Tiers"></Chip>
-            </div>
-          </li>
-
-                    
-          <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 font-medium">Titles</div>
-            <div class="text-900 w-full md:w-8 md:flex-order-1 flex-order-1">
-              <Chip label="Challenger" class="mr-2"></Chip>
-              <Chip label="No 1" class="mr-2"></Chip>
-              <Chip label="God Tiers"></Chip>
-            </div>
-          </li>
-          
-          <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 font-medium">Bio</div>
-            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
-              <span v-if="!isEditingBio">{{ Bio }}</span>
-              <input v-else type="text" v-model="editedBio" @keyup.enter="ModifyUserBio" />
-            </div>
-            <div class="w-6 md:w-2 flex justify-content-end">
-              <button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserBio">
-                {{ isEditingBio ? (isSavingBio ? 'Saving...' : 'Save') : 'Edit' }}
-              </button>
-            </div>
-          </li>
-
-        </ul>
       </div>
     </div>
   </div>
+
+  <Accordion :activeIndex="0">
+    <AccordionTab header="Profile">
+      <div class="surface-section border-round box-shadow" style="padding: 5em;" >
+
+  <div class="grid-container">
+    <div class="p-card p-component card" style="background-color: rgb(69, 60, 73); width: 29em;">
+      <div class="p-card-body">
+        <div @click="openImagePicker" class="selected-image" :class="{ active: showPopup }" style="background-color: rgb(37, 37, 37);">
+          <img :src="selectedImage.img" :alt="'Image ' + selectedImage.id" type="pointer"/>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="profile-details">
+    <div class="font-medium text-3xl text-900 mb-3">Profile</div>
+
+    <ul class="list-none p-0 m-0">
+      
+      <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+    <div class="text-500 w-6 md:w-2 font-medium">Username</div>
+    <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1" :class="{ 'whitespace-nowrap': !isEditingUsername, 'text-justify': !isEditingUsername }">
+      <span v-if="!isEditingUsername">{{ username }}</span>
+      <input
+        v-else
+        type="text"
+        v-model="editedUsername"
+        @keyup.enter="ModifyUserUsername"
+        @keyup.esc="cancelEditing('username')"
+        ref="usernameInput"
+        style="width: auto;"
+        data-v-ced23842="" 
+        class="p-inputtext p-component p-inputtext-sm" 
+        data-pc-name="inputtext" 
+        data-pc-section="root"
+        placeholder="username"
+      />
+
+    </div>
+    <div class="w-6 md:w-2 flex justify-content-end">
+      <Button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserUsername">
+      {{ isEditingUsername ? (isSavingUsername ? 'Saving...' : 'Save') : 'Edit' }}
+    </Button>
+
+
+    </div>
+  </li>
+
+  <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
+        <div class="text-500 w-6 md:w-2 font-medium">Id</div>
+        <div class="text-900 w-full md:w-8 md:flex-order-1 flex-order-1">
+          <Chip>{{ id }}</Chip>
+        </div>
+      </li>
+      
+  <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+    <div class="text-500 w-6 md:w-2 font-medium">Email</div>
+    <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1" :class="{ 'whitespace-nowrap': !isEditingEmail, 'text-justify': !isEditingEmail }">
+      <span v-if="!isEditingEmail">{{ email }}</span>
+      <input
+        v-else
+        type="email"
+        v-model="editedEmail"
+        @keyup.enter="ModifyUserEmail"
+        @keyup.esc="cancelEditing('email')"
+        ref="emailInput"
+        style="width: auto;"
+        data-v-ced23842="" 
+        class="p-inputtext p-component p-inputtext-sm" 
+        data-pc-name="inputtext" 
+        data-pc-section="root"
+        placeholder="email"
+      />
+    </div>
+    <div class="w-6 md:w-2 flex justify-content-end">
+      <Button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserEmail">
+        {{ isEditingEmail ? (isSavingEmail ? 'Saving...' : 'Save') : 'Edit' }}
+      </button>
+    </div>
+  </li>
+
+  <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+  <div class="text-500 w-6 md:w-2 font-medium">Bio</div>
+  <div class="text-900 w-full md:w-8 md:flex-order-0 flex-grow-1" :class="{ 'whitespace-nowrap': !isEditingBio, 'text-justify': !isEditingBio }">
+    <span v-if="!isEditingBio">{{ Bio }}</span>
+    <input
+      v-else
+      type="text"
+      v-model="editedBio"
+      @keyup.enter="ModifyUserBio"
+      @keyup.esc="cancelEditing('bio')"
+      ref="bioInput"
+      style="width: auto;"
+      data-v-ced23842="" 
+      class="p-inputtext p-component p-inputtext-sm" 
+      data-pc-name="inputtext" 
+      data-pc-section="root"
+      placeholder="bio"
+    />
+  </div>
+  <div class="w-4 md:w-2 flex justify-content-end">
+    <Button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserBio">
+      {{ isEditingBio ? (isSavingBio ? 'Saving...' : 'Save') : 'Edit' }}
+    </button>
+  </div>
+</li>
+
+  
+</ul>
+</div>
+
+</div>
+</div>
+</AccordionTab>
+<AccordionTab header="Friends">
+    
+
+  <div class="surface-section border-round box-shadow " style="padding: 5em">
+        <div class="p-inputgroup flex-1 mb-4">
+          <span class="p-inputgroup-addon">
+            <i class="pi pi-user"></i>
+          </span>
+
+          <Dropdown
+            v-model="selectedFriend"
+            editable
+            :options="filteredUsernames"
+            @input="filterUsernames"
+            placeholder="Find by: Username / Id"
+            class="w-full md:w-14rem"
+          />
+
+          <Button @click="addFriend"           
+          style="background-color: rgb(197, 72, 255)"
+                  >Add</Button>
+        </div>
+      <ul class="list-none p-0 m-0">
+
+        <!-- New list tiles -->
+      
+      <li class="h-32 flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap"
+        v-for="(friend, index) in userFriends"
+        :key="index"
+        @mouseover="showDeleteIcon[index + 1] = true"
+        @mouseout="showDeleteIcon[index + 1] = false"
+      >
+    
+        <div class="text-500 w-6 md:w-2 font-medium">
+          <div class="friend-container">
+  <div class="image-frame" style="width: 75px; height: 75px; float: left; margin-right: 50px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
+    <img
+      :src="getAvatarById(friend.img)"
+      :alt="'Avatar ' + friend.username"
+      style="width: 100%; height: 100%; object-fit: cover;"
+    />
+  </div>
+  <div class="text-500 w-6 md:w-2 font-medium" style="overflow: hidden;">
+    <span style="display: block; margin-top: 5px;">{{ friend.username }}</span>
+  </div>
+</div>
+
+
+
+          
+          </div>
+        <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
+      <span v-if="friend.loggedIn">
+        <Tag 
+          icon="pi pi-circle-fill" 
+          style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)"
+
+ 
+          value="Online"></Tag>
+      </span>
+    </div>
+    <div class="w-6 md:w-2 flex justify-content-end space-x-2">
+        <Button
+          v-show="showDeleteIcon[index + 1]"
+          icon="pi pi-eye"
+          rounded
+          class="mr-3"
+          aria-label="ViewProfile"
+          style="background-color: rgb(197, 72, 255)"
+
+          @click="removeFriend(index)"
+        ></Button>
+        <Button
+          v-show="showDeleteIcon[index + 1]"
+          icon="pi pi-ban pi-ban"
+          rounded
+          class="mr-3"
+          aria-label="Ban"
+          style="background-color: rgb(253, 174, 101)"
+
+          @click="removeFriend(index)"
+        ></Button>
+        <Button
+          icon="pi pi-times"
+          v-show="showDeleteIcon[index + 1]"
+          rounded
+          class="mr-3"
+          aria-label="Delete"
+          style="background-color: rgb(247, 82, 118)"
+          @click="removeFriend(index)"
+        ></Button>
+        
+      </div>
+      </li>
+      </ul>
+        </div>
+    </AccordionTab>
+    <AccordionTab header="History">
+        <p>
+            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
+            culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
+        </p>
+    </AccordionTab>
+    <AccordionTab header="statistics">
+        <p>
+            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
+            culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
+        </p>
+    </AccordionTab>
+    
+  </Accordion>
+
+
+
 </template>
 
 <script lang="ts">
@@ -95,236 +248,472 @@ import store from '@/store';
 import { defineComponent } from 'vue';
 import { server } from "@/utils/helper";
 import axios, { AxiosResponse, AxiosError } from 'axios';
+import { User } from '@/utils/interfaces';
+
 
 export default defineComponent({
-  name: 'ProfileView',
-  computed: {
-    selectedImage() {
-      const selectedId = store.state.user.img;
-      return this.getImageById(selectedId) || { id: 1, img: require('@/assets/welc.jpeg') };
-    },
-    username() {
-      return store.state.user.username;
-    },
-    email() {
-      return store.state.user.email;
-    },
-    Bio() {
-      return store.state.user.bio;
-    },
-  },
-  data() {
-    return {      
-      isEditingEmail: false,
-      isSavingEmail: false,
-      editedEmail: "",
-      
-      isEditingBio: false,
-      isSavingBio: false,
-      editedBio: "", 
-      
-      isEditingUsername: false,
-      isSavingUsername: false,
-      editedUsername: "",
-      
-      showPopup: false,
-      imageGrid: [
-        { id: "1", img: require('@/assets/profiles/profil_1.jpg') },
-        { id: "2", img: require('@/assets/profiles/profil_2.jpg') },
-        { id: "3", img: require('@/assets/profiles/profil_3.jpg') },
-        { id: "4", img: require('@/assets/profiles/profil_4.jpg') },
-        { id: "5", img: require('@/assets/profiles/profil_5.jpg') },
-        { id: "6", img: require('@/assets/profiles/profil_6.jpg') },
-        { id: "7", img: require('@/assets/profiles/profil_7.jpg') },
-        { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
-        { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
-      ],
+name: 'ProfileView',
+computed: {
+selectedImage() {
+  const selectedId = store.state.user.img;
+  return this.getImageById(selectedId) || { id: 1, img: require('@/assets/welc.jpeg') };
+},
+username() {
+  return store.state.user.username;
+},
+email() {
+  return store.state.user.email;
+},
+Bio() {
+  return store.state.user.bio;
+},
+},
+mounted() {
+  this.getAllFriends();
+  this.getAllUsernames();
+},
+data() {
+return {      
+  isEditingEmail: false,
+  isSavingEmail: false,
+  editedEmail: store.state.user.email,
+  
+  isEditingBio: false,
+  isSavingBio: false,
+  editedBio: store.state.user.bio, 
+  
+  isEditingUsername: false,
+  isSavingUsername: false,
+  editedUsername: store.state.user.username,
+
+  id: store.state.user.id,
+  
+  showPopup: false,
+  imageGrid: [
+    { id: "1", img: require('@/assets/profiles/profil_1.jpg') },
+    { id: "2", img: require('@/assets/profiles/profil_2.jpg') },
+    { id: "3", img: require('@/assets/profiles/profil_3.jpg') },
+    { id: "4", img: require('@/assets/profiles/profil_4.jpg') },
+    { id: "5", img: require('@/assets/profiles/profil_5.jpg') },
+    { id: "6", img: require('@/assets/profiles/profil_6.jpg') },
+    { id: "7", img: require('@/assets/profiles/profil_7.jpg') },
+    { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
+    { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
+  ],
+
+  userFriends: [] as User[],
+  isInputAddFriendsFocused: false,
+  selectedFriend: '' as string,
+  usernames: [] as string[],
+  filteredUsernames: [] as string[],
+  showDeleteIcon: [] as boolean[],
+}
+},
+methods: 
+{
+openImagePicker() {
+  this.showPopup = true;
+},
+
+getImageById(id: string | null) {
+  if (!id) return null;
+  return this.imageGrid.find(image => image.id === id);
+},
+
+cancelEditing(field) {
+    if (field === 'username') {
+      this.editedUsername = this.username;
+      this.isEditingUsername = false;
+    } else if (field === 'email') {
+      this.editedEmail = this.email;
+      this.isEditingEmail = false;
+    } else if (field === 'bio') {
+      this.editedBio = this.Bio;
+      this.isEditingBio = false;
     }
-  },
-  methods: 
-  {
-    openImagePicker() {
-      this.showPopup = true;
-    },
-    selectImage(image) {
-      store.commit('setAvatarId', image.id);
-      this.showPopup = false;
-    },
-    getImageById(id: string | null) {
-      if (!id) return null;
-      return this.imageGrid.find(image => image.id === id);
-    },    
-    async ModifyUserBio() 
-    {
-      if (this.isEditingBio) 
-      {
+},
+
+async ModifyUserAvatarId(image) 
+{
+    this.ModifyStoreAvatarId(image);
+    const user = store.state.user;
+    axios.defaults.baseURL = server.nestUrl;
+    await axios.post('/api/user/update', user,
+      { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
+    .then((response: AxiosResponse) => {
+        console.log(response);
+    })
+    .catch((error: AxiosError) => {
+        console.log(error);
+    })
+    this.showPopup = false;
+},
+
+async ModifyUserBio() {
+      if (this.isEditingBio) {
+        if (this.editedBio !== null) {
+          if (this.editedBio.length > 500) {
+            alert("Bio cannot exceed 500 characters.");
+            return;
+          }
+    }
         this.ModifyStoreBio();
         const user = store.state.user;
         axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/update', user,
-          { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
-        .then((response: AxiosResponse) => {
+        await axios.post('/api/user/update', user, {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+          .then((response: AxiosResponse) => {
             console.log(response);
-        })
-        .catch((error: AxiosError) => {
+          })
+          .catch((error: AxiosError) => {
             console.log(error);
-        })
-
-        this.isSavingBio = false; // Mettre à jour l'état du bouton après la requête
+          });
+        this.isSavingBio = false;
       }
       this.isEditingBio = !this.isEditingBio;
-    },
-
-    async ModifyUserEmail() 
-    {
-      if (this.isEditingEmail) 
-      {
-        this.ModifyStoreEmail();
-        const user = store.state.user;
-        axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/update', user,
-          { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
-        .then((response: AxiosResponse) => {
-            console.log(response);
-        })
-        .catch((error: AxiosError) => {
-            console.log(error);
-        })
-        this.isSavingEmail = false;
+      if (this.isEditingBio) {
+    this.$nextTick(() => {
+      const bioInput = this.$refs.bioInput as HTMLInputElement | null;
+      if (bioInput) {
+        bioInput.focus();
       }
-      this.isEditingEmail = !this.isEditingEmail;
-    },
-
-    async ModifyUserUsername() 
-    {
-      if (this.isEditingUsername) 
-      {
-        this.ModifyStoreUsername();
-        const user = store.state.user;
-        axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/user/update', user,
-          { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
-        .then((response: AxiosResponse) => {
-            console.log(response);
-        })
-        .catch((error: AxiosError) => {
-            console.log(error);
-        })
-        this.isSavingUsername = false;
-      }
-      this.isEditingUsername = !this.isEditingUsername;
-    },
-    ModifyStoreUsername() {
-      store.commit('setUsername', this.editedUsername);
-    },
-    ModifyStoreEmail() {
-      store.commit('setEmail', this.editedEmail);
-    },
-    ModifyStoreBio() {
-      store.commit('setBio', this.editedBio);
-    },
+    });
   }
+
+    },
+
+    async ModifyUserEmail() {
+  if (this.isEditingEmail) {
+    if (this.editedEmail !== null) {
+      if (this.editedEmail.trim() === '') {
+        alert("Email cannot be empty.");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.editedEmail)) {
+        alert("Invalid email format.");
+        return;
+      }
+    }
+    this.ModifyStoreEmail();
+    const user = store.state.user;
+    axios.defaults.baseURL = server.nestUrl;
+    await axios.post('/api/user/update', user, {
+        headers: { Authorization: `Bearer ${store.state.user.hash}` },
+      })
+      .then((response: AxiosResponse) => {
+        console.log(response);
+      })
+      .catch((error: AxiosError) => {
+        console.log(error);
+      });
+    this.isSavingEmail = false;
+  }
+  this.isEditingEmail = !this.isEditingEmail;
+  if (this.isEditingEmail) {
+    this.$nextTick(() => {
+      const emailInput = this.$refs.emailInput as HTMLInputElement | null;
+      if (emailInput) {
+        emailInput.focus();
+      }
+    });
+}
+    },
+
+async ModifyUserUsername() {
+  if (this.isEditingUsername) {
+    if (this.editedUsername !== null) {
+      if (this.editedUsername.trim() === '') {
+        alert("Username cannot be empty.");
+        return;
+      }
+      if (this.editedUsername.length > 50) {
+        alert("Username cannot exceed 50 characters.");
+        return;
+      }
+      if (/\s/.test(this.editedUsername)) {
+        alert("Username cannot contain whitespace.");
+        return;
+      }
+    }
+    this.ModifyStoreUsername();
+    const user = store.state.user;
+    axios.defaults.baseURL = server.nestUrl;
+    await axios.post('/api/user/update', user, {
+        headers: { Authorization: `Bearer ${store.state.user.hash}` },
+      })
+      .then((response: AxiosResponse) => {
+        console.log(response);
+      })
+      .catch((error: AxiosError) => {
+        console.log(error);
+      });
+    this.isSavingUsername = false;
+  }
+  this.isEditingUsername = !this.isEditingUsername;
+  if (this.isEditingUsername) {
+    this.$nextTick(() => {
+      const usernameInput = this.$refs.usernameInput as HTMLInputElement | null;
+      if (usernameInput) {
+        usernameInput.focus();
+      }
+    });
+}},
+
+getAllUsernames() {
+    axios.defaults.baseURL = server.nestUrl;
+    axios
+      .get(`/api/user/`, {
+        headers: { Authorization: `Bearer ${store.state.user.hash}` },
+      })
+      .then((response: AxiosResponse) => {
+        console.log(response);
+        this.usernames = response.data.map((user) => user.username);
+      })
+      .catch((error: AxiosError) => {
+        console.error(error);
+      });
+  },
+
+  getAllFriends() {
+    axios.defaults.baseURL = server.nestUrl;
+    axios
+      .get(`/api/user/`, {
+        headers: { Authorization: `Bearer ${store.state.user.hash}` },
+      })
+      .then((response: AxiosResponse) => {
+        console.log(response);
+        this.userFriends = response.data.map((user) => user);
+      })
+      .catch((error: AxiosError) => {
+        console.error(error);
+      });
+  },
+
+  filterUsernames() {
+    const searchQuery = this.selectedFriend.toLowerCase();
+    if (searchQuery != '') {
+      this.filteredUsernames = this.usernames.filter((username) =>
+        username.toLowerCase().includes(searchQuery)
+      ).slice(0, 4);
+    } else {
+      this.filteredUsernames = [];
+    }
+  },
+
+  getUserById(id: number): Promise<User | null> {
+    axios.defaults.baseURL = server.nestUrl;
+    return axios
+      .get(`/api/user/${id}`, {
+        headers: { Authorization: `Bearer ${store.state.user.hash}` },
+      })
+      .then((response: AxiosResponse) => {
+        console.log(response);
+        return response.data as User;
+      })
+      .catch((error: AxiosError) => {
+        console.error(error);
+        return null;
+      });
+  },
+
+  getUserByUsername(username: string): Promise<User | null> {
+    axios.defaults.baseURL = server.nestUrl;
+    return axios
+      .get(`/api/user/username/${username}`, {
+        headers: { Authorization: `Bearer ${store.state.user.hash}` },
+      })
+      .then((response: AxiosResponse) => {
+        console.log(response);
+        return response.data as User;
+      })
+      .catch((error: AxiosError) => {
+        console.error(error);
+        return null;
+      });
+  },
+
+  addFriend() {
+    const id = parseInt(this.selectedFriend);
+    if (!isNaN(id)) {
+      this.handleIdSearch(id);
+    } else {
+      this.handleUsernameSearch(this.selectedFriend);
+    }
+  },
+
+  handleIdSearch(id: number) {
+    this.getUserById(id)
+      .then((user) => {
+        if (user && user.username) {
+          if (!this.userFriends.some((friend) => friend.id === user.id)) {
+            this.userFriends.push(user);
+            this.showDeleteIcon.push(false);
+            this.selectedFriend = '';
+            // AJOUTER USER DANS LISTE DES AMIS DE LA BDD
+          } else {
+            alert('This friend is already in your friends');
+          }
+        } else {
+          alert('The user with the provided ID not found.');
+        }
+      })
+      .catch((error: AxiosError) => {
+        console.error(error);
+      });
+  },
+
+  handleUsernameSearch(username: string) {
+    this.getUserByUsername(username)
+      .then((user) => {
+        if (user && user.username) {
+          if (!this.userFriends.some((friend) => friend.id === user.id)) {
+            this.userFriends.push(user);
+            this.showDeleteIcon.push(false);
+            this.selectedFriend = '';
+            // AJOUTER LE USER DANS LA BDD. 
+          } else {
+            alert('This friend is already registered in your friends list.');
+          }
+        } else {
+          alert('User with provided username not found.');
+        }
+      })
+      .catch((error: AxiosError) => {
+        console.error(error);
+      });
+  },
+
+  removeFriend(index: number) {
+    this.userFriends.splice(index, 1);
+    this.showDeleteIcon.splice(index + 1, 1);
+    //ICI SUPPRIMER LE FRIEND DE LA LISTE DE FRIENDS
+  },
+
+  displayFriendsList() {
+if (this.userFriends.length > 0) {
+  console.log("friends list : ", this.userFriends);
+} else {
+  console.log("No friends registered.");
+}
+},
+
+
+getAvatarById(id) {
+  if (!id) return require('@/assets/welc.jpeg');
+  const avatar = this.imageGrid.find((image) => image.id === id);
+  return avatar ? avatar.img : require('@/assets/welc.jpeg');
+},
+
+ModifyStoreUsername() {
+  store.commit('setUsername', this.editedUsername);
+},
+ModifyStoreEmail() {
+  store.commit('setEmail', this.editedEmail);
+},
+ModifyStoreBio() {
+  store.commit('setBio', this.editedBio);
+},
+ModifyStoreAvatarId(image) {
+  store.commit('setAvatarId', image.id );
+},
+},
 })
 </script>
 
 
 <style scoped>
 .popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #49354f;
-  padding: 40px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  text-align: center;
-  z-index: 2;
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background: #49354f;
+padding: 40px;
+border: 1px solid #ccc;
+border-radius: 10px;
+text-align: center;
+z-index: 2;
 }
 
-  .popup-title {
-    color: #000;
-    font-size: 2rem;
-    font-style: italic;
-    font-family:Verdana, Geneva, Tahoma, sans-serif;
-    text-align: left;
-    padding-bottom: 0.3cm;
-  }
-  
-  .image-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  
-  .image-frame {
-    width: 200px; /* Largeur de 300 pixels pour le cadre */
-    height: 200px; /* Hauteur de 300 pixels pour le cadre */
-    position: relative;
-    overflow: hidden;
-    background: #000;
-  }
-  
-  .image-frame img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    cursor: pointer;
-  }
+.popup-title {
+color: #000;
+font-size: 1.4em;
+font-family:Verdana, Geneva, Tahoma, sans-serif;
+text-align: left;
+padding-bottom: 0.3cm;
+}
+
+.image-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 10px;
+}
+
+.image-frame {
+width: 200px;
+height: 200px;
+position: relative;
+overflow: hidden;
+background: #000;
+}
+
+.image-frame img {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+max-width: 100%;
+max-height: 100%;
+object-fit: contain;
+cursor: pointer;
+}
 
 
 .selected-image {
-  cursor: pointer;
-  z-index: 1; /* Ajoutez cette ligne pour définir le z-index à 1 */
+cursor: pointer;
+z-index: 1;
 }
-  
-  .selected-image.active {
-    border: 2px solid #000;
-  }
+
+.selected-image.active {
+border: 2px solid #000;
+}
 
 .grid-container {
-  display: grid;
-  grid-template-columns: 32em; /* Répartit l'espace en deux colonnes, la première pour la carte et la deuxième pour les détails du profil */
-  grid-gap: 1em;
+display: grid;
+grid-template-columns: 32em;
+grid-gap: 1em;
 }
 
 .card {
-  grid-column: 1; /* Place la carte dans la première colonne */
+grid-column: 1;
 }
 
 .selected-image {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100%;
 }
 
 .selected-image img {
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  object-fit: cover;
-  padding: 30px;
+width: 500px;
+height: 500px;
+border-radius: 50%;
+object-fit: cover;
+padding: 30px;
 }
 
 .profile-details {
-  grid-column: 2; /* Place les détails du profil dans la deuxième colonne */
-}
-
-.p-button-text {
-  color: #000;
+grid-column: 2;
 }
 
 .myBackground {
-  background:
-  linear-gradient( #290526, transparent),
-  linear-gradient(to top left, #2e081f, transparent),
-  linear-gradient(to top right, #1e1546, transparent),
-  linear-gradient(to left, #00000000, #19032583);
-  background-blend-mode: screen;
+background:
+linear-gradient( #290526, transparent),
+linear-gradient(to top left, #2e081f, transparent),
+linear-gradient(to top right, #1e1546, transparent),
+linear-gradient(to left, #00000000, #19032583);
+background-blend-mode: screen;
 }
 </style>
