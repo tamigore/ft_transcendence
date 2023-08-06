@@ -126,7 +126,13 @@ export default defineComponent({
     lastPrivate() {
       return store.state.lastPrivate as Room;
     },
-    lastMessage () {
+    lastMessage () { // TODO
+      if (store.state.lastMessage && store.state.lastMessage.room
+        && store.state.lastMessage.room.users.length > 0
+        && store.state.lastMessage.room.users.find((user) => {user.id === store.state.user.id}))
+      {
+          this.toast.add({severity: 'info', summary: 'New message' ,detail: `In room ${store.state.lastMessage.room.name} from user ${store.state.lastMessage.user.username}` });  
+      }
       return store.state.lastMessage as Message;
     },
     Rooms () {

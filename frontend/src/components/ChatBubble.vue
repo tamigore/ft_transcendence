@@ -152,12 +152,46 @@ export default defineComponent({
     return {
       toggle: false,
       items: ref([
-          { label: 'View Profile', icon: 'pi pi-fw pi-search' },
-          { label: 'Block', icon: 'pi pi-fw pi-lock' },
-          { label: 'Ban', icon: 'pi pi-fw pi-trash' },
-          { label: 'Mute', icon: 'pi pi-fw pi-eye-slash' },
-          { label: 'Invite Friend', icon: 'pi pi-fw pi-user' },
-          { label: 'Invite Pong', icon: 'pi pi-fw pi-circle-fill' },
+          { label: 'View Profile', icon: 'pi pi-fw pi-search',
+            command: () => {
+              this.searchUser(this.message?.user);
+            },
+          },
+          { label: 'Block', icon: 'pi pi-fw pi-lock',
+            command: () => {
+              this.blockUser(this.message?.user);
+            },
+          },
+          { label: 'Kick', icon: 'pi pi-fw pi-sign-out',
+            command: () => {
+              this.kickUser(this.message?.user);
+            },
+          },
+          { label: 'Ban', icon: 'pi pi-fw pi-trash',
+            command: () => {
+              this.banUser(this.message?.user);
+            },
+          },
+          { label: 'Mute', icon: 'pi pi-fw pi-eye-slash',
+            command: () => {
+              this.muteUser(this.message?.user);
+            },
+          },
+          { label: 'Invite Friend', icon: 'pi pi-fw pi-user',
+            command: () => {
+              this.inviteFriend(this.message?.user);
+            },
+          },
+          { label: 'Invite Pong', icon: 'pi pi-fw pi-circle-fill',
+            command: () => {
+              this.invitePong(this.message?.user);
+            },
+          },
+          { label: 'Private Message', icon: 'pi pi-fw pi-comments',
+            command: () => {
+              this.privateMessage(this.message?.user);
+            },
+          },
       ]),
     }
   },
@@ -183,6 +217,30 @@ export default defineComponent({
     },
     display() {
       this.toggle = !this.toggle;
+    },
+    searchUser() {
+      console.log("searchUser");
+    },
+    blockUser() {
+      console.log("blockUser");
+    },
+    kickUser() {
+      console.log("kickUser");
+    },
+    banUser() {
+      console.log("banUser");
+    },
+    muteUser() {
+      console.log("muteUser");
+    },
+    inviteFriend() {
+      console.log("inviteFriend");
+    },
+    invitePong() {
+      console.log("invitePong");
+    },
+    privateMessage() {
+      console.log("privateMessage");
     },
   }
 })
