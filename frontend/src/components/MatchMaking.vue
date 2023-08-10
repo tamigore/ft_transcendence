@@ -43,11 +43,15 @@ export default defineComponent({
   },
   methods: {
     async SearchGame() {
-      console.log(`typeof ${typeof(store.state.user.id)}`);
+     socket.connect();
+    
+      store.commit("setUserGameSocket", socket.id);
+      // console.log(`typeof ${typeof(store.state.user.id)}`);
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/matchmaker', {
           userId: store.state.user.id as number,
           gameSettings: false,
+          userName: store.state.user.username as string,
         }, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -55,12 +59,15 @@ export default defineComponent({
         })
         .then((response: AxiosResponse) => {
           console.log("response from Mathmaker : ", response.data.name);
-          socket.connect();
-          console.log("socket connecting room : ", response.data.player1.name);
+          console.log("socket connecting room : ", response.data.player1.username);
+
+
           socket.emit("joinGameRoom", {
           user : store.state.user,
-          room : response.data.player1.name,
+          room : response.data.player1.username as string,
           });
+
+
           console.log(response);
           store.commit("setGameParam", {
             multi: true as boolean,
@@ -70,7 +77,7 @@ export default defineComponent({
             noPlayer: false as boolean,
             score: [0, 0] as number[],
           });
-          store.commit("setGameRoom", response.data.player1);
+
           if (response.data.player2)
           {
             if (store.state.user.id == response.data.player1.id)
@@ -79,7 +86,8 @@ export default defineComponent({
               store.commit("setPlayerNum", 2);
 
           
-            store.commit("setGameConnect", true);
+              store.commit("setGameConnect", false);
+              store.commit("setInQueue", true);
           }
           else
           {

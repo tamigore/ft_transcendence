@@ -72,13 +72,20 @@ export default defineComponent({
 	},
 	updated() {
 		this.inGame = store.state.ingame;
-		if (this.inGame) {
-			socket.connect();
-		}
-		else {
-			socket.disconnect();
-		}
+        
+		// if (this.inGame) {
+		// 	socket.connect();
+        //     store.commit("setGameConnect", true);
+		// }
+		// else {
+		// 	socket.disconnect();
+		// }
 	},
+    onMonted() {
+
+        socket.connect();
+        store.commit("setGameConnect", true);
+    },
 })
 
 </script>

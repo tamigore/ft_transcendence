@@ -1,11 +1,13 @@
 import { createStore } from 'vuex';
 import { User, Room, Message, Game } from '../utils/interfaces';
+import { Socket } from "socket.io-client";
 
 const store = createStore({
     state: {
         user: {} as User,
 		game: {} as Game,
         gameRoom: "" as string,
+        gameSocket: {} as Socket,
         messages: [{}] as Message[],
         rooms: [{}] as Room[],
         connected: false as boolean,
@@ -24,6 +26,9 @@ const store = createStore({
         last_message: {} as Message,
     },
     mutations: {
+        setUserGameSocket : function (state, gameSocket: string) {
+            state.user.gameSocket = gameSocket;
+        },
         setGameRoom : function (state, gameRoom: string) {
             state.gameRoom = gameRoom;
         },

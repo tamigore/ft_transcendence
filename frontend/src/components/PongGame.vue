@@ -157,7 +157,7 @@ import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import store from "@/store";
 import socket from "@/utils/gameSocket"
-import { GameMove, PaddleState } from "@/utils/interfaces"
+import { GameMove, PaddleState, BallState, BlockState } from "@/utils/interfaces"
 import {
   SetPongWidth,
   SetPongHeight,
@@ -216,6 +216,22 @@ class EffectBlock {
     this.pong = Pong;
     this.id = this.pong.blockId;
   }
+
+getBlockState(): BlockState
+{
+  return (
+    {
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height,
+      color: this.color,
+      effect: this.effect,
+      id: this.id,
+    } as BlockState
+  );
+}
+
 
   triggerEffect(ball: BallClass): void {
     if (this.effect === "R_SLOW") {
@@ -276,6 +292,18 @@ class BallClass {
       this.hp = hp;
   }
 
+
+  ballState(): BallState {
+    return ({
+      ballX: this.x,
+      ballY: this.y,
+      ballVeloX: this.veloX,
+      ballVeloY: this.veloY,
+      ballId: this.id,
+      player: store.state.playerNum,
+    } as BallState);
+   
+  }
   ballWallColision() {
     if (this.y <= 0) {
       this.veloY = Math.abs(this.veloY);
@@ -284,26 +312,51 @@ class BallClass {
       this.veloY = -Math.abs(this.veloY);
     }
     if (this.x <= 1) {
-      this.hp--;
-      this.pong.scoreB += 1;
-      this.x = this.pong.width / 2;
-      this.y = this.pong.height / 2;
-      this.veloX = this.pong.randStartSpeedX();
-      this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
-    }
-    else if (this.x >= this.pong.width - 1) {
-      if (this.pong.wallIsUp) {
-        this.veloX = -this.veloX;
-        return;
+      if (!store.state.ingame)
+      {
+        console.log("goal on 1 IN GAMEEEE");
+        this.pong.scoreB += 1;
+        this.x = this.pong.width / 2;
+        this.y = this.pong.height / 2;
+        this.veloX = this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
       }
-      this.hp--;
-      this.pong.scoreA += 1;
-      this.x = this.pong.width / 2;
-      this.y = this.pong.height / 2;
-      this.veloX = -this.pong.randStartSpeedX();
-      this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
-    }
-  }
+      else if (store.state.playerNum == 1)
+      {
+        this.x = this.pong.width / 2;
+        this.y = this.pong.height / 2;
+        this.veloX = this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+        socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom});
+        socket.emit("goalMessage", {room: store.state.gameRoom, player: 1});
+      }
+   }
+    else if (this.x >= this.pong.width - 1) {
+      if (!store.state.ingame )
+      {
+        if (this.pong.wallIsUp) {
+          this.veloX = -this.veloX;
+          return;
+        }
+        console.log("goal on 2 IN GAMEEEE");
+        this.hp--;
+        this.pong.scoreA += 1;
+        this.x = this.pong.width / 2;
+        this.y = this.pong.height / 2;
+        this.veloX = -this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+      }
+      else if (store.state.playerNum == 2)
+      {
+        this.x = this.pong.width / 2;
+        this.y = this.pong.height / 2;
+        this.veloX = -this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+        socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom});
+        socket.emit("goalMessage", {room: store.state.gameRoom, player: 2});
+      }
+}
+}
 
   ballPaddleColision = (paddleX: number, paddleY: number, paddleHeight: number, paddleWidth: number, sign: number): boolean => {
     const dist_center = Math.abs(this.x - (this.pong.width / 2));
@@ -315,8 +368,10 @@ class BallClass {
           this.veloX = ballMaxSpeedX * sign;
         if (this.pong.gameIsBlocks && Math.random() < 0.6)
           this.pong.generateBlocks();
+        // if (store.state.playerNum == 1) //test gen Block
+        //   this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
-        if (this.veloY > 0)
+        // if (this.veloY > 0)
         // this.sendBallPaddle(paddleY, player);
         return true;
       }
@@ -352,7 +407,9 @@ class BallClass {
       if (this.x + this.radius >= block.x && this.x - this.radius <= block.x + block.width) {
         if (this.y + this.radius >= block.y && this.y - this.radius <= block.y + block.height) {
           block.triggerEffect(this);
+          socket.emit("destroyBlock", {room: store.state.gameRoom, blockId: block.id});
           this.pong.removeBlock(block.id);
+
           return;
         }
       }
@@ -404,13 +461,17 @@ class BallClass {
       this.ballPaddleColision(Math.abs(this.pong.paddleOffset + this.pong.leftPaddleWidth - this.pong.width / 2),
         this.pong.leftPaddleY, this.pong.leftPaddleHeight,
         this.pong.leftPaddleWidth, 1)) {
-      this.pong.num_ping += 1;
+        this.pong.num_ping += 1;
+        if (store.state.playerNum == 1)
+          socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom});
     }
     else if (this.x > this.pong.width / 2 / 3 &&
       this.ballPaddleColision(this.pong.rightPaddleX - this.pong.width / 2,
         this.pong.rightPaddleY, this.pong.rightPaddleHeight,
         this.pong.rightPaddleWidth, -1)) {
       this.pong.num_pong += 1;
+      if (store.state.playerNum == 2)
+          socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom});
     }
     if (this.hp == 0)
       this.pong.myBalls.splice(this.pong.myBalls.indexOf(this), 1);
@@ -422,7 +483,12 @@ class BallClass {
     return this;
   }
 
-
+  setBallState = (state: BallState) => {
+    this.x = state.ballX;
+    this.y = state.ballY;
+    this.veloX = state.ballVeloX;
+    this.veloY = state.ballVeloY;
+  }
 
 }
 
@@ -559,7 +625,7 @@ export class PongGameClass {
     //VARIOUS PARAMETERS
 
     this.blockSpace = setBlockSpace;
-    this.blockId = 0;
+    this.blockId = 1;
     this.ballId = 0;
 
     this.gameIsRunning = false;
@@ -657,6 +723,7 @@ export class PongGameClass {
     this.theBall.veloX = 0;
     this.theBall.veloY = 0;
 
+    this.blockId = 1;
     this.myBlocks = [];
 
     this.inertie = [0, 0];
@@ -703,7 +770,8 @@ export class PongGameClass {
     this.restartMatch(true);
     this.inMultiplayer = true;
     this.gameIsRunning = true;
-    console.log("startMultiOnline");
+    store.commit("setGameConnect", true);
+    console.log("startMultiOnline-----------");
     this.leftPlayerKeyDown = '';
     this.leftPlayerKeyUp = '';
     this.rightPlayerKeyDown = '';
@@ -717,8 +785,9 @@ export class PongGameClass {
     {
       this.rightPlayerKeyDown = 's';
       this.rightPlayerKeyUp = 'w';
-      
     }
+
+
   }
 
 
@@ -793,10 +862,16 @@ export class PongGameClass {
   }
 
 
+  setPaddleState = (paddleState : PaddleState) =>
+  {
+    if (paddleState.player == 1 && store.state.playerNum != 2)
+      this.leftPaddleY = paddleState.posY;
+    else if (paddleState.player == 2 && store.state.playerNum != 1)
+      this.rightPaddleY = paddleState.posY;
+  }
 
   /*******************Keys handelers*******************/
 
-  
 
   handleKeyOnline = (player:number, notPressed:boolean, key:number) =>
   {
@@ -827,6 +902,7 @@ export class PongGameClass {
   onlineKeyUp = (playerN:number, key:number) => {
     if (playerN != 2)
     {
+      console.log("------------MtonlineKeyUp");
       if (key == 1)
         this.leftArrowUp = 0;
       else if (key == 0)
@@ -834,18 +910,21 @@ export class PongGameClass {
     }
     if (playerN != 1)
     {
+      console.log("----MtonlineKeyUp");
       if (key == 1)
-        this.leftArrowUp = 0;
+        this.rightArrowUp = 0;
       else if (key == 0)
-        this.leftArrowDown = 0;
+        this.rightArrowDown = 0;
     }
   }
 
   sendKey = (_player:number, _up:boolean, _key:number) =>
   {
+    console.log("game socket in game", store.state.gameSocket);
+
+    console.log("sendKey", store.state.ingame, this.inMultiplayer);
     if (store.state.ingame && this.inMultiplayer)
       {
-
         const gameMoveData = {
         player: _player,
         notPressed: _up,
@@ -853,22 +932,23 @@ export class PongGameClass {
       } as GameMove;
 
         socket.emit("gameMessage", { moove: gameMoveData, room: store.state.gameRoom});
-    }
-    if (_up == true)
-    {
-      let _posY = 0;
-      if (_player == 1)
-        _posY = this.leftPaddleY;
-      else if (_player == 2)
-        _posY = this.rightPaddleY;
 
-      const paddleStateData = {
-        player: _player,
-        posY: _posY,
-      } as PaddleState;
+      if (_up == true)
+      {
+        let _posY = 0;
+        if (_player == 1)
+          _posY = this.leftPaddleY;
+        else if (_player == 2)
+          _posY = this.rightPaddleY;
+
+        const paddleStateData = {
+          player: _player,
+          posY: _posY,
+        } as PaddleState;
 
 
-      socket.emit("paddlePosMessage", {state: paddleStateData, room: store.state.gameRoom })
+        socket.emit("paddlePosMessage", {state: paddleStateData, room: store.state.gameRoom })
+      }
     }
   }
 
@@ -1007,12 +1087,15 @@ export class PongGameClass {
         break;
       }
       case 4: {
-        this.myBlocks.push(new EffectBlock(this, genX,
-          genY,
-          this.blockWidth, this.blockHeight, '#3fe6f2', "newBall"));
-        break;
+        // this.myBlocks.push(new EffectBlock(this, genX,
+        //   genY,
+        //   this.blockWidth, this.blockHeight, '#3fe6f2', "newBall"));
+        // break;
+        return ;
       }
     }
+    console.log("block created", this.myBlocks[this.myBlocks.length - 1].getBlockState());
+    socket.emit("createBlock", {room: store.state.gameRoom, block: this.myBlocks[this.myBlocks.length - 1].getBlockState()});
   }
 
   removeBlock = (blockId: number) => {
@@ -1048,15 +1131,14 @@ export default defineComponent({
     /*******************Game Loop*******************/
     
     const gameLoop = () => {
-      if (store.state.ingame && !Pong.value.gameIsRunning)
-      {
-        console.log(Pong.value.gameIsRunning);
-        Pong.value.startMultiOnline();
-      }
+      // if (store.state.ingame && !Pong.value.gameIsRunning)
+      // {
+      //   console.log(Pong.value.gameIsRunning);
+      //   Pong.value.startMultiOnline();
+      // }
       if (!ctx)
         return;
       ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
-      // Pong.value.generateBlocks();
       Pong.value.bot();
       Pong.value.moovePaddles();
       Pong.value.theBall.ballColision();
@@ -1122,32 +1204,79 @@ export default defineComponent({
     /*******************Mounted and unMounted*******************/
 
     onMounted(() => {
-    //   try {
-    //     hitSound.value = await loadSound("@/assets/sounds/hitSound.wav");
-    //   } catch (error) {
-    //     console.error("Error loading sound:", error);
-    //   }
+ 
+      socket.on("gameRoomJoiner", (data) => {
+        console.log("GameRoomJoiner", data.room);
+        store.commit("setGameRoom", data.room);
+        if (store.state.playerNum == 2)
+        {
+          store.commit("setGameConnect", true);
+          store.commit("setInQueue", false);
+          Pong.value.startMultiOnline();
+          console.log("ReadyGame", store.state.gameRoom);
+          socket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
+        }
+      })
 
-    socket.on("gameRoomJoiner", (data) => {
-      console.log("GameRoomJoiner", data.room);
-      store.commit("setGameRoom", data.room);
-      if (data.user.id == store.state.user.id)
+      socket.on("LaunchGame", (e: BallState) =>
       {
+
         store.commit("setGameConnect", true);
         store.commit("setInQueue", false);
+        console.log("LaunchGame", e);
         Pong.value.startMultiOnline();
-      }
-    })
+        Pong.value.theBall.setBallState(e);
+      });
 
       if (store.state.ingame)
       {
-        console.log("ingame de socket on");
+      
         socket.on("servMessage", (e:GameMove ) => {
-          console.log("aaaaaaaaaservMessage socket = ", socket.id);
+          console.log("servMessage moove= ", e);
           Pong.value.handleKeyOnline(e.player, e.notPressed, e.key);
         }); 
-      }
+        socket.on("paddleStateMessage", (e: PaddleState) => {
+          console.log("paddleStateMessage state = ", e);
+          Pong.value.setPaddleState(e);
+          
+        });
+
+        socket.on("setBall", (e: BallState) =>
+        {
+          console.log("setBall", e);
+          if (store.state.playerNum != e.player)
+          Pong.value.theBall.setBallState(e);
+        });
       
+        socket.on("scoreMessage", (e: number) =>
+        {
+          console.log("scoreMessage", e);
+          if (e == 2)
+            Pong.value.scoreA++;
+          else if (e == 1)
+            Pong.value.scoreB++;
+        });
+
+        socket.on("blockCreation", (block: BlockState) => {
+          console.log("blockCreation", block);
+
+          console.log("--blockCreation ID :", block.id, Pong.value.blockId);
+          if (block.id > Pong.value.blockId)
+          {
+            console.log("----------------------blockCreation IS DONE");
+            Pong.value.blockId++; 
+            Pong.value.myBlocks.push(new EffectBlock(Pong.value, block.x, block.y,
+                                                    block.width, block.height, block.color, block.effect));
+          }
+        });
+
+        socket.on("blockDestruction", (id: number) => {
+          console.log("blockDestruction", id);
+          Pong.value.removeBlock(id);
+        });
+
+      }
+
 
       if (myCanvas.value) {
         ctx = myCanvas.value.getContext('2d');

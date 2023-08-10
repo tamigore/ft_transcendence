@@ -17,7 +17,19 @@ export interface GameMove {
     ballY: number,
     ballVeloX: number,
     ballVeloY: number,
+    player: number,
   }
+
+  export interface BlockState
+{
+  effect: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  color: string,
+  id: number,
+}
 
   export interface PaddleState
   {

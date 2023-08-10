@@ -39,6 +39,17 @@ export class UserController {
     this.userService.updateChatSocket(userId, chatSocket.socket);
   }
 
+  @Post("gamesocket")
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  updateGameSocket(
+    @GetCurrentUserId() userId: number,
+    @Body() chatSocket: any,
+  ) {
+    this.userService.updateGameSocket(userId, chatSocket.socket);
+  }
+
   // @Public()
   @Get()
   // @UseGuards(AtGuard)

@@ -36,12 +36,21 @@ export interface Game {
 export interface GameMove {
   player: number,
 
-  notPressed: boolean;
-  key: number;
+  notPressed: boolean,
+  key: number,
   gameRoom: string,
 }
 
-
+export interface BlockState
+{
+  effect: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  color: string,
+  id: number,
+}
 
 export interface BallState
   {
@@ -50,6 +59,7 @@ export interface BallState
     ballY: number,
     ballVeloX: number,
     ballVeloY: number,
+    player: number,
   }
 
   export interface PaddleState

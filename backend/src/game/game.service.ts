@@ -12,17 +12,21 @@ export class GameService {
   async matchMaker(dto: Matchamker): Promise<Game>
   {
     console.log(`typeof ${typeof(dto.userId)}`);
+   
+
     const game = await this.prisma.$transaction(async () => {
       const game = await this.prisma.game.findFirst({
         where: {
           player2: { is: null },
         },
       })
+      console.log("INMATCHMAKER : ", dto.userName);
+      
       if (!game) {
         this.logger.log(`no game found creating game: ${dto.userId} ... type ${typeof(dto.userId)}`);
         return await this.prisma.game.create({
           data: {
-            name: dto.userId,
+            name: dto.userName,
             player1: {
               connect: {
                 id: parseInt(dto.userId),
