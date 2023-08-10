@@ -68,9 +68,6 @@ import { User } from '@/utils/interfaces';
 import { useRoute } from "vue-router";
 
 
-
-
-
 export default defineComponent({
 name: 'SubProfile',
 computed: {
@@ -80,7 +77,7 @@ selectedImage() {
 },
 },
 async mounted() {
-    await this.getUserById();
+    await this.getUserByUsername();
   },
 data() {
   return {
@@ -106,46 +103,23 @@ methods:
     return this.imageGrid.find(image => image.id === id);
   },
 
-  
-
-
-    // async   getUserByUsername() {
-    //   const username = "loulou";
-    //   console.log(username);
-    //   axios.defaults.baseURL = server.nestUrl;
-    //   return await axios
-    //     .get(`/api/user/username/${username}`, {
-    //       headers: { Authorization: `Bearer ${store.state.user.hash}` },
-    //     })
-    //     .then((response: AxiosResponse) => {
-    //       console.log(response);
-    //       this.userData = response.data as User;
-    //     })
-    //     .catch((error: AxiosError) => {
-    //       console.error(error);
-    //       return null;
-    //     });
-    // },
-
-    async getUserById() {
-      const id = 2;
-      const route = useRoute();
-      const username = route.params.username;
-      console.log(username);
-      console.log(id);
-      axios.defaults.baseURL = server.nestUrl;
-      return axios
-        .get(`/api/user/${id}`, {
-          headers: { Authorization: `Bearer ${store.state.user.hash}` },
-        })
-        .then((response: AxiosResponse) => {
-          console.log(response);
-          this.userData = response.data as User;
-        })
-        .catch((error: AxiosError) => {
-          console.error(error);
-        });
-    },
+  async getUserByUsername() {
+    const route = useRoute();
+    const username = route.params.username;
+    console.log(username);
+    axios.defaults.baseURL = server.nestUrl;
+    return axios
+    .get(`/api/user/username/${username}`, {
+      headers: { Authorization: `Bearer ${store.state.user.hash}` },
+    })
+    .then((response: AxiosResponse) => {
+      console.log(response);
+      this.userData = response.data as User;
+    })
+    .catch((error: AxiosError) => {
+      console.error(error);
+    });
+  },
 },
 })
 </script>

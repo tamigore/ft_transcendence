@@ -18,9 +18,18 @@ export class UserService {
 
   async findById(id: number): Promise<User> {
     this.logger.log(`findById user: ${id}`);
-    return await this.prisma.user
-      .findUnique({
+    return await this.prisma.user.findUnique({
         where: { id: id },
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async findByUsername(username: string): Promise<User> {
+    this.logger.log(`findByUsername user: ${username}`);
+    return await this.prisma.user.findUnique({
+        where: { username: username },
       })
       .catch((error) => {
         throw new Error(error);

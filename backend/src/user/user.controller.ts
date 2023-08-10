@@ -87,6 +87,15 @@ export class UserController {
     return this.userService.findById(id);
   }
 
+  //@Public()
+  @Get("username/:username")
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*")
+  findUserByUsername(@Param("username") username: string): Promise<User> {
+  return this.userService.findByUsername(username);
+  }
+
+
   @Get("!self")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
