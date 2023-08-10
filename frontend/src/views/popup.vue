@@ -31,7 +31,7 @@ export default defineComponent({
 
           store.commit('setAvatarId', this.imageUrl);
         } else {
-          alert('URL invalide');
+          alert('invalid URL');
           this.imageUrl = '';
         }
       }
