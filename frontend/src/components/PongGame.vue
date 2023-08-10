@@ -206,7 +206,7 @@ class EffectBlock {
   id: number;
   pong: PongGameClass;
 
-  constructor(Pong: PongGameClass, x: number, y: number, width: number, height: number, color: string, effect: string) {
+  constructor(Pong: PongGameClass, x: number, y: number, width: number, height: number, color: string, effect: string, _id?: number) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -214,7 +214,12 @@ class EffectBlock {
     this.effect = effect;
     this.color = color;
     this.pong = Pong;
-    this.id = this.pong.blockId;
+    if (_id !== undefined) {
+      this.id = _id;
+    }
+    else {
+      this.id = this.pong.blockId;
+    }
   }
 
 getBlockState(): BlockState
@@ -250,6 +255,8 @@ getBlockState(): BlockState
         if (block.effect === "TP" && block.id != this.id) {
           ball.x = block.x + block.width / 2
           ball.y = block.y + block.height / 2;
+          socket.emit("destroyBlock", {room: store.state.gameRoom, blockId: block.id});
+          socket.emit("ballSetter", {ballInfo: ball.ballState(), room: store.state.gameRoom });
           ball.pong.removeBlock(block.id);
           return;
         }
@@ -314,7 +321,7 @@ class BallClass {
     if (this.x <= 1) {
       if (!store.state.ingame)
       {
-        console.log("goal on 1 IN GAMEEEE");
+        this.hp--;
         this.pong.scoreB += 1;
         this.x = this.pong.width / 2;
         this.y = this.pong.height / 2;
@@ -323,6 +330,7 @@ class BallClass {
       }
       else if (store.state.playerNum == 1)
       {
+        this.hp--;
         this.x = this.pong.width / 2;
         this.y = this.pong.height / 2;
         this.veloX = this.pong.randStartSpeedX();
@@ -338,7 +346,6 @@ class BallClass {
           this.veloX = -this.veloX;
           return;
         }
-        console.log("goal on 2 IN GAMEEEE");
         this.hp--;
         this.pong.scoreA += 1;
         this.x = this.pong.width / 2;
@@ -366,10 +373,10 @@ class BallClass {
         this.veloX = sign * (Math.abs(this.veloX) + Math.random() / 3);
         if (this.veloX >= ballMaxSpeedX || this.veloX <= - ballMaxSpeedX)
           this.veloX = ballMaxSpeedX * sign;
-        if (this.pong.gameIsBlocks && Math.random() < 0.6)
-          this.pong.generateBlocks();
+        // if (this.pong.gameIsBlocks && Math.random() < 0.6)
+          // this.pong.generateBlocks();
         // if (store.state.playerNum == 1) //test gen Block
-        //   this.pong.generateBlocks();
+          // this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         // if (this.veloY > 0)
         // this.sendBallPaddle(paddleY, player);
@@ -408,6 +415,7 @@ class BallClass {
         if (this.y + this.radius >= block.y && this.y - this.radius <= block.y + block.height) {
           block.triggerEffect(this);
           socket.emit("destroyBlock", {room: store.state.gameRoom, blockId: block.id});
+          socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom });
           this.pong.removeBlock(block.id);
 
           return;
@@ -420,7 +428,6 @@ class BallClass {
   preColision = (): boolean => {
     const oldVeloX = this.veloX;
     const oldVeloY = this.veloY;
-    console.log("precolisiont\n");
 
     if (this.ballPaddleColision(Math.abs(this.pong.paddleOffset + this.pong.leftPaddleWidth - this.pong.width / 2),
       this.pong.leftPaddleY, this.pong.leftPaddleHeight,
@@ -474,7 +481,10 @@ class BallClass {
           socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom});
     }
     if (this.hp == 0)
-      this.pong.myBalls.splice(this.pong.myBalls.indexOf(this), 1);
+    {
+      socket.emit("destroyBall", {room: store.state.gameRoom, ballId: this.id});
+      this.pong.removeBall(this.id);
+    }
     this.x += this.veloX;
     this.y += this.veloY;
 
@@ -696,14 +706,23 @@ export class PongGameClass {
       var_color = color;
     if (direction)
       veloX = Math.abs(veloX) * direction;
+    let newBall: BallClass;
     if (x && y)
-      this.myBalls.push(new BallClass(this, x, y, veloX,
-        this.randStartSpeedY() * Math.sign(Math.random() - 0.5),
-        this.ballRadius, var_color, var_hp));
+    {
+      newBall = new BallClass(this, x, y, veloX,
+              this.randStartSpeedY() * Math.sign(Math.random() - 0.5),
+              this.ballRadius, var_color, var_hp)
+      this.myBalls.push(newBall);
+    }
     else
-      this.myBalls.push(new BallClass(this, this.width / 2, this.height / 2, veloX,
+    {
+      newBall = new BallClass(this, this.width / 2, this.height / 2, veloX,
         this.randStartSpeedY() * Math.sign(Math.random() - 0.5),
-        this.ballRadius, var_color, var_hp));
+        this.ballRadius, var_color, var_hp)
+      this.myBalls.push(newBall);
+    }
+    if (store.state.ingame )
+      socket.emit("createBall", {room: store.state.gameRoom, ball: newBall.ballState()});
   }
 
   restartMatch(gameIsRunnig?: boolean, rightBot?: boolean, wallIsUp?: boolean, bothBot?: boolean) {
@@ -714,7 +733,7 @@ export class PongGameClass {
     this.num_pong = 0;
 
 
-    this.ballId = 0;
+    this.ballId = 1;
     this.myBalls = [];
 
     this.theBall.x = this.width / 2;
@@ -757,7 +776,6 @@ export class PongGameClass {
         this.rightPaddleY = this.height + 1000;
       }
       if (bothBot != undefined && bothBot) {
-        console.log("both bot");
         this.rightPlayerKeyDown = '';
         this.rightPlayerKeyUp = '';
         this.leftPlayerKeyDown = '';
@@ -780,14 +798,15 @@ export class PongGameClass {
     {
       this.leftPlayerKeyDown = 's';
       this.leftPlayerKeyUp = 'w';
+      this.blockId = 1;
     }
     if (store.state.playerNum == 2)
     {
       this.rightPlayerKeyDown = 's';
       this.rightPlayerKeyUp = 'w';
+      this.blockId = 2;
     }
-
-
+    // this.newBall();
   }
 
 
@@ -875,7 +894,6 @@ export class PongGameClass {
 
   handleKeyOnline = (player:number, notPressed:boolean, key:number) =>
   {
-    console.log("handleKeyOnline");
     if (notPressed)
       this.onlineKeyUp(player, key);
     else
@@ -902,7 +920,6 @@ export class PongGameClass {
   onlineKeyUp = (playerN:number, key:number) => {
     if (playerN != 2)
     {
-      console.log("------------MtonlineKeyUp");
       if (key == 1)
         this.leftArrowUp = 0;
       else if (key == 0)
@@ -910,7 +927,6 @@ export class PongGameClass {
     }
     if (playerN != 1)
     {
-      console.log("----MtonlineKeyUp");
       if (key == 1)
         this.rightArrowUp = 0;
       else if (key == 0)
@@ -920,9 +936,9 @@ export class PongGameClass {
 
   sendKey = (_player:number, _up:boolean, _key:number) =>
   {
-    console.log("game socket in game", store.state.gameSocket);
+    // console.log("game socket in game", store.state.gameSocket);
 
-    console.log("sendKey", store.state.ingame, this.inMultiplayer);
+    // console.log("sendKey", store.state.ingame, this.inMultiplayer);
     if (store.state.ingame && this.inMultiplayer)
       {
         const gameMoveData = {
@@ -1057,7 +1073,7 @@ export class PongGameClass {
     }
     if (j == 25)
       return;
-    this.blockId++;
+    this.blockId += 2;
     switch ((Math.floor(100 * Math.random())) % 5) {
       case 0:
         {
@@ -1087,19 +1103,22 @@ export class PongGameClass {
         break;
       }
       case 4: {
-        // this.myBlocks.push(new EffectBlock(this, genX,
-        //   genY,
-        //   this.blockWidth, this.blockHeight, '#3fe6f2', "newBall"));
-        // break;
-        return ;
+        this.myBlocks.push(new EffectBlock(this, genX,
+          genY,
+          this.blockWidth, this.blockHeight, '#3fe6f2', "newBall"));
+        break;
       }
     }
-    console.log("block created", this.myBlocks[this.myBlocks.length - 1].getBlockState());
+    // console.log("block created", this.myBlocks[this.myBlocks.length - 1].getBlockState());
     socket.emit("createBlock", {room: store.state.gameRoom, block: this.myBlocks[this.myBlocks.length - 1].getBlockState()});
   }
 
   removeBlock = (blockId: number) => {
     this.myBlocks = this.myBlocks.filter(block => block.id !== blockId);
+  }
+
+  removeBall = (ballId: number) => {
+    this.myBalls = this.myBalls.filter(ball => ball.id !== ballId);
   }
 
 }
@@ -1206,14 +1225,13 @@ export default defineComponent({
     onMounted(() => {
  
       socket.on("gameRoomJoiner", (data) => {
-        console.log("GameRoomJoiner", data.room);
+        // console.log("GameRoomJoiner", data.room);
         store.commit("setGameRoom", data.room);
         if (store.state.playerNum == 2)
         {
           store.commit("setGameConnect", true);
           store.commit("setInQueue", false);
           Pong.value.startMultiOnline();
-          console.log("ReadyGame", store.state.gameRoom);
           socket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
         }
       })
@@ -1223,7 +1241,6 @@ export default defineComponent({
 
         store.commit("setGameConnect", true);
         store.commit("setInQueue", false);
-        console.log("LaunchGame", e);
         Pong.value.startMultiOnline();
         Pong.value.theBall.setBallState(e);
       });
@@ -1232,25 +1249,30 @@ export default defineComponent({
       {
       
         socket.on("servMessage", (e:GameMove ) => {
-          console.log("servMessage moove= ", e);
           Pong.value.handleKeyOnline(e.player, e.notPressed, e.key);
         }); 
+
         socket.on("paddleStateMessage", (e: PaddleState) => {
-          console.log("paddleStateMessage state = ", e);
           Pong.value.setPaddleState(e);
           
         });
 
         socket.on("setBall", (e: BallState) =>
         {
-          console.log("setBall", e);
           if (store.state.playerNum != e.player)
-          Pong.value.theBall.setBallState(e);
+            if (e.ballId == 0)
+              Pong.value.theBall.setBallState(e);
+          else
+          {
+            for (const ball of Pong.value.myBalls) {
+              if (ball.id == e.ballId)
+                ball.setBallState(e);
+            }
+          }
         });
       
         socket.on("scoreMessage", (e: number) =>
         {
-          console.log("scoreMessage", e);
           if (e == 2)
             Pong.value.scoreA++;
           else if (e == 1)
@@ -1258,22 +1280,28 @@ export default defineComponent({
         });
 
         socket.on("blockCreation", (block: BlockState) => {
-          console.log("blockCreation", block);
 
-          console.log("--blockCreation ID :", block.id, Pong.value.blockId);
-          if (block.id > Pong.value.blockId)
+          if ( (block.id % 2 != 0 && store.state.playerNum != 1) || (block.id % 2 != 1 && store.state.playerNum != 2) )
           {
-            console.log("----------------------blockCreation IS DONE");
-            Pong.value.blockId++; 
             Pong.value.myBlocks.push(new EffectBlock(Pong.value, block.x, block.y,
-                                                    block.width, block.height, block.color, block.effect));
+                                                    block.width, block.height, block.color, block.effect, block.id));
           }
         });
 
-        socket.on("blockDestruction", (id: number) => {
-          console.log("blockDestruction", id);
-          Pong.value.removeBlock(id);
+        socket.on("ballCreation", (ball: BallState) => {
+          console.log("ballCreation", ball);
+          if (store.state.playerNum != ball.player)
+          {
+            Pong.value.myBalls.push(new BallClass(Pong.value, ball.ballX, ball.ballY, ball.ballVeloX, ball.ballVeloY,
+                                                  Pong.value.ballRadius, 'blue', 1));
+          }
         });
+
+        socket.on("ballDestruction", (id: number) => {
+          console.log("ballDestruction", id);
+          Pong.value.removeBall(id);
+        });
+
 
       }
 

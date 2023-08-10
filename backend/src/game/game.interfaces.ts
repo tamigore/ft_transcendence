@@ -13,6 +13,7 @@ export interface GameMove {
 
   export interface BallState
   {
+    ballId: number,
     ballX: number,
     ballY: number,
     ballVeloX: number,

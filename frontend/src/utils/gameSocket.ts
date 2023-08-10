@@ -18,11 +18,15 @@ export interface ServerToClientEvents {
   scoreMessage(player: number): void;
   blockCreation(e: BlockState): void;
   blockDestruction(e: number): void;
+  ballDestruction(e: number): void;
+  ballCreation(e: BallState): void;
 }
 
 export interface ClientToServerEvents {
   createBlock(e: {room: string, block: BlockState}): void;
   destroyBlock(e: {room: string, blockId: number}): void;
+  createBall(e: {room: string, ball: BallState}): void;
+  destroyBall(e: {room: string, ballId: number}): void;
   goalMessage(e: {room: string, player: number}): void;
   ballPing(e: {ballInfo: BallState, room: string}): void;
   ReadyGame(e: {room: string, ball: BallState}): void;

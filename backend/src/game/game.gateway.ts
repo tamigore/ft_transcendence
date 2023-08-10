@@ -43,16 +43,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage("gameMessage")
   async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: { moove: GameMove, room: string}) {
     this.logger.log("gameMessage");
-    this.logger.debug("MEaasfe body: ", body, "ConnectedSocket: ", client.id);
+    // this.logger.debug("MEaasfe body: ", body, "ConnectedSocket: ", client.id);
     this.server.to(body.room).emit("servMessage", body.moove);
   }
 
   @SubscribeMessage("paddlePosMessage")
   async onPaddlePos(@ConnectedSocket() client: Socket, @MessageBody() body: { state: PaddleState, room: string}) {
     this.logger.log("paddlePosMessage");
-    this.logger.debug("ICI PADDLE: ", body, "ConnectedSocket: ", client.id);
+    // this.logger.debug("ICI PADDLE: ", body, "ConnectedSocket: ", client.id);
     const str = body.room;
-    this.logger.debug("teast ROOM ", str);
+    // this.logger.debug("teast ROOM ", str);
 
     this.server.to(body.room).emit("paddleStateMessage", body.state);
   }
@@ -60,7 +60,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage("pingMessage")
   async onPong(@ConnectedSocket() client: Socket, @MessageBody() body: {ballInfo: BallState, room: string}) {
     this.logger.log("pingMessage");
-    this.logger.debug("HitMEssage bodyy: ", body, "ConnectedSocket: ", client.id);
+    // this.logger.debug("HitMEssage bodyy: ", body, "ConnectedSocket: ", client.id);
     this.server.to(body.room).emit("pongMessage", body.ballInfo);
   }
 
@@ -82,30 +82,42 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("ballSetter")
   async onBallSetter(@ConnectedSocket() client: Socket, @MessageBody () body: {ballInfo: BallState, room: string}) {
-    console.log("ballSetter  : ", body.ballInfo);
+    // console.log("ballSetter  : ", body.ballInfo);
     this.logger.log("setBall");
     this.server.to(body.room).emit("setBall", body.ballInfo);
   }
 
   @SubscribeMessage("goalMessage")
   async onGoalMessage(@ConnectedSocket() client: Socket, @MessageBody () body: { room: string, player: number}) {
-    console.log("goalMessage from player  : ", body.player);
+    // console.log("goalMessage from player  : ", body.player);
     this.logger.log("goalMessage");
     this.server.to(body.room).emit("scoreMessage", body.player);
   }
 
   @SubscribeMessage("createBlock")
   async onBlockCreatation(@ConnectedSocket() client: Socket, @MessageBody () body: { room: string, block: BlockState}) {
-    console.log("block creation ^^  : ");
+    // console.log("block creation ^^  : ", body.block.id);
     this.server.to(body.room).emit("blockCreation", body.block);
   }
 
   @SubscribeMessage("destroyBlock")
-  async onBlockdestruction(@ConnectedSocket() client: Socket, @MessageBody () body: { room: string, id: number}) {
-    console.log("block DESTRUCTION ^^  : ");
-    this.server.to(body.room).emit("blockDestruction", body.id);
+  async onBlockdestruction(@ConnectedSocket() client: Socket, @MessageBody () body: { room: string, blockId: number}) {
+    // console.log("block DESTRUCTION ^^  : ", body.blockId);
+    this.server.to(body.room).emit("blockDestruction", body.blockId);
   }
 
+
+  @SubscribeMessage("createBall")
+  async onBallCreatation(@ConnectedSocket() client: Socket, @MessageBody () body: { room: string, ball: BallState}) {
+    console.log("ball creation ^^  : ", body.ball.ballId);
+    this.server.to(body.room).emit("ballCreation", body.ball);
+  }
+
+  @SubscribeMessage("destroyBall")
+  async onBalldestruction(@ConnectedSocket() client: Socket, @MessageBody () body: { room: string, ballId: number}) {
+    console.log("ball DESTRUCTION ^^  : ", body.ballId);
+    this.server.to(body.room).emit("ballDestruction", body.ballId);
+  }
 
 }
 
