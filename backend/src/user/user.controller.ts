@@ -53,7 +53,7 @@ export class UserController {
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   findFriends(@Param("id") param: string): Promise<User[]> {
     const id = parseInt(param);
-    return this.userService.findFriendsById(id);
+    return this.userService.findFriendsByUserId(id);
   }
 
   @Post("chatsocket")

@@ -143,7 +143,7 @@ export class UserService {
       });
   }
 
-  async findFriendsById(userId: number) {
+  async findFriendByUserId(userId: number) {
     this.logger.log(`findFriendById user: ${userId}`);
     const users = await this.prisma.user.findMany({
       where: {
