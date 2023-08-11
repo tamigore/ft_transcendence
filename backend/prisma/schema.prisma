@@ -17,7 +17,7 @@ model User {
 
   email      String     @unique
   username   String     @unique
-  hash       String     @unique
+  hash       String
   hashRt     String?
   chatSocket String?
   gameSocket String?
@@ -92,15 +92,14 @@ model Room {
 
   name        String
   private     Boolean   @default(false)
+  hash        String?
   ownerId     Int?
-  hash        String?   @unique
   owner       User?     @relation(name: "owner", fields: [ownerId], references: [id], onDelete: SetNull)
   admins      User[]    @relation(name: "admin")
   users       User[]    @relation(name: "users")
   ban         User[]    @relation(name: "ban")
   mute        User[]    @relation(name: "mute")
   messages    Message[]
-  description String?
 
   @@map("rooms")
 }

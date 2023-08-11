@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 import { Room, User } from "@prisma/client";
 import * as RoomTypes from "./dto/types";
+import * as argon2 from "argon2/argon2";
 
 @Injectable()
 export class RoomService implements OnModuleInit {
@@ -19,7 +20,6 @@ export class RoomService implements OnModuleInit {
         .create({
           data: {
             name: "general",
-            description: "General chat room",
           },
           include: {
             users: true,
@@ -40,20 +40,10 @@ export class RoomService implements OnModuleInit {
     pawnId: number,
   ): boolean {
     if (
-      typeof room != "undefined" &&
-      room &&
-      typeof room.users != "undefined" &&
-      room.users &&
-      room.users.length &&
-      room.users.find((x: User) => x.id === pawnId) &&
-      ((room.owner && room.owner.id === userId) ||
-        (typeof room.admins != "undefined" &&
-          room.admins &&
-          room.admins.length &&
-          room.admins.find((x: User) => x.id == userId) &&
-          room.owner &&
-          room.owner.id &&
-          room.owner.id !== pawnId))
+      this.isUser(room, pawnId) &&
+      !this.isOwner(room, pawnId) &&
+      (this.isOwner(room, userId) ||
+        (this.isAdmin(room, userId) && !this.isAdmin(room, pawnId)))
     )
       return true;
     return false;
@@ -149,8 +139,37 @@ export class RoomService implements OnModuleInit {
     });
   }
 
+  async findByIdWithAll(id: number): Promise<Room> {
+    this.logger.log(`findById room: ${id}`);
+    return await this.prisma.room.findUnique({
+      where: { id: id },
+      include: {
+        owner: true,
+        admins: true,
+        users: true,
+        ban: true,
+        messages: true,
+      },
+    });
+  }
+
+  async findByIdWithUser(id: number): Promise<RoomTypes.RoomWithUsers> {
+    this.logger.log(`findById room: ${id}`);
+    return await this.prisma.room.findUnique({
+      where: { id: id },
+      include: {
+        users: true,
+      },
+    });
+  }
+
   async createRoom(room: Room): Promise<Room> {
     this.logger.log("createRoom: " + room);
+    if (!room) return null;
+    let password = null;
+    if (room.hash) {
+      password = await argon2.hash(room.hash);
+    }
     return await this.prisma.room
       .create({
         data: {
@@ -165,7 +184,7 @@ export class RoomService implements OnModuleInit {
               id: room.ownerId,
             },
           },
-          description: room.description,
+          hash: password,
         },
       })
       .then((newRoom) => {
@@ -223,7 +242,6 @@ export class RoomService implements OnModuleInit {
             return await prisma.room.create({
               data: {
                 name: `${user1.username} & ${user2.username} Room`,
-                description: `User ${user1.username} and ${user2.username} private room`,
                 private: true,
                 users: {
                   connect: [{ id: user1.id }, { id: user2.id }],
@@ -249,7 +267,6 @@ export class RoomService implements OnModuleInit {
         where: { id: roomDto.id },
         data: {
           name: roomDto.name,
-          description: roomDto.description,
         },
       })
       .then((updatedRoom) => {
@@ -261,7 +278,7 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async addUser(roomId: number, userId: number) {
+  async addUser(roomId: number, userId: number, pwd: string): Promise<boolean> {
     this.logger.log(`addUser: ${userId} to room: ${roomId}`);
     await this.prisma
       .$transaction(async (prisma) => {
@@ -271,10 +288,14 @@ export class RoomService implements OnModuleInit {
             ban: true,
           },
         });
-        if (this.isBan(room, userId))
-          throw new Error(
-            `User ${userId} donesn't have rights on room ${roomId}`,
-          );
+        if (typeof room === "undefined" || !room || this.isBan(room, userId))
+          return false;
+        if (room.hash) {
+          this.logger.debug(pwd);
+          this.logger.debug(room.hash);
+          const verif = await argon2.verify(room.hash, pwd);
+          if (!verif) return false;
+        }
         return await this.prisma.room.update({
           where: { id: roomId },
           data: {
@@ -291,12 +312,13 @@ export class RoomService implements OnModuleInit {
           },
         });
       })
-      .then((room) => {
-        this.logger.log("addUser success: ", room);
+      .then(() => {
+        return true;
       })
-      .catch((error) => {
-        throw new Error(`addUser failure: ${error}`);
+      .catch(() => {
+        return false;
       });
+    return false;
   }
 
   async addAdmin(roomId: number, userId: number, adminId: number) {
@@ -357,6 +379,20 @@ export class RoomService implements OnModuleInit {
           data: {
             ban: {
               connect: [
+                {
+                  id: banId,
+                },
+              ],
+            },
+            admins: {
+              disconnect: [
+                {
+                  id: banId,
+                },
+              ],
+            },
+            users: {
+              disconnect: [
                 {
                   id: banId,
                 },
@@ -423,32 +459,40 @@ export class RoomService implements OnModuleInit {
     this.logger.log(`user id : ${userId} wants to removeById room: ${roomId}`);
     await this.prisma
       .$transaction(async (prisma) => {
-        const room = await prisma.room.findUnique({
-          where: { id: roomId },
-          include: { owner: true },
-        });
+        const room = await prisma.room
+          .findUnique({
+            where: { id: roomId },
+            include: { owner: true },
+          })
+          .catch((error) => {
+            throw new Error(error);
+          });
         if (userId !== room.owner.id)
           throw new Error(`User ${userId} doesn't own room ${roomId}`);
-        prisma.room.update({
-          where: { id: roomId },
-          data: {
-            users: {
-              set: [],
+        prisma.room
+          .update({
+            where: { id: roomId },
+            data: {
+              users: {
+                set: [],
+              },
+              admins: {
+                set: [],
+              },
+              ban: {
+                set: [],
+              },
+              mute: {
+                set: [],
+              },
+              owner: {
+                disconnect: true,
+              },
             },
-            admins: {
-              set: [],
-            },
-            ban: {
-              set: [],
-            },
-            mute: {
-              set: [],
-            },
-            owner: {
-              disconnect: true,
-            },
-          },
-        });
+          })
+          .catch((error) => {
+            throw new Error(error);
+          });
         return prisma.room.delete({
           where: { id: roomId },
         });
@@ -485,6 +529,13 @@ export class RoomService implements OnModuleInit {
         return await prisma.room.update({
           where: { id: roomId },
           data: {
+            admins: {
+              disconnect: [
+                {
+                  id: removeId,
+                },
+              ],
+            },
             users: {
               disconnect: [
                 {

@@ -14,12 +14,13 @@ async function bootstrap() {
   // app.useWebSocketAdapter(new AuthenticatedSocketAdapter(app)); // Add our custom socket adapter.
 
   app.enableCors({
-    origin: [
-      "http://localhost:8080/",
-      "http://localhost:8080",
-      "http://127.0.0.1:8080",
-      "*",
-    ], // add ip address to access the server
+    origin: "*",
+    // [
+    //   "http://localhost:8080/",
+    //   "http://localhost:8080",
+    //   "http://127.0.0.1:8080",
+    //   "*",
+    // ], // add ip address to access the server
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"],

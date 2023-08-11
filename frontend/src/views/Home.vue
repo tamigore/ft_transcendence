@@ -99,14 +99,14 @@ export default defineComponent ({
   },
   methods: {
     ToggleSignin() {
+      if (this.signupTriggers)
+        this.ToggleSignup();
       this.signinTriggers = !this.signinTriggers
-      if (this.signupTriggers == true)
-        this.signupTriggers = !this.signupTriggers
     },
     ToggleSignup() {
+      if (this.signinTriggers)
+        this.ToggleSignup();
       this.signupTriggers = !this.signupTriggers
-      if (this.signinTriggers == true)
-        this.signinTriggers = !this.signinTriggers
     },
   }
 })

@@ -9,57 +9,16 @@ import {
   Body,
   Param,
 } from "@nestjs/common";
-import { GetCurrentUserId } from "../common/decorators";
-import { Room } from "@prisma/client";
-import { ModifySelfDto, ModifyOtherDto } from "./dto/room.dto";
+import { GetCurrentUserId, Public } from "../common/decorators";
+import { Room, User } from "@prisma/client";
+import { ModifyOtherDto } from "./dto/room.dto";
 import { RoomService } from "./room.service";
 
 @Controller("room")
 export class RoomController {
   constructor(private roomService: RoomService) {}
 
-  // @Public()
-  @Post("update")
-  // @UseGuards(AtGuard)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  @HttpCode(HttpStatus.OK)
-  updateRoom(@GetCurrentUserId() userId: number, @Body() updateRoomDto: Room) {
-    this.roomService.update(userId, updateRoomDto);
-  }
-
-  @Post("addUser")
-  // @UseGuards(AtGuard)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  @HttpCode(HttpStatus.OK)
-  addUser(@Body() dto: ModifySelfDto) {
-    this.roomService.addUser(dto.roomId, dto.userId);
-  }
-
-  @Post("addAdmin")
-  // @UseGuards(AtGuard)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  @HttpCode(HttpStatus.OK)
-  addAdmin(@Body() dto: ModifyOtherDto) {
-    this.roomService.addAdmin(dto.roomId, dto.userId, dto.otherId);
-  }
-
-  @Post("create")
-  // @UseGuards(AtGuard)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  @HttpCode(HttpStatus.OK)
-  createRoom(@Body() dto: Room) {
-    this.roomService.createRoom(dto);
-  }
-
-  @Post("delete/user")
-  // @UseGuards(AtGuard)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  @HttpCode(HttpStatus.OK)
-  removeUser(@Body() dto: ModifyOtherDto) {
-    this.roomService.removeUser(dto.roomId, dto.userId, dto.otherId);
-  }
-
-  // @Public()
+  @Public()
   @Get()
   // @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
@@ -68,6 +27,7 @@ export class RoomController {
     return this.roomService.findAll();
   }
 
+  @Public()
   @Get("all")
   // @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
@@ -78,7 +38,17 @@ export class RoomController {
     return rooms;
   }
 
-  // @Public()
+  @Public()
+  @Get("private/:id")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  findPrivateRooms(@Param("id") param: string): Promise<Room[]> {
+    const id: number = parseInt(param);
+    return this.roomService.findPrivateRooms(id);
+  }
+
+  @Public()
   @Get(":id")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
@@ -88,13 +58,67 @@ export class RoomController {
     return this.roomService.findById(id);
   }
 
-  @Get("private/:id")
+  @Public()
+  @Post("update")
   // @UseGuards(AtGuard)
-  @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  findPrivateRooms(@Param("id") param: string): Promise<Room[]> {
-    const id: number = parseInt(param);
-    return this.roomService.findPrivateRooms(id);
+  @HttpCode(HttpStatus.OK)
+  updateRoom(@GetCurrentUserId() userId: number, @Body() updateRoomDto: Room) {
+    this.roomService.update(userId, updateRoomDto);
+  }
+
+  @Public()
+  @Post("addUser")
+  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @HttpCode(HttpStatus.OK)
+  addUser(@Body() dto: any): Promise<boolean> {
+    return this.roomService.addUser(dto.roomId, dto.userId, dto.pwd);
+  }
+
+  @Public()
+  @Post("addAdmin")
+  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @HttpCode(HttpStatus.OK)
+  addAdmin(@Body() dto: ModifyOtherDto) {
+    this.roomService.addAdmin(dto.roomId, dto.userId, dto.otherId);
+  }
+
+  @Public()
+  @Post("addBan")
+  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @HttpCode(HttpStatus.OK)
+  addBanned(@Body() dto: ModifyOtherDto) {
+    this.roomService.addBan(dto.roomId, dto.userId, dto.otherId);
+  }
+
+  @Public()
+  @Post("create")
+  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @HttpCode(HttpStatus.OK)
+  createRoom(@Body() dto: Room) {
+    return this.roomService.createRoom(dto);
+  }
+
+  @Public()
+  @Post("private")
+  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @HttpCode(HttpStatus.OK)
+  createPrivateRoom(@Body() dto: { user1: User; user2: User }) {
+    this.roomService.getPrivateRoom(dto.user1, dto.user2);
+  }
+
+  @Public()
+  @Post("delUser")
+  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @HttpCode(HttpStatus.OK)
+  removeUser(@Body() dto: any) {
+    this.roomService.removeUser(dto.roomId, dto.userId, dto.otherId);
   }
 
   // @Public()

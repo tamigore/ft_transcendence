@@ -12,12 +12,34 @@ export interface User {
   loggedIn: boolean,
   bio: string | null,
   img: string | null, //Path to img src
+  friend: User[],
+  friendBy: User[],
+  blocked: User[],
+  blockedBy: User[],
   owner: Room[],
   admin: Room[],
   rooms: Room[],
+  ban: Room[],
+  mute: Room[],
   messages: Message[],
+  player1: Game[],
+  player2: Game[],
+  spectator: Game[],
   win: Historic,
   loose: Historic,
+}
+
+export interface Game {
+  id: number,
+  created_at: Date,
+
+  name: string
+  player1Id: number,
+  player1: User,
+  player2Id: number,
+  player2: User,
+  spectator: User[],
+  historic: Historic | null,
 }
 
 export interface Historic {
@@ -47,10 +69,13 @@ export interface Room {
   created_at: Date,
 
   name: string,
+  private: boolean,
+  hash: string | null,
   ownerId: number,
   owner: User,
   admin: User[],
   users: User[],
+  ban: User[],
+  mute: User[],
   messages: Message[],
-  description: string | null,
 }

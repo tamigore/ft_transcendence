@@ -11,11 +11,6 @@ const store = createStore({
         lastPrivate: {} as Room,
         lastMessage: {} as Message,
     },
-    getters: {
-        userInRoom: function (state, room: Room) {
-            return room.users.find(user => user.id === state.user.id) ? true : false;
-        },
-    },
     mutations: {
         addMessage : function (state, chatMessage: Message) {
             state.messages.push(chatMessage);
@@ -31,14 +26,12 @@ const store = createStore({
             state.lastPrivate.id = room.id;
             state.lastPrivate.name = room.name;
             state.lastPrivate.ownerId = room.ownerId;
-            state.lastPrivate.description = room.description;
         },
         setLastRoom: function (state, room: Room) {
             console.log('setLastRoom: ', room);
             state.lastRoom.id = room.id;
             state.lastRoom.name = room.name;
             state.lastRoom.ownerId = room.ownerId;
-            state.lastRoom.description = room.description;
         },
         setRooms: function (state, rooms: Room[]) {
             console.log('setRooms: ', rooms);

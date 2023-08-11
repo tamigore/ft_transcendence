@@ -13,6 +13,7 @@ import { UserService } from "src/user/user.service";
 import { ChatService } from "./chat.service";
 import { RoomService } from "src/room/room.service";
 import { User, Room } from "@prisma/client";
+// import * as argon2 from "argon2/argon2";
 // import { WsGuard } from "src/common/guards/ws.guard";
 
 @WebSocketGateway(8082)
@@ -83,15 +84,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       user: User;
       room: Room;
     },
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.logger.log(`${payload.user.username} is joining ${payload.room.name}`);
     const user = await this.userService.findById(payload.user.id);
     if (!user) throw new Error("onJoinRoom no user found");
-    let room = await this.roomService.findById(payload.room.id);
-    if (!room) room = await this.roomService.createRoom(payload.room);
+    const room = await this.roomService.findById(payload.room.id);
+    if (!room) throw new Error("onJoinRoom no room found");
     this.server.in(user.chatSocket).socketsJoin(room.name);
-    await this.roomService.addUser(room.id, user.id);
-    return true;
   }
 
   // @UseGuards(WsGuard)
@@ -102,14 +101,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       user: User;
       room: Room;
     },
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.logger.log(`${payload.user.username} is leaving ${payload.room.name}`);
     const user = await this.userService.findById(payload.user.id);
     if (!user) throw new Error("onLeaveRoom no user found");
     const room = await this.roomService.findById(payload.room.id);
     if (!room) throw new Error("onLeaveRoom no room found");
     this.server.in(user.chatSocket).socketsLeave(room.name);
-    await this.roomService.removeUser(room.id, user.id, user.id);
-    return true;
   }
 }

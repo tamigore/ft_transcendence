@@ -10,6 +10,19 @@ export class ModifySelfDto {
   roomId: number;
 }
 
+export class ModifyPwdDto {
+  @IsNotEmpty()
+  @IsString()
+  userId: number;
+
+  @IsNotEmpty()
+  @IsString()
+  roomId: number;
+
+  @IsString()
+  pwd: string;
+}
+
 export class ModifyOtherDto {
   @IsNotEmpty()
   @IsString()

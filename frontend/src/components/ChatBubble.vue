@@ -7,12 +7,12 @@
 
       <div class="msg-bubble">
         <div class="msg-info">
-          <div class="msg-info-name">{{ message?.user.username }}</div>
-          <div class="msg-info-time">{{ parsDate(new Date(message?.created_at ? message?.created_at : 0)) }}</div>
+          <div class="msg-info-name">{{ message.user.username }}</div>
+          <div class="msg-info-time">{{ parsDate(new Date(message.created_at ? message.created_at : 0)) }}</div>
         </div>
 
         <div class="msg-text">
-          {{ message?.text }}
+          {{ message.text }}
         </div>
       </div>
     </div>
@@ -146,6 +146,8 @@ body {
 import { defineComponent, ref } from 'vue'
 import { Message } from "@/utils/interfaces"
 import axios from 'axios';
+import store from "@/store";
+import { server } from '@/utils/helper';
 
 export default defineComponent({
   name: "ChatBubble",
@@ -155,42 +157,61 @@ export default defineComponent({
       items: ref([
           { label: 'View Profile', icon: 'pi pi-fw pi-search',
             command: () => {
-              this.searchUser(this.message?.user);
+              this.searchUser(this.message.user);
             },
           },
           { label: 'Block', icon: 'pi pi-fw pi-lock',
             command: () => {
-              this.blockUser(this.message?.user);
+              this.blockUser(this.message.user);
             },
+            visible: () => !this.isBlock,
+          },
+          { label: 'Admin', icon: 'pi pi-fw pi-sign-out',
+            command: () => {
+              this.addAdmin(this.message.user);
+            },
+            visible: () => store.state.lastRoom.ownerId === store.state.user.id,
           },
           { label: 'Kick', icon: 'pi pi-fw pi-sign-out',
             command: () => {
-              this.kickUser(this.message?.user);
+              this.kickUser(this.message.user);
             },
+            visible: () => this.hasHigherRights(),
           },
           { label: 'Ban', icon: 'pi pi-fw pi-trash',
             command: () => {
-              this.banUser(this.message?.user);
+              this.banUser(this.message.user);
             },
+            visible: () => this.hasHigherRights(),
           },
           { label: 'Mute', icon: 'pi pi-fw pi-eye-slash',
             command: () => {
-              this.muteUser(this.message?.user);
+              this.muteUser(this.message.user);
             },
+            visible: () => this.hasHigherRights(),
           },
-          { label: 'Invite Friend', icon: 'pi pi-fw pi-user',
+          { label: 'Invite Friend', icon: 'pi pi-fw pi-user-plus',
             command: () => {
-              this.inviteFriend(this.message?.user);
+              if (this.isFriend)
+                this.inviteFriend(this.message.user);
             },
+            visible: () => !this.isFriend,
+          },
+          { label: 'Remove Friend', icon: 'pi pi-fw pi-user-minus',
+            command: () => {
+              if (this.isFriend)
+                this.removeFriend(this.message.user);
+            },
+            visible: () => this.isFriend,
           },
           { label: 'Invite Pong', icon: 'pi pi-fw pi-circle-fill',
             command: () => {
-              this.invitePong(this.message?.user);
+              this.invitePong(this.message.user);
             },
           },
           { label: 'Private Message', icon: 'pi pi-fw pi-comments',
             command: () => {
-              this.privateMessage(this.message?.user);
+              this.privateMessage(this.message.user);
             },
           },
       ]),
@@ -199,11 +220,33 @@ export default defineComponent({
   props: {
     message: {
       type: Object as () => Message,
+      required: true,
     },
-    owner: { type: Boolean},
+    owner: { type: Boolean, required: true},
+  },
+  computed: {
+    isFriend(): boolean {
+      if (!store.state.user.friend)
+        return false;
+      return store.state.user.friend.find(user => {user.id === this.message.userId}) ? true : false;
+    },
+    isBlock(): boolean {
+      if (!store.state.user.blocked)
+        return false;
+      return store.state.user.blocked.find(user => {user.id === this.message.userId}) ? true : false;
+    },
   },
   methods: {
-    parsDate(date: Date) {
+    hasHigherRights(): boolean {
+      if (store.state.lastRoom.ownerId === store.state.user.id
+        || (store.state.lastRoom.admin
+          && store.state.lastRoom.admin?.find((user) => {user.id === store.state.user.id})
+          && !store.state.lastRoom.admin?.find((user) => {user.id === this.message.userId})
+          && store.state.lastRoom.ownerId !== this.message.userId))
+        return true;
+      return false;
+    },
+    parsDate(date: Date): string {
       const d = new Date(date);
       let month = '' + (d.getMonth() + 1);
       let day = '' + d.getDate();
@@ -216,39 +259,108 @@ export default defineComponent({
           day = '0' + day;
       return [year, month, day].join('-') + ` ${h.slice(-2)}:${m.slice(-2)}`;
     },
-    display() {
+    display(): void {
       this.toggle = !this.toggle;
     },
-    searchUser() {
+    async searchUser(): Promise<void> {
       console.log("searchUser");
+      // await axios.post('', {
+      //   id: this.message.userId,
+      // }, {
+      //   headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      // });
     },
-    blockUser() {
+    async blockUser(): Promise<void> {
       console.log("blockUser");
-      axios.post('/api/user/block/add', {
-        id: this.message?.userId,
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/user/block/add', {
+        id: this.message.userId,
       }, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      });
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => { throw new Error(err) });
     },
-    kickUser() {
+    async addAdmin(): Promise<void> {
+      console.log("addAdmin");
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/room/addAdmin', {
+        roomId: this.message.roomId,
+        userId: store.state.user.id,
+        otherId: this.message.userId,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => { throw new Error(err) });
+    },
+    kickUser(): void {
       console.log("kickUser");
     },
-    banUser() {
+    async banUser(): Promise<void> {
       console.log("banUser");
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/room/addBan', {
+        roomId: this.message.roomId,
+        userId: store.state.user.id,
+        otherId: this.message.userId,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => { throw new Error(err) });
     },
-    muteUser() {
+    muteUser(): void {
       console.log("muteUser");
     },
-    inviteFriend() {
+    async inviteFriend(): Promise<void> {
       console.log("inviteFriend");
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/user/friends/add', {
+        id: this.message.user,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => { throw new Error(err) });
     },
-    invitePong() {
+    async removeFriend(): Promise<void> {
+      console.log("inviteFriend");
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/user/friends/del', {
+        id: this.message.user,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => { throw new Error(err) });
+    },
+    invitePong(): void {
       console.log("invitePong");
     },
-    privateMessage() {
+    async privateMessage(): Promise<void> {
       console.log("privateMessage");
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/room/private', {
+        user1: store.state.user,
+        user2: this.message.user,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => { throw new Error(err) });
     },
   }
 })

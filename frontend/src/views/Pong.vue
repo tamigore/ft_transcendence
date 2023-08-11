@@ -853,7 +853,6 @@ const drawBall = () => {
     ctx.fill();
     ctx.closePath();
   }
-  
 }
 
 const drawPaddle = (x:number, y:number, width:number, height:number, color:string) => {
@@ -861,6 +860,10 @@ const drawPaddle = (x:number, y:number, width:number, height:number, color:strin
     return ;
   ctx.beginPath();
   ctx.rect(x, y, width, height);
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
   ctx.fillStyle = color;
   ctx.fill();
   ctx.closePath();

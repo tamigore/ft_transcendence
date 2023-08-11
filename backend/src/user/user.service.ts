@@ -27,23 +27,42 @@ export class UserService {
       });
   }
 
+  async findByUsername(name: string): Promise<User> {
+    this.logger.log(`findByUsername user: ${name}`);
+    return await this.prisma.user
+      .findUnique({
+        where: { username: name },
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
   async findAllButSelf(userId: number): Promise<User[]> {
     this.logger.log(`findAllButSelf user: ${userId}`);
-    const users = await this.prisma.user.findMany({
-      where: {
-        NOT: {
-          id: userId,
+    const users = await this.prisma.user
+      .findMany({
+        where: {
+          NOT: {
+            id: userId,
+          },
         },
-      },
-    });
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
     return users;
   }
 
   async findByChatSocket(socket: string): Promise<User> {
     this.logger.log(`findByChatSocket : ${socket}`);
-    return await this.prisma.user.findFirst({
-      where: { chatSocket: socket },
-    });
+    return await this.prisma.user
+      .findFirst({
+        where: { chatSocket: socket },
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
   }
 
   async update(userId: number, updateUserDto: any) {
@@ -89,9 +108,7 @@ export class UserService {
   }
 
   async addFriends(userId: number, friendId: number) {
-    this.logger.log(
-      `user id : ${userId} wants to update chatSocket: ${friendId}`,
-    );
+    this.logger.log(`user id: ${userId} wants to addFriends: ${friendId}`);
     await this.prisma
       .$transaction([
         this.prisma.user.update({
@@ -112,9 +129,7 @@ export class UserService {
   }
 
   async removeFriends(userId: number, friendId: number) {
-    this.logger.log(
-      `user id : ${userId} wants to update chatSocket: ${friendId}`,
-    );
+    this.logger.log(`user id : ${userId} wants to removeFriends : ${friendId}`);
     await this.prisma
       .$transaction([
         this.prisma.user.update({
@@ -127,15 +142,35 @@ export class UserService {
         }),
       ])
       .then((user) => {
-        this.logger.log("addFriends success: ", user);
+        this.logger.log("removeFriends success: ", user);
       })
       .catch((error) => {
         throw new Error(error);
       });
   }
 
-  async findFriendsById(userId: number) {
-    this.logger.log(`findFriendById user: ${userId}`);
+  async findFriendsById(userId: number, id: number) {
+    this.logger.log(`findFriendById user: ${userId}, friend: ${id}`);
+    const users = await this.prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            id: userId,
+          },
+          {
+            id: id,
+          },
+        ],
+      },
+      include: {
+        friend: true,
+      },
+    });
+    return users;
+  }
+
+  async findFriends(userId: number) {
+    this.logger.log(`findFriends user: ${userId}`);
     const users = await this.prisma.user.findMany({
       where: {
         id: userId,
@@ -148,9 +183,7 @@ export class UserService {
   }
 
   async addBlocked(userId: number, blockedId: number) {
-    this.logger.log(
-      `user id : ${userId} wants to update chatSocket: ${blockedId}`,
-    );
+    this.logger.log(`user id : ${userId} wants to addBlocked: ${blockedId}`);
     await this.prisma
       .$transaction([
         this.prisma.user.update({
@@ -171,9 +204,7 @@ export class UserService {
   }
 
   async removeBlocked(userId: number, blockedId: number) {
-    this.logger.log(
-      `user id : ${userId} wants to update chatSocket: ${blockedId}`,
-    );
+    this.logger.log(`user id : ${userId} wants to removeBlocked: ${blockedId}`);
     await this.prisma
       .$transaction([
         this.prisma.user.update({
@@ -186,7 +217,7 @@ export class UserService {
         }),
       ])
       .then((user) => {
-        this.logger.log("addBlocked success: ", user);
+        this.logger.log("removeBlocked success: ", user);
       })
       .catch((error) => {
         throw new Error(error);
