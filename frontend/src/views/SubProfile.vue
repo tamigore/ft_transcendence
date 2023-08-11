@@ -20,7 +20,7 @@
                 <div class="text-900 w-6 md:w-2 font-medium"></div>
               </li>
 
-              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+              <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
                 <div class="text-500 w-6 md:w-2 font-medium">Username</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
                   <span v-if="userData">{{ userData.username }}</span>
@@ -35,7 +35,7 @@
                 </div>
               </li>
 
-              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+              <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
                 <div class="text-500 w-6 md:w-2 font-medium">Email</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1 text-justify">
                   <span v-if="userData">{{ userData.email }}</span>
@@ -43,7 +43,7 @@
                 <div class="w-6 md:w-2 flex justify-content-end"></div>
               </li>
 
-              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+              <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
                 <div class="text-500 w-6 md:w-2 font-medium">Bio</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-0 flex-grow-1 text-justify">
                   <span v-if="userData">{{ userData.bio }}</span>
