@@ -10,8 +10,13 @@
           </div>
         </div>
       </div>
+       <div>
+        <label for="url">URL :</label>
+        <input type="text" v-model="url" id="url" />
+        <button @click="loadURLImage">Load an avatar</button>
+        </div>
+      </div>
     </div>
-  </div>
 
   <Accordion :activeIndex="0">
     <AccordionTab header="Profile">
@@ -28,9 +33,14 @@
     
     
     <div class="profile-details">
-    <div class="font-medium text-3xl text-900 mb-3">Profile</div>
+      <ul class="list-none p-0 m-0">
 
-    <ul class="list-none p-0 m-0">
+      <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+        <div class="font-medium text-3xl text-900 w-6 md:w-2 ">Profile
+        </div>
+        <Button label="View public profile" icon="pi pi-eye" @click="goToPublicProfile(username)" text/>
+      </li>
+
       
       <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
     <div class="text-500 w-6 md:w-2 font-medium">Username</div>
@@ -54,7 +64,7 @@
     </div>
     <div class="w-6 md:w-2 flex justify-content-end">
       <Button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserUsername">
-      {{ isEditingUsername ? (isSavingUsername ? 'Saving...' : 'Save') : 'Edit' }}
+      {{ isEditingUsername ? (isSavingUsername ? 'Saving... ' : 'Save ') : 'Edit' }}
     </Button>
 
 
@@ -62,7 +72,7 @@
   </li>
 
   <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
-        <div class="text-500 w-6 md:w-2 font-medium">Id</div>
+        <div class="text-500 w-6 md:w-2 font-medium">id</div>
         <div class="text-900 w-full md:w-8 md:flex-order-1 flex-order-1">
           <Chip>{{ id }}</Chip>
         </div>
@@ -97,7 +107,7 @@
   <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
   <div class="text-500 w-6 md:w-2 font-medium">Bio</div>
   <div class="text-900 w-full md:w-8 md:flex-order-0 flex-grow-1" :class="{ 'whitespace-nowrap': !isEditingBio, 'text-justify': !isEditingBio }">
-    <span v-if="!isEditingBio">{{ Bio }}</span>
+    <span v-if="!isEditingBio">{{ bio }}</span>
     <input
       v-else
       type="text"
@@ -151,6 +161,9 @@
         </div>
       <ul class="list-none p-0 m-0">
 
+
+        
+
         <!-- New list tiles -->
       
       <li class="h-32 flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap"
@@ -189,16 +202,15 @@
       </span>
     </div>
     <div class="w-6 md:w-2 flex justify-content-end space-x-2">
-        <Button
-          v-show="showDeleteIcon[index + 1]"
-          icon="pi pi-eye"
-          rounded
-          class="mr-3"
-          aria-label="ViewProfile"
-          style="background-color: rgb(197, 72, 255)"
-
-          @click="removeFriend(index)"
-        ></Button>
+      <Button
+    v-show="showDeleteIcon[index + 1]"
+    icon="pi pi-eye"
+    rounded
+    class="mr-3"
+    aria-label="ViewProfile"
+    style="background-color: rgb(197, 72, 255)"
+    @click="goToPublicProfile(friend.username)"
+  ></Button>
         <Button
           v-show="showDeleteIcon[index + 1]"
           icon="pi pi-ban pi-ban"
@@ -223,19 +235,19 @@
       </li>
       </ul>
         </div>
-    </AccordionTab>
-    <AccordionTab header="History">
+</AccordionTab>
+<AccordionTab header="History">
         <p>
             At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
             culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
         </p>
-    </AccordionTab>
-    <AccordionTab header="statistics">
+</AccordionTab>
+<AccordionTab header="statistics">
         <p>
             At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
             culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
         </p>
-    </AccordionTab>
+</AccordionTab>
     
   </Accordion>
 
@@ -249,6 +261,7 @@ import { defineComponent } from 'vue';
 import { server } from "@/utils/helper";
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { User } from '@/utils/interfaces';
+import router from '@/router';
 
 
 export default defineComponent({
@@ -264,16 +277,19 @@ username() {
 email() {
   return store.state.user.email;
 },
-Bio() {
+bio() {
   return store.state.user.bio;
 },
+id() {
+  return store.state.user.id;
+}
 },
 mounted() {
   this.getAllFriends();
   this.getAllUsernames();
 },
 data() {
-return {      
+  return {      
   isEditingEmail: false,
   isSavingEmail: false,
   editedEmail: store.state.user.email,
@@ -285,8 +301,6 @@ return {
   isEditingUsername: false,
   isSavingUsername: false,
   editedUsername: store.state.user.username,
-
-  id: store.state.user.id,
   
   showPopup: false,
   imageGrid: [
@@ -300,7 +314,9 @@ return {
     { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
     { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
   ],
-
+  url: '',
+  img: '',
+  
   userFriends: [] as User[],
   isInputAddFriendsFocused: false,
   selectedFriend: '' as string,
@@ -320,39 +336,65 @@ getImageById(id: string | null) {
   return this.imageGrid.find(image => image.id === id);
 },
 
+async loadURLImage() {
+  if (this.url) {
+    if (await this.isValidURL(this.url)) {
+      this.imageGrid.push({ id: this.url, img: null });
+      this.url = ''; // Réinitialise l'URL
+    } else {
+      alert('Invalid URL');
+      this.url = '';
+    }
+  }
+},
+
+async isValidURL(url: string) {
+  try {
+    const response = await axios.head(url);
+    return response.status === 200;
+  } catch (error) {
+    return false;
+  }
+},
+
+goToPublicProfile(username: string | null) {
+    if (username)
+      router.push(`/profile/${username}`);
+},
+
 cancelEditing(field) {
-    if (field === 'username') {
-      this.editedUsername = this.username;
-      this.isEditingUsername = false;
+  if (field === 'username') {
+    this.editedUsername = this.username;
+    this.isEditingUsername = false;
     } else if (field === 'email') {
       this.editedEmail = this.email;
       this.isEditingEmail = false;
     } else if (field === 'bio') {
-      this.editedBio = this.Bio;
+      this.editedBio = this.bio;
       this.isEditingBio = false;
     }
 },
 
 async ModifyUserAvatarId(image) 
 {
-    this.ModifyStoreAvatarId(image);
+    this.ModifyStoreAvatarId(image.id);
     const user = store.state.user;
     axios.defaults.baseURL = server.nestUrl;
     await axios.post('/api/user/update', user,
       { headers: {"Authorization": `Bearer ${store.state.user.hash}`}})
     .then((response: AxiosResponse) => {
-        console.log(response);
+      console.log(response);
     })
     .catch((error: AxiosError) => {
-        console.log(error);
+      console.log(error);
     })
     this.showPopup = false;
 },
 
 async ModifyUserBio() {
-      if (this.isEditingBio) {
-        if (this.editedBio !== null) {
-          if (this.editedBio.length > 500) {
+  if (this.isEditingBio) {
+    if (this.editedBio !== null) {
+      if (this.editedBio.length > 500) {
             alert("Bio cannot exceed 500 characters.");
             return;
           }
@@ -517,7 +559,7 @@ getAllUsernames() {
       });
   },
 
-  getUserByUsername(username: string): Promise<User | null> {
+async   getUserByUsername(username: string): Promise<User | null> {
     axios.defaults.baseURL = server.nestUrl;
     return axios
       .get(`/api/user/username/${username}`, {
@@ -614,8 +656,8 @@ ModifyStoreEmail() {
 ModifyStoreBio() {
   store.commit('setBio', this.editedBio);
 },
-ModifyStoreAvatarId(image) {
-  store.commit('setAvatarId', image.id );
+ModifyStoreAvatarId(id) {
+  store.commit('setAvatarId', id );
 },
 },
 })

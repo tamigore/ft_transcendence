@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import Home from '@/views/Home.vue';
 import Profile from '@/views/Profile.vue';
+import SubProfile from '@/views/SubProfile.vue'
 import Pong from '@/views/Pong.vue';
 import Chat from '@/views/ChatView.vue';
 import store from '@/store';
@@ -16,7 +17,14 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/profile',
     name: 'profile',
-    component: Profile
+    component: Profile,
+    props: true
+  },
+  {
+    path: '/profile/:username',
+    name: 'sub',
+    component: SubProfile,
+    props: true
   },
   {
     path: '/pong',
