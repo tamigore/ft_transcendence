@@ -315,7 +315,6 @@ data() {
     { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
   ],
   url: '',
-  img: '',
   
   userFriends: [] as User[],
   isInputAddFriendsFocused: false,
@@ -331,14 +330,21 @@ openImagePicker() {
   this.showPopup = true;
 },
 
-getImageById(id: string | null) {
-  if (!id) return null;
-  return this.imageGrid.find(image => image.id === id);
+getAvatarById(id) {
+  if (!id) return require('@/assets/welc.jpeg');
+  const avatar = this.imageGrid.find((image) => image.id === id);
+  return avatar ? avatar.img : require('@/assets/welc.jpeg');
 },
+
+getImageById(id: string | null) {
+  if (!id) return require('@/assets/welc.jpeg');
+  const avatar = this.imageGrid.find((image) => image.id === id);
+  return avatar ? avatar.img : require('@/assets/welc.jpeg');},
 
 async loadURLImage() {
   if (this.url) {
     if (await this.isValidURL(this.url)) {
+      // this.ModifyUserAvatarId(this.url);
       this.imageGrid.push({ id: this.url, img: null });
       this.url = ''; // Réinitialise l'URL
     } else {
@@ -638,13 +644,6 @@ if (this.userFriends.length > 0) {
 } else {
   console.log("No friends registered.");
 }
-},
-
-
-getAvatarById(id) {
-  if (!id) return require('@/assets/welc.jpeg');
-  const avatar = this.imageGrid.find((image) => image.id === id);
-  return avatar ? avatar.img : require('@/assets/welc.jpeg');
 },
 
 ModifyStoreUsername() {
