@@ -13,7 +13,9 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     this.logger.log(`findAll users`);
-    return await this.prisma.user.findMany();
+    return await this.prisma.user.findMany().catch((error) => {
+      throw new Error(error);
+    });
   }
 
   async findById(id: number): Promise<User> {
