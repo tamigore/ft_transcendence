@@ -1,9 +1,9 @@
 <template>
   <div>
-    <label for="imageUrl">Entrez l'URL de l'image :</label>
-    <input type="text" v-model="imageUrl" id="imageUrl" />
-    <button @click="chargerImage">Charger l'image</button>
-    <img v-if="loadedImage" :src="loadedImage" alt="Image chargée" />
+    <label for="url">URL :</label>
+    <input type="text" v-model="url" id="url" />
+    <button @click="loadURLImage">Load an avatar</button>
+    <img v-if="img" :src="img" alt="Image chargée" />
   </div>
 </template>
 
@@ -16,27 +16,27 @@ export default defineComponent({
   name: 'ImageLoader',
   data() {
     return {
-      imageUrl: '',
-      loadedImage: '',
+      url: '',
+      img: '',
     };
   },
   methods: {
-    async chargerImage() {
-      this.loadedImage = '';
+    async loadURLImage() {
+      this.img = '';
 
-      if (this.imageUrl) {
-        if (await this.estUrlImageValide(this.imageUrl)) {
-          this.loadedImage = this.imageUrl;
-          this.imageUrl = '';
+      if (this.url) {
+        if (await this.isValidURL(this.url)) {
+          this.img = this.url;
+          this.url = '';
 
-          store.commit('setAvatarId', this.imageUrl);
+          store.commit('setAvatarId', this.url);
         } else {
           alert('invalid URL');
-          this.imageUrl = '';
+          this.url = '';
         }
       }
     },
-    async estUrlImageValide(url: string) {
+    async isValidURL(url: string) {
       try {
         const response = await axios.head(url);
         return response.status === 200;

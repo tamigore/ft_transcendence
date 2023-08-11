@@ -20,6 +20,64 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   // @Public()
+  @Get()
+  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @HttpCode(HttpStatus.OK)
+  findUsers(): Promise<User[]> {
+    return this.userService.findAll();
+  }
+
+  // @Public()
+  @Get("username/:name")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  findUserWithName(@Param("name") param: string): Promise<User> {
+    return this.userService.findByUsername(param);
+  }
+
+  @Get("!self")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  findAllButSelf(@GetCurrentUserId() userId: number): Promise<User[]> {
+    return this.userService.findAllButSelf(userId);
+  }
+
+  // @Public()
+  @Get("friends")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  findAllFriends(@GetCurrentUserId() userId: number): Promise<User[]> {
+    return this.userService.findFriends(userId);
+  }
+
+  // @Public()
+  @Get("friends/:id")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  findFriends(
+    @GetCurrentUserId() userId: number,
+    @Param("id") param: string,
+  ): Promise<User[]> {
+    const id = parseInt(param);
+    return this.userService.findFriendsById(userId, id);
+  }
+
+  // @Public()
+  @Get(":id")
+  // @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  findUser(@Param("id") param: string): Promise<User> {
+    const id = parseInt(param);
+    return this.userService.findById(id);
+  }
+
+  // @Public()
   @Post("update")
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   // @UseGuards(AtGuard)
@@ -46,16 +104,6 @@ export class UserController {
     this.userService.removeFriends(userId, friend.id);
   }
 
-  // @Public()
-  @Get("friends/:id")
-  // @UseGuards(AtGuard)
-  @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  findFriends(@Param("id") param: string): Promise<User[]> {
-    const id = parseInt(param);
-    return this.userService.findFriendsById(id);
-  }
-
   @Post("chatsocket")
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   // @UseGuards(AtGuard)
@@ -68,41 +116,21 @@ export class UserController {
     this.userService.updateChatSocket(userId, chatSocket.socket);
   }
 
-  // @Public()
-  @Get()
-  // @UseGuards(AtGuard)
+  @Post("block/add")
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  findUsers(): Promise<User[]> {
-    return this.userService.findAll();
+  addBlock(@GetCurrentUserId() userId: number, @Body() friend: User) {
+    this.userService.addBlocked(userId, friend.id);
   }
 
   // @Public()
-  @Get(":id")
+  @Post("block/del")
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  findUser(@Param("id") param: string): Promise<User> {
-    const id = parseInt(param);
-    return this.userService.findById(id);
-  }
-
-  //@Public()
-  @Get("username/:username")
-  @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*")
-  findUserByUsername(@Param("username") username: string): Promise<User> {
-  return this.userService.findByUsername(username);
-  }
-
-
-  @Get("!self")
-  // @UseGuards(AtGuard)
-  @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  findAllButSelf(@Param("id") param: string): Promise<User[]> {
-    const id = parseInt(param);
-    return this.userService.findAllButSelf(id);
+  delBlock(@GetCurrentUserId() userId: number, @Body() friend: User) {
+    this.userService.removeBlocked(userId, friend.id);
   }
 
   // // @Public()
