@@ -10,8 +10,13 @@
           </div>
         </div>
       </div>
+       <div>
+        <label for="url">URL :</label>
+        <input type="text" v-model="url" id="url" />
+        <button @click="loadURLImage">Load an avatar</button>
+        </div>
+      </div>
     </div>
-  </div>
 
   <Accordion :activeIndex="0">
     <AccordionTab header="Profile">
@@ -230,19 +235,19 @@
       </li>
       </ul>
         </div>
-    </AccordionTab>
-    <AccordionTab header="History">
+</AccordionTab>
+<AccordionTab header="History">
         <p>
             At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
             culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
         </p>
-    </AccordionTab>
-    <AccordionTab header="statistics">
+</AccordionTab>
+<AccordionTab header="statistics">
         <p>
             At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
             culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
         </p>
-    </AccordionTab>
+</AccordionTab>
     
   </Accordion>
 
@@ -309,6 +314,8 @@ data() {
     { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
     { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
   ],
+  url: '',
+  img: '',
   
   userFriends: [] as User[],
   isInputAddFriendsFocused: false,
@@ -327,6 +334,27 @@ openImagePicker() {
 getImageById(id: string | null) {
   if (!id) return null;
   return this.imageGrid.find(image => image.id === id);
+},
+
+async loadURLImage() {
+  if (this.url) {
+    if (await this.isValidURL(this.url)) {
+      this.imageGrid.push({ id: this.url, img: null });
+      this.url = ''; // Réinitialise l'URL
+    } else {
+      alert('Invalid URL');
+      this.url = '';
+    }
+  }
+},
+
+async isValidURL(url: string) {
+  try {
+    const response = await axios.head(url);
+    return response.status === 200;
+  } catch (error) {
+    return false;
+  }
 },
 
 goToPublicProfile(username: string | null) {
@@ -349,7 +377,7 @@ cancelEditing(field) {
 
 async ModifyUserAvatarId(image) 
 {
-    this.ModifyStoreAvatarId(image);
+    this.ModifyStoreAvatarId(image.id);
     const user = store.state.user;
     axios.defaults.baseURL = server.nestUrl;
     await axios.post('/api/user/update', user,
@@ -628,8 +656,8 @@ ModifyStoreEmail() {
 ModifyStoreBio() {
   store.commit('setBio', this.editedBio);
 },
-ModifyStoreAvatarId(image) {
-  store.commit('setAvatarId', image.id );
+ModifyStoreAvatarId(id) {
+  store.commit('setAvatarId', id );
 },
 },
 })
