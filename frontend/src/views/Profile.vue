@@ -9,6 +9,11 @@
           </div>
         </div>
       </div>
+      <div>
+        <label for="url">URL :</label>
+        <input type="text" v-model="url" id="url" />
+        <button @click="loadURLImage">Load an avatar</button>
+      </div>
     </div>
   </div>
 
@@ -19,7 +24,7 @@
         <div class="grid-container">
           <div class="p-card p-component card" style="background-color: rgb(69, 60, 73); width: 29em;">
             <div class="p-card-body">
-              <div @click="openImagePicker" class="selected-image" :class="{ active: showPopup }"
+              <div @click="openPopup" class="selected-image" :class="{ active: showPopup }"
                 style="background-color: rgb(37, 37, 37);">
                 <img :src="selectedImage.img" :alt="'Image ' + selectedImage.id" type="pointer" />
               </div>
@@ -44,13 +49,11 @@
                     @keyup.esc="cancelEditing('username')" ref="usernameInput" style="width: auto;" data-v-ced23842=""
                     class="p-inputtext p-component p-inputtext-sm" data-pc-name="inputtext" data-pc-section="root"
                     placeholder="username" />
-
                 </div>
                 <div class="w-6 md:w-2 flex justify-content-end">
                   <Button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserUsername">
                     {{ isEditingUsername ? (isSavingUsername ? 'Saving... ' : 'Save ') : 'Edit' }}
                   </Button>
-
                 </div>
               </li>
 
@@ -95,14 +98,12 @@
                 </div>
               </li>
 
-
             </ul>
           </div>
-
         </div>
       </div>
-    </AccordionTab>
-    <AccordionTab header="Friends">
+  </AccordionTab>
+  <AccordionTab header="Friends">
 
       <div class="surface-section border-round box-shadow " style="padding: 5em">
         <div class="p-inputgroup flex-1 mb-4">
@@ -213,19 +214,19 @@ export default defineComponent({
   },
   data() {
     return {
-      isEditingEmail: false,
-      isSavingEmail: false,
-      editedEmail: store.state.user.email,
+      isEditingEmail: false as boolean,
+      isSavingEmail: false as boolean,
+      editedEmail: store.state.user.email as string | null,
 
-      isEditingBio: false,
-      isSavingBio: false,
-      editedBio: store.state.user.bio,
+      isEditingBio: false as boolean,
+      isSavingBio: false as boolean,
+      editedBio: store.state.user.bio as string | null,
 
-      isEditingUsername: false,
-      isSavingUsername: false,
-      editedUsername: store.state.user.username,
+      isEditingUsername: false as boolean,
+      isSavingUsername: false as boolean,
+      editedUsername: store.state.user.username as string | null,
 
-      showPopup: false,
+      showPopup: false as boolean,
       imageGrid: [
         { id: "1", img: require('@/assets/profiles/profil_1.jpg') },
         { id: "2", img: require('@/assets/profiles/profil_2.jpg') },
@@ -237,6 +238,7 @@ export default defineComponent({
         { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
         { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
       ],
+      url:'' as string | null,
 
       userFriends: [] as User[],
       isInputAddFriendsFocused: false,
@@ -248,15 +250,47 @@ export default defineComponent({
   },
   methods:
   {
-    openImagePicker() {
+    openPopup() {
       this.showPopup = true;
     },
 
     getImageById(id: string | null) {
-      if (!id) {
-        return { id: 1, img: require('@/assets/welc.jpeg') };
-      } else if (id && id.length < 2) {
-        return this.imageGrid.find(image => image.id === id);
+  if (!id) {
+    return { id: 1, img: require('@/assets/welc.jpeg') };
+  } else if (id && id.length < 2) {
+    return this.imageGrid.find(image => image.id === id);
+  } else {
+    // Si l'ID est une URL, chargez l'image à partir de l'URL
+    if (id.length > 2) {
+      return { id: id, img: id }; // Utilisez l'ID (l'URL) comme source de l'image
+    } else {
+      return { id: 1, img: require('@/assets/welc.jpeg') };
+    }
+  }
+},
+
+    async loadURLImage() {
+      if (this.url) {
+        if (await this.isValidURL(this.url)) {
+          this.ModifyStoreAvatarId(this.url);
+          if (this.imgId)
+          {
+            this.imageGrid.push({ id: this.imgId, img: null });
+            this.url = ''; // Réinitialise l'URL
+          }
+        } else {
+          alert('Invalid URL');
+          this.url = '';
+        }
+      }
+    },
+
+    async isValidURL(url: string) {
+      try {
+        const response = await axios.head(url);
+        return response.status === 200;
+      } catch (error) {
+        return false;
       }
     },
 
@@ -265,7 +299,7 @@ export default defineComponent({
         router.push(`/profile/${username}`);
     },
 
-    cancelEditing(field) {
+    cancelEditing(field : string) {
       if (field === 'username') {
         this.editedUsername = this.username;
         this.isEditingUsername = false;
@@ -324,7 +358,6 @@ export default defineComponent({
           }
         });
       }
-
     },
 
     async ModifyUserEmail() {
@@ -478,6 +511,8 @@ export default defineComponent({
     },
 
     async addFriend() {
+      if (this.selectedFriend.trim() === '') {
+        return;}
       const id = parseInt(this.selectedFriend);
       let friend = null as User | null;
       if (!isNaN(id)) {
@@ -503,36 +538,42 @@ export default defineComponent({
 
     async handleIdSearch(id: number): Promise<User | null> {
       const user = await this.getUserById(id);
-      if (user && user.username) {
+      if (user && user.username && (user.username !== this.username)) {
         if (!this.userFriends.some((friend) => friend.id === user.id)) {
           this.userFriends.push(user);
           this.showDeleteIcon.push(false);
           this.selectedFriend = '';
           return (user);
-        } else {
-          alert('This friend is already registered in your friends list.');
-        }
-      } else {
+        } 
+        else
+        alert('This friend is already registered in your friends list.');
+      }
+      else if (user && user.username && (user.username === this.username))
+        alert("You can't add yourself in your friends list.");
+      else {
         alert('User with provided id not found.');
       }
       return null;
     },
 
     async handleUsernameSearch(username: string): Promise<User | null> {
-      const user = await this.getUserByUsername(username)
-      if (user && user.username) {
+      const user = await this.getUserByUsername(username);
+      if (user && user.username && (user.username !== this.username)) {
         if (!this.userFriends.some((friend) => friend.id === user.id)) {
           this.userFriends.push(user);
           this.showDeleteIcon.push(false);
           this.selectedFriend = '';
           return (user);
-        } else {
-          alert('This friend is already registered in your friends list.');
         }
-      } else {
+        else
+        alert('This friend is already registered in your friends list.');
+      }
+      else if (user && user.username && (user.username === this.username))
+        alert("You can't add yourself in your friends list.");
+      else {
         alert('User with provided username not found.');
       }
-      return (null);
+      return null;
     },
 
     async blockFriend(index: number, user: User) {
