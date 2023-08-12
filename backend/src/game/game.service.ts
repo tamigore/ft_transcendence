@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { Game } from "@prisma/client";
+import { Game, Historic } from "@prisma/client";
 import { Matchamker } from "./dto";
 
 @Injectable()
@@ -66,6 +66,53 @@ export class GameService {
       throw error;
     });
     return game;
+  }
+
+  async gameToHistoric(game: Game, _winner: number,
+    _looser: number, _score: string): Promise<Historic>
+  {
+    if (!game)
+    {
+      console.log("gameToHistoric : game is null");
+    }
+
+    const historic = await this.prisma.historic.create({
+      data: {
+        score: _score,
+        winner: {
+          connect: {
+            id : _winner,
+          }
+        },
+        looser: {
+          connect: {
+            id : _looser,
+          }
+        },
+        game:
+        {
+          connect: {
+             id : game.id,
+             
+        }
+      }
+      },
+      include: {
+        winner: true,
+        looser: true,
+        game: true,
+      }
+
+    })
+
+    .then((historic) => {
+      this.logger.log("---------YOOO LE HISTORIC : ", historic)
+      return historic;
+    })
+    .catch((error) => {
+      throw error;
+    });
+    return historic;
   }
 
   

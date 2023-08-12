@@ -7,7 +7,7 @@ import {
   WebSocketServer,
   ConnectedSocket,
 } from "@nestjs/websockets";
-import { User } from "@prisma/client";
+import { User, Game } from "@prisma/client";
 import { Server, Socket } from "socket.io";
 import { Logger } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
@@ -114,9 +114,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage("destroyBall")
-  async onBalldestruction(@ConnectedSocket() client: Socket, @MessageBody () body: { room: string, ballId: number}) {
+  async onBallDestruction(@ConnectedSocket() client: Socket, @MessageBody () body: { room: string, ballId: number}) {
     console.log("ball DESTRUCTION ^^  : ", body.ballId);
     this.server.to(body.room).emit("ballDestruction", body.ballId);
+  }
+
+  @SubscribeMessage("endGame")
+  async onEndGame(@ConnectedSocket() client: Socket, @MessageBody ()
+  body: { room: string, game: Game, winner: number, looser: number, score: string}) {
+    console.log("---------------EndGame ^^ winner : ", body.winner);
+    this.server.to(body.room).emit("gameEnder");
+    this.gameService.gameToHistoric(body.game, body.winner, body.looser, body.score);
   }
 
 }

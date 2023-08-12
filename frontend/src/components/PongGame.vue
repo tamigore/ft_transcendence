@@ -311,6 +311,7 @@ class BallClass {
     } as BallState);
    
   }
+
   ballWallColision() {
     if (this.y <= 0) {
       this.veloY = Math.abs(this.veloY);
@@ -335,8 +336,7 @@ class BallClass {
         this.y = this.pong.height / 2;
         this.veloX = this.pong.randStartSpeedX();
         this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
-        socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom});
-        socket.emit("goalMessage", {room: store.state.gameRoom, player: 1});
+        this.onlinePoint(1);
       }
    }
     else if (this.x >= this.pong.width - 1) {
@@ -359,11 +359,16 @@ class BallClass {
         this.y = this.pong.height / 2;
         this.veloX = -this.pong.randStartSpeedX();
         this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
-        socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom});
-        socket.emit("goalMessage", {room: store.state.gameRoom, player: 2});
+        this.onlinePoint(2);
       }
-}
-}
+    }
+  }
+
+  onlinePoint = (_player:number) => {
+    console.log("onlinePoint-----------");
+    socket.emit("ballSetter", {ballInfo: this.ballState(), room: store.state.gameRoom});
+    socket.emit("goalMessage", {room: store.state.gameRoom, player: _player});
+  }
 
   ballPaddleColision = (paddleX: number, paddleY: number, paddleHeight: number, paddleWidth: number, sign: number): boolean => {
     const dist_center = Math.abs(this.x - (this.pong.width / 2));
@@ -807,6 +812,29 @@ export class PongGameClass {
       this.blockId = 2;
     }
     // this.newBall();
+  }
+
+  endGameOnline() {
+    this.inMultiplayer = false;
+    this.gameIsRunning = false;
+    store.commit("setGameConnect", false);
+    let winnerId = 0;
+    let looserId = 0;
+    if (this.scoreA > this.scoreB)
+    {
+      winnerId = 1;
+      looserId = 2;
+    }
+    else
+    {
+      winnerId = 2;
+      looserId = 1;
+    }
+    const theScore = this.scoreA + " - " + this.scoreB as string;
+    console.log("endGameOnline----------- score  = ", theScore);
+    socket.emit("endGame", {room: store.state.gameRoom,
+      game: store.state.game, winner: winnerId, looser: looserId, score: theScore});
+    this.restartMatch();
   }
 
 
@@ -1277,6 +1305,11 @@ export default defineComponent({
             Pong.value.scoreA++;
           else if (e == 1)
             Pong.value.scoreB++;
+            if (Pong.value.scoreA >= 5 || Pong.value.scoreB >= 5)
+            {
+              Pong.value.endGameOnline();
+              store.commit("setGameConnect", false);
+            }
         });
 
         socket.on("blockCreation", (block: BlockState) => {
@@ -1300,6 +1333,14 @@ export default defineComponent({
         socket.on("ballDestruction", (id: number) => {
           console.log("ballDestruction", id);
           Pong.value.removeBall(id);
+        });
+
+        socket.on("gameEnder", () => {
+          Pong.value.inMultiplayer = false;
+          Pong.value.gameIsRunning = false;
+          store.commit("setGameConnect", false);
+          Pong.value.restartMatch();
+          console.log("gameEnder is ended");
         });
 
 

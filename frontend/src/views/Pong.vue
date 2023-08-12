@@ -82,7 +82,7 @@ export default defineComponent({
 		// }
 	},
     onMonted() {
-
+        //socket.emit("gameLeave", { room: store.state.gameRoom, player: store.state.playerNum });
         socket.connect();
         store.commit("setGameConnect", true);
     },
