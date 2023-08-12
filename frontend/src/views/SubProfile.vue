@@ -12,18 +12,22 @@
           </div>
 
           <div class="profile-details">
-            <ul class="list-none p-0 m-0">
+            <ul v-if="userData" class="list-none p-0 m-0">
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-                <div class="font-medium text-3xl text-900 w-6 md:w-2">
-                  <span v-if="userData">{{ userData.username }}'s profile</span>
+                <div class="font-medium text-3xl text-900 w-6 md:w-2">{{ userData.username }}'s profile
                 </div>
-                <div class="text-900 w-6 md:w-2 font-medium"></div>
+                <div v-if="userData.username !== username">
+
+
+                  <Button @click="addFriend" icon="pi pi-eye" label="Add to my friends list" text/>
+                </div>
+                
               </li>
 
               <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
                 <div class="text-500 w-6 md:w-2 font-medium">Username</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
-                  <span v-if="userData">{{ userData.username }}</span>
+                  <span>{{ userData.username }}</span>
                 </div>
                 <div class="w-6 md:w-2 flex justify-content-end"></div>
               </li>
@@ -31,14 +35,14 @@
               <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
                 <div class="text-500 w-6 md:w-2 font-medium">Id</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-1 flex-order-1">
-                  <Chip><span v-if="userData">{{ userData.id }}</span></Chip>
+                  <Chip><span>{{ userData.id }}</span></Chip>
                 </div>
               </li>
 
               <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
                 <div class="text-500 w-6 md:w-2 font-medium">Email</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1 text-justify">
-                  <span v-if="userData">{{ userData.email }}</span>
+                  <span>{{ userData.email }}</span>
                 </div>
                 <div class="w-6 md:w-2 flex justify-content-end"></div>
               </li>
@@ -46,7 +50,7 @@
               <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
                 <div class="text-500 w-6 md:w-2 font-medium">Bio</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-0 flex-grow-1 text-justify">
-                  <span v-if="userData">{{ userData.bio }}</span>
+                  <span>{{ userData.bio }}</span>
                 </div>
                 <div class="w-4 md:w-2 flex justify-content-end"></div>
               </li>
@@ -75,10 +79,15 @@ selectedImage() {
   const selectedId = store.state.user.img;
   return this.getImageById(selectedId) || { id: 1, img: require('@/assets/welc.jpeg') };
 },
+username() {
+  return store.state.user.username;
+},
+
 },
 async mounted() {
     await this.getUserByUsername();
-  },
+},
+
 data() {
   return {
     userData: null as User | null,
@@ -99,28 +108,51 @@ data() {
 methods: 
 {
   getImageById(id: string | null) {
-    if (!id) return null;
-    return this.imageGrid.find(image => image.id === id);
-  },
+      if (!id) {
+        return { id: 1, img: require('@/assets/welc.jpeg') };
+      } else if (id && id.length < 2) {
+        return this.imageGrid.find(image => image.id === id);
+      } else {
+        if (id.length > 2) {
+          return { id: id, img: id };
+        } else {
+          return { id: 1, img: require('@/assets/welc.jpeg') };
+        }
+      }
+    },
 
-  async getUserByUsername() {
-    const route = useRoute();
-    const username = route.params.username;
-    console.log(username);
-    axios.defaults.baseURL = server.nestUrl;
-    return axios
-    .get(`/api/user/username/${username}`, {
-      headers: { Authorization: `Bearer ${store.state.user.hash}` },
-    })
-    .then((response: AxiosResponse) => {
-      console.log(response);
-      this.userData = response.data as User;
-    })
-    .catch((error: AxiosError) => {
-      console.error(error);
-    });
+    async addFriend() {
+      axios.defaults.baseURL = server.nestUrl;
+      return axios
+        .post(`/api/user/friends/add`, this.userData, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+        })
+        .catch((error: AxiosError) => {
+          console.error(error);
+        });
+    },
+
+    async getUserByUsername() {
+      const route = useRoute();
+      const username = route.params.username;
+      console.log(username);
+      axios.defaults.baseURL = server.nestUrl;
+      return axios
+      .get(`/api/user/username/${username}`, {
+        headers: { Authorization: `Bearer ${store.state.user.hash}` },
+      })
+      .then((response: AxiosResponse) => {
+        console.log(response);
+        this.userData = response.data as User;
+      })
+      .catch((error: AxiosError) => {
+        console.error(error);
+      });
+    },
   },
-},
 })
 </script>
 

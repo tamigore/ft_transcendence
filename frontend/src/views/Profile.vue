@@ -1,15 +1,16 @@
 <template>
    <div v-if="showPopup">
-    <div class="popup box-shadow">
+    <div class="popup">
       <div class="popup-header">
-        <div class="popup-title">Choose your avatar</div>
-        <Button
-          icon="pi pi-times"
-          rounded
-          class="close-button"
-          @click="closePopup"
-        ></Button>
-      </div>
+      <span class="p-font-weight-bold text-900">Choose your avatar</span>
+      <Button
+        icon="pi pi-times"
+        rounded
+        class="p-button-secondary"
+        style="background-color: rgb(211, 177, 224); color: rgb(30, 27, 31);"
+        @click="closePopup"
+      ></Button>
+    </div>
       <Divider />
 
       <div class="image-grid">
@@ -144,12 +145,16 @@
             <div class="text-500 w-6 md:w-2 font-medium">
               <div class="friend-container">
                 <div class="image-frame"
-                  style="width: 75px; height: 75px; float: left; margin-right: 50px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
-                  <img :src="getImageById(friend.img).img" :alt="'Avatar ' + friend.username"
-                    style="width: 100%; height: 100%; object-fit: cover;" />
+                     style="width: 75px; height: 75px; float: left; margin-right: 50px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
+                  <img :src="getImageById(friend.img).img"
+                       :alt="'Avatar ' + friend.username"
+                       style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
-                <div class="text-500 w-6 md:w-2 font-medium" style="overflow: hidden;">
-                  <span style="display: block; margin-top: 5px;">{{ friend.username }}</span>
+                <div class="text-500 w-8 md:w-4 font-medium" style="overflow: hidden;">
+                  <span style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                        title="{{ friend.username }}">
+                    {{ friend.username }}
+                  </span>
                 </div>
               </div>
 
@@ -276,19 +281,18 @@ export default defineComponent({
     },
 
     getImageById(id: string | null) {
-  if (!id) {
-    return { id: 1, img: require('@/assets/welc.jpeg') };
-  } else if (id && id.length < 2) {
-    return this.imageGrid.find(image => image.id === id);
-  } else {
-    // Si l'ID est une URL, chargez l'image à partir de l'URL
-    if (id.length > 2) {
-      return { id: id, img: id }; // Utilisez l'ID (l'URL) comme source de l'image
-    } else {
-      return { id: 1, img: require('@/assets/welc.jpeg') };
-    }
-  }
-},
+      if (!id) {
+        return { id: 1, img: require('@/assets/welc.jpeg') };
+      } else if (id && id.length < 2) {
+        return this.imageGrid.find(image => image.id === id);
+      } else {
+        if (id.length > 2) {
+          return { id: id, img: id };
+        } else {
+          return { id: 1, img: require('@/assets/welc.jpeg') };
+        }
+      }
+    },
 
     async loadURLImage() {
       if (this.url) {
@@ -670,14 +674,12 @@ export default defineComponent({
   z-index: 2;
 }
 
-.popup-title {
-  color: #000;
-  font-size: 1.4em;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  text-align: left;
-  padding-bottom: 0.3cm;
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
-
 .image-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
