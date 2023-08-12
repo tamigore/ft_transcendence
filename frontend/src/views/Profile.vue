@@ -1,7 +1,17 @@
 <template>
-  <div v-if="showPopup">
-    <div class="popup border-round box-shadow" style="padding: 5em;">
-      <h2 class="popup-title">Choose an avatar</h2>
+   <div v-if="showPopup">
+    <div class="popup box-shadow">
+      <div class="popup-header">
+        <div class="popup-title">Choose your avatar</div>
+        <Button
+          icon="pi pi-times"
+          rounded
+          class="close-button"
+          @click="closePopup"
+        ></Button>
+      </div>
+      <Divider />
+
       <div class="image-grid">
         <div v-for="image in imageGrid" :key="image.id" @click="ModifyUserAvatarId(image)">
           <div class="image-frame">
@@ -9,10 +19,17 @@
           </div>
         </div>
       </div>
+      <Divider />
       <div>
-        <label for="url">URL :</label>
-        <input type="text" v-model="url" id="url" />
-        <button @click="loadURLImage">Load an avatar</button>
+
+        <div class="p-inputgroup flex-1">
+    <span class="p-inputgroup-addon">
+        <i class="pi pi-download"></i>
+    </span>
+    <InputText placeholder="Enter the URL of your image" v-model="url" id="url" />
+    <Button @click="loadURLImage">download</Button>
+</div>
+
       </div>
     </div>
   </div>
@@ -35,9 +52,9 @@
             <ul class="list-none p-0 m-0">
 
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-                <div class="font-medium text-3xl text-900 w-6 md:w-2 ">Profile
+                <div class="font-medium text-3xl text-900 w-6 md:w-2 ">My profile
                 </div>
-                <Button label="View public profile" icon="pi pi-eye" @click="goToPublicProfile(username)" text />
+                <Button label="View my public profile" icon="pi pi-eye" @click="goToPublicProfile(username)" text />
               </li>
 
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
@@ -254,6 +271,10 @@ export default defineComponent({
       this.showPopup = true;
     },
 
+    closePopup() {
+      this.showPopup = false;
+    },
+
     getImageById(id: string | null) {
   if (!id) {
     return { id: 1, img: require('@/assets/welc.jpeg') };
@@ -275,8 +296,10 @@ export default defineComponent({
           this.ModifyStoreAvatarId(this.url);
           if (this.imgId)
           {
-            this.imageGrid.push({ id: this.imgId, img: null });
+            if (this.imgId && this.imageGrid.length < 9) {
+              this.imageGrid.push({ id: this.imgId, img: null }); }
             this.url = ''; // Réinitialise l'URL
+            this.showPopup = false;
           }
         } else {
           alert('Invalid URL');
@@ -640,8 +663,8 @@ export default defineComponent({
   left: 50%;
   transform: translate(-50%, -50%);
   background: #49354f;
-  padding: 40px;
-  border: 1px solid #ccc;
+  padding: 25px;
+  border: 1px solid #c9a1dd;
   border-radius: 10px;
   text-align: center;
   z-index: 2;
