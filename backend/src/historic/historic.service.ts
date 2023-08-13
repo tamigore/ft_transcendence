@@ -39,36 +39,36 @@ export class HistoricService {
     return message;
   }
 
-  async setGameByGameId(body: any) : Promise<void> {
-    let winnerID = 0;
-    winnerID = + body.winnerID;
-    let looserID = 0;
-    looserID = + body.looserID;
+  // async setGameByGameId(body: any) : Promise<void> {
+  //   let winnerID = 0;
+  //   winnerID = + body.winnerID;
+  //   let looserID = 0;
+  //   looserID = + body.looserID;
 
-    await this.prisma.historic
-      .create({
-        data: {
-          winner: {
-            connect: {
-              id: winnerID,
-            },
-          },
-          looser: {
-            connect: {
-              id: looserID,
-            },
-          },
-          score : body.score,
-          game : {
-            connect : {
-              id : body.gameId
-            }
-          }
-        },
-      })
-      .catch((error: any) => {
-        this.logger.log("", error)
-      });
-    }
+  //   await this.prisma.historic
+  //     .create({
+  //       data: {
+  //         winner: {
+  //           connect: {
+  //             id: winnerID,
+  //           },
+  //         },
+  //         looser: {
+  //           connect: {
+  //             id: looserID,
+  //           },
+  //         },
+  //         score : body.score,
+  //         game : {
+  //           connect : {
+  //             id : body.gameId
+  //           }
+  //         }
+  //       },
+  //     })
+  //     .catch((error: any) => {
+  //       this.logger.log("", error)
+  //     });
+  //   }
     
 }

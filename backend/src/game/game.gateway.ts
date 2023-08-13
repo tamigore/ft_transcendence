@@ -125,7 +125,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log("---------------EndGame ^^ winner : ", body.winner);
     this.server.to(body.room).emit("gameEnder");
     this.gameService.gameToHistoric(body.game, body.winner, body.looser, body.score);
-  }
+  }z
 
 }
 

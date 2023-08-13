@@ -50,7 +50,7 @@ export default defineComponent({
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/matchmaker', {
           userId: store.state.user.id as number,
-          gameSettings: false,
+          gameSettings: this.boxes as boolean,
           userName: store.state.user.username as string,
         }, {
           headers: {
@@ -105,7 +105,15 @@ export default defineComponent({
       store.commit("setGameConnect", true);
     },
     LeaveGame() {
+      if (store.state.ingame)
+      {
+        const looser = store.state.playerNum == 1 ? 2 : 1;
+        const winner = store.state.playerNum == 1 ? 1 : 2;
+        socket.emit("endGame", {room: store.state.gameRoom, game : store.state.game, winner: winner, looser: looser, score: "forfeit"});
+      }
+      store.commit("setInQueue", false);
       store.commit("setGameConnect", false);
+      store.commit("setGameRoom", "");
     },
   },
 });

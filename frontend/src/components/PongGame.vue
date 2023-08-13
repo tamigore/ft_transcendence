@@ -11,7 +11,7 @@
       <p>{{ "scoreB " + Pong.scoreB }}</p>
     </div>
 
-    <div class="button-container">
+    <div v-if="!Pong.inMultiplayer" class="button-container">
       <button @click="Pong.startMatchSolo" :disabled="Pong.gameIsRunning">Solo</button>
       <button @click="Pong.startMatchMultiLocal" :disabled="Pong.gameIsRunning">MultiplayerLocal</button>
       <button @click="Pong.startNoPlayer" :disabled="Pong.gameIsRunning">NoPlayer</button>
@@ -19,7 +19,6 @@
       <button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</button>
       <button @click="Pong.setBlocks" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</button>
 
-      
     </div>
     <div class="pong-container">
 
@@ -219,6 +218,8 @@ class EffectBlock {
     }
     else {
       this.id = this.pong.blockId;
+      if (store.state.ingame)
+        socket.emit("createBlock", {room: store.state.gameRoom, block: this.getBlockState()});
     }
   }
 
@@ -262,7 +263,7 @@ getBlockState(): BlockState
         }
       }
     }
-    else if (this.effect === "newBall") {
+    else if (this.effect === "newBall" && ball.pong.myBalls.length < 3 && store.state.playerNum == 1) {
       ball.pong.newBall('blue', this.x + this.width / 2, this.y + this.height / 2, 1, ball.veloX / Math.abs(ball.veloX));
     }
 
@@ -308,6 +309,7 @@ class BallClass {
       ballVeloY: this.veloY,
       ballId: this.id,
       player: store.state.playerNum,
+      ballHp: this.hp,
     } as BallState);
    
   }
@@ -378,13 +380,17 @@ class BallClass {
         this.veloX = sign * (Math.abs(this.veloX) + Math.random() / 3);
         if (this.veloX >= ballMaxSpeedX || this.veloX <= - ballMaxSpeedX)
           this.veloX = ballMaxSpeedX * sign;
-        // if (this.pong.gameIsBlocks && Math.random() < 0.6)
-          // this.pong.generateBlocks();
-        // if (store.state.playerNum == 1) //test gen Block
-          // this.pong.generateBlocks();
+        if (!store.state.ingame && this.pong.gameIsBlocks && Math.random() < 0.5)
+          this.pong.generateBlocks();
+        else if (store.state.ingame && this.pong.gameIsBlocks && store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
+          this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
         // if (this.veloY > 0)
         // this.sendBallPaddle(paddleY, player);
+
+        // const audio = new Audio(('@/assets/sounds/hitSound.wav'));
+        // audio.play();
+        
         return true;
       }
     }
@@ -726,7 +732,7 @@ export class PongGameClass {
         this.ballRadius, var_color, var_hp)
       this.myBalls.push(newBall);
     }
-    if (store.state.ingame )
+    if (store.state.ingame && store.state.playerNum == 1)
       socket.emit("createBall", {room: store.state.gameRoom, ball: newBall.ballState()});
   }
 
@@ -811,6 +817,8 @@ export class PongGameClass {
       this.rightPlayerKeyUp = 'w';
       this.blockId = 2;
     }
+    this.rightPaddleHeight = 600;
+    this.leftPaddleHeight = 600;
     // this.newBall();
   }
 
@@ -1138,7 +1146,7 @@ export class PongGameClass {
       }
     }
     // console.log("block created", this.myBlocks[this.myBlocks.length - 1].getBlockState());
-    socket.emit("createBlock", {room: store.state.gameRoom, block: this.myBlocks[this.myBlocks.length - 1].getBlockState()});
+    
   }
 
   removeBlock = (blockId: number) => {
@@ -1162,9 +1170,10 @@ export default defineComponent({
     const myCanvas = ref<(HTMLCanvasElement | null)>(null);
     let ctx: CanvasRenderingContext2D | null = null;
     const { fps } = useFPS();
-    
-    const hitSound = ref(null);
+    // const hitSound = ref(null);
+    let lastDate = Date.now();
     const Pong = ref(new PongGameClass());
+    
 
 //     const loadSound = (url) => {
 //     return new Promise((resolve, reject) => {
@@ -1183,8 +1192,21 @@ export default defineComponent({
       //   console.log(Pong.value.gameIsRunning);
       //   Pong.value.startMultiOnline();
       // }
+     if (store.state.ingame && store.state.playerNum == 1)
+     {
+      const nowDate = Date.now();
+      if (lastDate + 250 > nowDate)
+      {
+        lastDate  = nowDate;
+        socket.emit("ballSetter", {ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom});
+      }
+     }
+
+    if (Pong.value.inMultiplayer && !store.state.ingame)
+     Pong.value.restartMatch();
       if (!ctx)
         return;
+
       ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
       Pong.value.bot();
       Pong.value.moovePaddles();
@@ -1305,11 +1327,11 @@ export default defineComponent({
             Pong.value.scoreA++;
           else if (e == 1)
             Pong.value.scoreB++;
-            if (Pong.value.scoreA >= 5 || Pong.value.scoreB >= 5)
-            {
-              Pong.value.endGameOnline();
-              store.commit("setGameConnect", false);
-            }
+          if (Pong.value.scoreA >= 10 || Pong.value.scoreB >= 10)
+          {
+            Pong.value.endGameOnline();
+            store.commit("setGameConnect", false);
+          }
         });
 
         socket.on("blockCreation", (block: BlockState) => {
@@ -1323,7 +1345,7 @@ export default defineComponent({
 
         socket.on("ballCreation", (ball: BallState) => {
           console.log("ballCreation", ball);
-          if (store.state.playerNum != ball.player)
+          if (store.state.playerNum != 1)
           {
             Pong.value.myBalls.push(new BallClass(Pong.value, ball.ballX, ball.ballY, ball.ballVeloX, ball.ballVeloY,
                                                   Pong.value.ballRadius, 'blue', 1));
@@ -1338,6 +1360,7 @@ export default defineComponent({
         socket.on("gameEnder", () => {
           Pong.value.inMultiplayer = false;
           Pong.value.gameIsRunning = false;
+          store.commit("setGameRoom", "");
           store.commit("setGameConnect", false);
           Pong.value.restartMatch();
           console.log("gameEnder is ended");
@@ -1375,13 +1398,13 @@ export default defineComponent({
 
     }));
 
+
     return {
       Pong,
       pongStyle,
       myCanvas,
       computedCanvasStyle,
       fps,
-      hitSound,
     };
   },
 

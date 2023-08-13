@@ -89,18 +89,18 @@ export class GameService {
             id : _looser,
           }
         },
-        game:
-        {
-          connect: {
-             id : game.id,
+        // game:
+        // {
+        //   connect: {
+        //      id : game.id,
              
-        }
-      }
+        // }
+      // }
       },
       include: {
         winner: true,
         looser: true,
-        game: true,
+        // game: true,
       }
 
     })
