@@ -40,7 +40,7 @@
       <div class="surface-section border-round box-shadow" style="padding: 5em;">
 
         <div class="grid-container">
-          <div class="p-card p-component card" style="background-color: rgb(69, 60, 73); width: 29em;">
+          <div class="p-card p-component card" style="background-color:#121212; width: 29em;">
             <div class="p-card-body">
               <div @click="openPopup" class="selected-image" :class="{ active: showPopup }"
                 style="background-color: rgb(37, 37, 37);">
@@ -53,13 +53,13 @@
             <ul class="list-none p-0 m-0">
 
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-                <div class="font-medium text-3xl text-900 w-6 md:w-2 ">My profile
+                <div class="font-medium text-3xl text-900 w-6 md:w-2 mr-8">My profile
                 </div>
                 <Button label="View my public profile" icon="pi pi-eye" @click="goToPublicProfile(username)" text />
               </li>
 
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-                <div class="text-500 w-6 md:w-2 font-medium">Username</div>
+                <div class="text-500 w-6 md:w-2 mr-8 font-medium">Username</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1"
                   :class="{ 'whitespace-nowrap': !isEditingUsername, 'text-justify': !isEditingUsername }">
                   <span v-if="!isEditingUsername">{{ username }}</span>
@@ -68,23 +68,23 @@
                     class="p-inputtext p-component p-inputtext-sm" data-pc-name="inputtext" data-pc-section="root"
                     placeholder="username" />
                 </div>
-                <div class="w-6 md:w-2 flex justify-content-end">
-                  <Button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserUsername">
+                <div class="ml-7 flex justify-content-end">
+                  <Button class="p-button-text ml-2" icon="pi pi-pencil" @click="ModifyUserUsername">
                     {{ isEditingUsername ? (isSavingUsername ? 'Saving... ' : 'Save ') : 'Edit' }}
                   </Button>
                 </div>
               </li>
 
               <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
-                <div class="text-500 w-6 md:w-2 font-medium">id</div>
+                <div class="text-500 w-6 md:w-2 mr-8 font-medium">id</div>
                 <div class="text-900 w-full md:w-8 md:flex-order-1 flex-order-1">
                   <Chip>{{ id }}</Chip>
                 </div>
               </li>
 
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-                <div class="text-500 w-6 md:w-2 font-medium">Email</div>
-                <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1"
+                <div class="text-500 w-6 md:w-2 mr-8 font-medium">Email</div>
+                <div class="bio-text text-900 w-full md:w-8 md:flex-order-0 flex-order-1"
                   :class="{ 'whitespace-nowrap': !isEditingEmail, 'text-justify': !isEditingEmail }">
                   <span v-if="!isEditingEmail">{{ email }}</span>
                   <input v-else type="email" v-model="editedEmail" @keyup.enter="ModifyUserEmail"
@@ -92,29 +92,29 @@
                     class="p-inputtext p-component p-inputtext-sm" data-pc-name="inputtext" data-pc-section="root"
                     placeholder="email" />
                 </div>
-                <div class="w-6 md:w-2 flex justify-content-end">
-                  <Button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserEmail">
+                <div class="ml-7 flex justify-content-end">
+                  <Button class="p-button-text ml-2" icon="pi pi-pencil" @click="ModifyUserEmail">
                     {{ isEditingEmail ? (isSavingEmail ? 'Saving...' : 'Save') : 'Edit' }}
                   </button>
                 </div>
               </li>
 
-              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-                <div class="text-500 w-6 md:w-2 font-medium">Bio</div>
-                <div class="text-900 w-full md:w-8 md:flex-order-0 flex-grow-1"
-                  :class="{ 'whitespace-nowrap': !isEditingBio, 'text-justify': !isEditingBio }">
-                  <span v-if="!isEditingBio">{{ bio }}</span>
-                  <input v-else type="text" v-model="editedBio" @keyup.enter="ModifyUserBio"
-                    @keyup.esc="cancelEditing('bio')" ref="bioInput" style="width: auto;" data-v-ced23842=""
-                    class="p-inputtext p-component p-inputtext-sm" data-pc-name="inputtext" data-pc-section="root"
-                    placeholder="bio" />
-                </div>
-                <div class="w-4 md:w-2 flex justify-content-end">
-                  <Button class="p-button-text" icon="pi pi-pencil" @click="ModifyUserBio">
-                    {{ isEditingBio ? (isSavingBio ? 'Saving...' : 'Save') : 'Edit' }}
-                  </button>
-                </div>
-              </li>
+          <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+            <div class="text-500 w-6 md:w-2 mr-8 font-medium">Bio</div>
+            <div class="bio-text text-900 w-full md:w-8 md:flex-order-0 flex-grow-1"
+              :class="{ 'whitespace-nowrap': !isEditingBio, 'text-justify': !isEditingBio, 'text-overflow-ellipsis': !isEditingBio }">
+              <span v-if="!isEditingBio">{{ bio }}</span>
+              <Textarea v-else v-model="editedBio" rows="3" @keyup.esc="cancelEditing('bio')" ref="bioInput"
+                style="width: 100%;" class="p-inputtextarea p-component p-inputtextarea-sm" placeholder="bio" />
+            </div>
+            <div class="ml-7 flex justify-end">
+              <Button class="p-button-text mr-1" icon="pi pi-pencil" @click="ModifyUserBio">
+                {{ isEditingBio ? (isSavingBio ? 'Saving...' : 'Save') : 'Edit' }}
+              </button>
+            </div>
+          </li>
+
+
 
             </ul>
           </div>
@@ -159,15 +159,20 @@
               </div>
 
             </div>
-            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
+            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1 ">
               <span v-if="friend.loggedIn">
-                <Tag icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)"
+                <Tag class="pr-6" icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)"
                   value="Online"></Tag>
               </span>
+              <span v-if="friend.loggedIn">
+                <Tag icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)"
+                  value="In game"></Tag>
+              </span>
+
             </div>
             <div class="w-6 md:w-2 flex justify-content-end space-x-2">
               <Button icon="pi pi-comment" v-show="showDeleteIcon[index + 1]" rounded class="mr-3" aria-label="PrivateMessage"
-                style="background-color: rgb(93, 104, 225)" @click="removeFriend(index, friend)"></Button>
+                style="background-color: rgb(93, 104, 225)"></Button>
               <Button v-show="showDeleteIcon[index + 1]" icon="pi pi-eye" rounded class="mr-3" aria-label="ViewProfile"
                 style="background-color: rgb(197, 72, 255)" @click="goToPublicProfile(friend.username)"></Button>
               <Button v-show="showDeleteIcon[index + 1]" icon="pi pi-ban pi-ban" rounded class="mr-3" aria-label="Ban"
@@ -207,7 +212,6 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { User } from '@/utils/interfaces';
 import router from '@/router';
 
-
 export default defineComponent({
   name: 'ProfileView',
   computed: {
@@ -236,6 +240,7 @@ export default defineComponent({
   },
   data() {
     return {
+
       isEditingEmail: false as boolean,
       isSavingEmail: false as boolean,
       editedEmail: store.state.user.email as string | null,
@@ -297,14 +302,9 @@ export default defineComponent({
     async loadURLImage() {
       if (this.url) {
         if (await this.isValidURL(this.url)) {
-          this.ModifyStoreAvatarId(this.url);
-          if (this.imgId)
-          {
-            if (this.imgId && this.imageGrid.length < 9) {
-              this.imageGrid.push({ id: this.imgId, img: null }); }
-            this.url = ''; // Réinitialise l'URL
-            this.showPopup = false;
-          }
+          this.imageGrid.push({ id: this.url, img: this.url });
+          this.ModifyUserAvatarId(this.imageGrid[this.imageGrid.length - 1]);
+          this.showPopup = false;
         } else {
           alert('Invalid URL');
           this.url = '';
@@ -357,8 +357,8 @@ export default defineComponent({
     async ModifyUserBio() {
       if (this.isEditingBio) {
         if (this.editedBio !== null) {
-          if (this.editedBio.length > 500) {
-            alert("Bio cannot exceed 500 characters.");
+          if (this.editedBio.length > 1000) {
+            alert("Bio cannot exceed 1000 characters.");
             return;
           }
         }
@@ -377,14 +377,6 @@ export default defineComponent({
         this.isSavingBio = false;
       }
       this.isEditingBio = !this.isEditingBio;
-      if (this.isEditingBio) {
-        this.$nextTick(() => {
-          const bioInput = this.$refs.bioInput as HTMLInputElement | null;
-          if (bioInput) {
-            bioInput.focus();
-          }
-        });
-      }
     },
 
     async ModifyUserEmail() {
@@ -709,10 +701,9 @@ export default defineComponent({
 .selected-image {
   cursor: pointer;
   z-index: 1;
-}
-
-.selected-image.active {
-  border: 2px solid #000;
+  outline-color: rgb(69, 60, 73);
+  outline-style: outset;
+  outline-width: 14px;
 }
 
 .grid-container {
@@ -737,11 +728,17 @@ export default defineComponent({
   height: 500px;
   border-radius: 50%;
   object-fit: cover;
-  padding: 30px;
+  padding: 45px;
 }
 
 .profile-details {
   grid-column: 2;
+}
+
+.bio-text {
+  overflow-wrap: break-word;
+  word-break: break-all;
+  max-width: 100%;
 }
 
 .myBackground {
