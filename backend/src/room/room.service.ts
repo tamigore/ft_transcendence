@@ -132,6 +132,20 @@ export class RoomService implements OnModuleInit {
     });
   }
 
+  async findAllPublic(): Promise<Room[]> {
+    this.logger.log("findAllPublic rooms");
+    return await this.prisma.room.findMany({
+      where: { private: false },
+      include: {
+        owner: true,
+        admins: true,
+        users: true,
+        ban: true,
+        messages: true,
+      },
+    });
+  }
+
   async findById(id: number): Promise<Room> {
     this.logger.log(`findById room: ${id}`);
     return await this.prisma.room.findUnique({
@@ -198,66 +212,67 @@ export class RoomService implements OnModuleInit {
   }
 
   async findPrivateRooms(userId: number): Promise<Room[]> {
-    await this.prisma.room
+    return await this.prisma.room
       .findMany({
         where: {
-          private: true,
-          users: {
-            every: {
-              id: userId,
+          AND: [
+            {
+              private: true,
             },
-          },
+            {
+              users: {
+                some: {
+                  id: userId,
+                },
+              },
+            },
+          ],
         },
-      })
-      .then((rooms) => {
-        this.logger.log("findPrivateRooms success");
-        return rooms;
       })
       .catch((error) => {
         throw error;
       });
-    return [];
   }
 
   async getPrivateRoom(user1: User, user2: User): Promise<Room> {
     this.logger.log(
       `getPrivateRoom of ${user1.username} and ${user2.username}`,
     );
-    await this.prisma
+    return await this.prisma
       .$transaction(async (prisma) => {
-        await prisma.room
-          .findMany({
+        const room = await prisma.room
+          .findFirst({
             where: {
-              name: `${user1.username} & ${user2.username} Room`,
+              private: true,
+              OR: [
+                { name: `${user1.username} & ${user2.username} Room` },
+                { name: `${user2.username} & ${user1.username} Room` },
+              ],
             },
           })
-          .then((res) => {
-            this.logger.log("getPrivateRoom findMany success");
-            return res;
-          })
-          .catch(async (error) => {
-            this.logger.log(
-              "getPrivateRoom findMany failed with error: " + error,
-            );
-            return await prisma.room.create({
-              data: {
-                name: `${user1.username} & ${user2.username} Room`,
-                private: true,
-                users: {
-                  connect: [{ id: user1.id }, { id: user2.id }],
-                },
-              },
-            });
+          .catch((error) => {
+            throw new Error(error);
           });
-      })
-      .then((room) => {
-        this.logger.log("getPrivateRoom success: ", room);
-        return room;
+        if (typeof room !== "undefined" && room) {
+          return room;
+        }
+        return await prisma.room
+          .create({
+            data: {
+              name: `${user1.username} & ${user2.username} Room`,
+              private: true,
+              users: {
+                connect: [{ id: user1.id }, { id: user2.id }],
+              },
+            },
+          })
+          .catch((error) => {
+            throw new Error(error);
+          });
       })
       .catch((error) => {
         throw new Error(`getPrivateRoom failure: ${error}`);
       });
-    return {} as Room;
   }
 
   async update(userId: number, roomDto: Room) {
@@ -280,7 +295,7 @@ export class RoomService implements OnModuleInit {
 
   async addUser(roomId: number, userId: number, pwd: string): Promise<boolean> {
     this.logger.log(`addUser: ${userId} to room: ${roomId}`);
-    await this.prisma
+    return await this.prisma
       .$transaction(async (prisma) => {
         const room = await prisma.room.findUnique({
           where: { id: roomId },
@@ -318,7 +333,6 @@ export class RoomService implements OnModuleInit {
       .catch(() => {
         return false;
       });
-    return false;
   }
 
   async addAdmin(roomId: number, userId: number, adminId: number) {

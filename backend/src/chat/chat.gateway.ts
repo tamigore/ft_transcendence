@@ -58,7 +58,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // @UseGuards(WsGuard)
-  @SubscribeMessage("privMassage")
+  @SubscribeMessage("privMessage")
   async onPrivMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: any,

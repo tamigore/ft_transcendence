@@ -8,11 +8,11 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  join_room: (e: { user: User; room: Room }) => void;
-  leave_room: (e: { user: User; room: Room }) => void;
-  kick_user: (e: { user: User; user_to_kick: User; room: Room }) => void;
-  cliMessage: (e: Message) => void;
-  privMessage: (e: { user1: User, user2: User, message: Message }) => void;
+  join_room: (e: { user: User; room: Room }) => boolean;
+  leave_room: (e: { user: User; room: Room }) => boolean;
+  kick_user: (e: { user: User; user_to_kick: User; room: Room }) => boolean;
+  cliMessage: (e: Message) => boolean;
+  privMessage: (e: { user1: User, user2: User, message: Message }) => boolean;
 }
 
 class SocketioChat {
@@ -23,6 +23,7 @@ class SocketioChat {
       {
         transports : ['websocket'],
         autoConnect: false,
+        upgrade: false,
       }
     );
     this.socket.on('servMessage', (msg: Message) => {

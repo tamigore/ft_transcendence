@@ -39,6 +39,17 @@ export class RoomController {
   }
 
   @Public()
+  @Get("public")
+  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @HttpCode(HttpStatus.OK)
+  async findPublicRooms(): Promise<Room[]> {
+    const rooms = await this.roomService.findAllPublic();
+    console.debug(rooms);
+    return rooms;
+  }
+
+  @Public()
   @Get("private/:id")
   // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
@@ -108,8 +119,8 @@ export class RoomController {
   // @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
-  createPrivateRoom(@Body() dto: { user1: User; user2: User }) {
-    this.roomService.getPrivateRoom(dto.user1, dto.user2);
+  createPrivateRoom(@Body() dto: { user1: User; user2: User }): Promise<Room> {
+    return this.roomService.getPrivateRoom(dto.user1, dto.user2);
   }
 
   @Public()

@@ -148,6 +148,8 @@ import { Message } from "@/utils/interfaces"
 import axios from 'axios';
 import store from "@/store";
 import { server } from '@/utils/helper';
+import socket from '@/utils/socket';
+import router from '@/router';
 
 export default defineComponent({
   name: "ChatBubble",
@@ -190,10 +192,10 @@ export default defineComponent({
             },
             visible: () => this.hasHigherRights(),
           },
-          { label: 'Invite Friend', icon: 'pi pi-fw pi-user-plus',
+          { label: 'Add Friend', icon: 'pi pi-fw pi-user-plus',
             command: () => {
-              if (this.isFriend)
-                this.inviteFriend(this.message.user);
+              if (!this.isFriend)
+                this.addFriend(this.message.user);
             },
             visible: () => !this.isFriend,
           },
@@ -226,12 +228,12 @@ export default defineComponent({
   },
   computed: {
     isFriend(): boolean {
-      if (!store.state.user.friend)
+      if (!store.state.user.friend || store.state.user.friend.length == 0)
         return false;
       return store.state.user.friend.find(user => {user.id === this.message.userId}) ? true : false;
     },
     isBlock(): boolean {
-      if (!store.state.user.blocked)
+      if (!store.state.user.blocked || store.state.user.blocked.length == 0)
         return false;
       return store.state.user.blocked.find(user => {user.id === this.message.userId}) ? true : false;
     },
@@ -264,11 +266,8 @@ export default defineComponent({
     },
     async searchUser(): Promise<void> {
       console.log("searchUser");
-      // await axios.post('', {
-      //   id: this.message.userId,
-      // }, {
-      //   headers: {"Authorization": `Bearer ${store.state.user.hash}`}
-      // });
+      if (this.message.user && this.message.user.username)
+        router.push(`/profile/${this.message.user.username}`);
     },
     async blockUser(): Promise<void> {
       console.log("blockUser");
@@ -319,12 +318,10 @@ export default defineComponent({
     muteUser(): void {
       console.log("muteUser");
     },
-    async inviteFriend(): Promise<void> {
-      console.log("inviteFriend");
+    async addFriend(): Promise<void> {
+      console.log("addFriend");
       axios.defaults.baseURL = server.nestUrl;
-      await axios.post('/api/user/friends/add', {
-        id: this.message.user,
-      }, {
+      await axios.post('/api/user/friends/add', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then((res) => {
@@ -333,11 +330,9 @@ export default defineComponent({
       .catch(err => { throw new Error(err) });
     },
     async removeFriend(): Promise<void> {
-      console.log("inviteFriend");
+      console.log("removeFriend");
       axios.defaults.baseURL = server.nestUrl;
-      await axios.post('/api/user/friends/del', {
-        id: this.message.user,
-      }, {
+      await axios.post('/api/user/friends/del', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then((res) => {
@@ -359,6 +354,8 @@ export default defineComponent({
       })
       .then((res) => {
         console.log(res);
+        socket.emit("join_room", { user: store.state.user, room: res.data });
+        socket.emit("join_room", { user: this.message.user, room: res.data });
       })
       .catch(err => { throw new Error(err) });
     },

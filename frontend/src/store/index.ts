@@ -41,6 +41,13 @@ const store = createStore({
             console.log('addRoom: ', room);
             state.rooms.push(room);
         },
+        delRoom: function (state, room: Room) {
+            console.log('delRoom: ', room);
+            const index = state.rooms.indexOf(room);
+            if (index >= 0) {
+                state.rooms.splice(index, index);
+            }
+        },
         setPrivate: function (state, rooms: Room[]) {
             console.log('setRooms: ', rooms);
             state.private = rooms;

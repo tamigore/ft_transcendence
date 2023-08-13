@@ -144,7 +144,7 @@
             </div>
             <div class="w-6 md:w-2 flex justify-content-end space-x-2">
               <Button icon="pi pi-comment" v-show="showDeleteIcon[index + 1]" rounded class="mr-3" aria-label="Delete"
-                style="background-color: rgb(93, 104, 225)" @click="removeFriend(index, friend)"></Button>
+                style="background-color: rgb(93, 104, 225)" @click="privateMessage(index, friend)"></Button>
               <Button v-show="showDeleteIcon[index + 1]" icon="pi pi-eye" rounded class="mr-3" aria-label="ViewProfile"
                 style="background-color: rgb(197, 72, 255)" @click="goToPublicProfile(friend.username)"></Button>
               <Button v-show="showDeleteIcon[index + 1]" icon="pi pi-ban pi-ban" rounded class="mr-3" aria-label="Ban"
@@ -183,7 +183,7 @@ import { server } from "@/utils/helper";
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { User } from '@/utils/interfaces';
 import router from '@/router';
-
+import socket from '@/utils/socket';
 
 export default defineComponent({
   name: 'ProfileView',
@@ -403,7 +403,7 @@ export default defineComponent({
     async getAllUsernames() {
       axios.defaults.baseURL = server.nestUrl;
       await axios
-        .get(`/api/user/`, {
+        .get(`/api/user/!self`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
         })
         .then((response: AxiosResponse) => {
@@ -556,6 +556,23 @@ export default defineComponent({
         })
         .then((response: AxiosResponse) => {
           console.log(response);
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
+
+    async privateMessage(index: number, user: User) {
+      await axios
+        .post(`/api/room/private`, { user1: store.state.user, user2: user },
+        {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          socket.emit("join_room", { user: store.state.user, room: response.data });
+          socket.emit("join_room", { user: user, room: response.data });
+          router.push('Chat');
         })
         .catch((error: AxiosError) => {
           throw error;

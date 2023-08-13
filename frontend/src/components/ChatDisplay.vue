@@ -14,14 +14,14 @@
           <label for="ingredient1" class="ml-2">Connected</label>
         </div>
         <div class="flex justify-content-center">
-          <form>
+          <form v-on:submit.prevent>
             <div class="p-inputgroup flex">
               <span class="p-inputgroup-addon">
-                <i class="pi pi-user"></i>
+                <i class="pi pi-box"> Room </i>
               </span>
               <InputText v-model="roomName" placeholder="Name" />
               <span class="p-inputgroup-addon">
-                <i class="pi pi-user"></i>
+                <i class="pi pi-unlock"></i>
               </span>
               <InputText v-model="roomPassword" placeholder="Password" />
               <Button @click="createRoom()">Create Room</button>
@@ -33,7 +33,7 @@
         <TabView>
           <TabPanel header="Rooms">
             <div class="flex flex-column flex-wrap col-4 w-full" style="height: 70vh;">
-              <div v-for="Room in Rooms.values()" :key="Room.id" class="p-2">
+              <div v-for="Room in Rooms" :key="Room.id" class="p-2">
                 <div class="flex flex-row" v-bind:class="[Room.id == lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
                   <div class="flex flex-row p-2 m-2">
                     <div class="flex flex-row px-4 mx-4 cursor-pointer" @click="selectRoom(Room)">
@@ -67,7 +67,7 @@
           <div class="flex flex-column col" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
             <div v-for="Room in Rooms" :key="Room.id">
               <div v-if="Room.name == lastRoom.name">
-                <div class="scroll">
+                <div id="messageContainer" class="scroll">
                   <div v-for="msg in Messages" :key="msg.id">
                     <div class="flex">
                       <ChatBubble :message="msg" :owner="msg.userId == User.id" />
@@ -77,10 +77,10 @@
               </div>
             </div>
             <div class="flex flex-column-reverse col">
-              <form>
+              <form v-on:submit.prevent>
                 <div class="p-inputgroup flex-1">
                   <span class="p-inputgroup-addon">
-                    <i class="pi pi-user"></i>
+                    <i class="pi pi-comment"></i>
                   </span>
                   <InputText v-model="text" placeholder="Message" />
                   <Button @click="onSubmit()">Submit</button>
@@ -119,11 +119,6 @@ export default defineComponent({
       password: "" as string,
    };
   },
-  // async updated() { // WORST WAY TO FORCE UPDATE
-  //   await new Promise(r => setTimeout(r, 2000)); 
-  //   this.getRooms();
-  //   this.getPrivate();
-  // },
   computed: {
     connected () {
       if (socket.connected)
@@ -181,6 +176,11 @@ export default defineComponent({
     this.getRooms();
     this.getPrivate();
   },
+  updated() {
+    const objDiv = document.getElementById("messageContainer");
+    if (objDiv)
+      objDiv.scrollTop = objDiv.scrollHeight;
+  },
   methods: {
     InRoom (room: Room) {
       return room.users.find(user => user.id === store.state.user.id) ? true : false;
@@ -213,7 +213,7 @@ export default defineComponent({
     },
     async getRooms() {
       axios.defaults.baseURL = server.nestUrl;
-      await axios.get("api/room/all", {
+      await axios.get("api/room/public", {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
@@ -243,12 +243,14 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log("createRoom success: " + response);
+          console.log(`createRoom success: ${response.data}`);
           socket.emit("join_room", { user: store.state.user, room:  response.data });
           store.commit("setLastRoom", response.data);
           this.getRooms();
         })
         .catch((error: AxiosError) => { throw error; });
+        this.roomName = "";
+        this.roomPassword = "";
     },
     async deleteRoom(room: Room) {
       axios.defaults.baseURL = server.nestUrl;
@@ -257,12 +259,14 @@ export default defineComponent({
       })
         .then((response: AxiosResponse) => {
           console.log("deleteRoom success: " + response);
-          this.getRooms();
+          socket.emit("leave_room", { user: store.state.user, room:  response.data });
+          store.commit("setLastRoom", {});
+          store.commit("delRoom", room);
         })
         .catch((error: AxiosError) => { throw error; });
     },
     async joinRoom(room: Room) {
-      console.log("joinRoom: " + room.id + store.state.user.id);
+      console.log(`joinRoom: ${room}`);
       let pwd = null as string | null;
       if (room.hash) pwd = prompt("Input the room password: ", "pwd");
       axios.defaults.baseURL = server.nestUrl;
@@ -275,13 +279,16 @@ export default defineComponent({
       })
       .then((res) => {
         console.log(`joinRoom success ${res.data}`);
+        if (!res.data)
+          return;
         const payload = {
           user: store.state.user,
           room: room,
         };
         socket.emit("join_room", payload);
-        store.commit("setLastRoom", payload.room);
-        this.getMessages(this.lastRoom);
+        store.commit("setLastRoom", room);
+        this.getMessages(room);
+        this.getRooms();
       })
       .catch((error: AxiosError) => { throw error; });
     },
@@ -300,12 +307,13 @@ export default defineComponent({
         };
         socket.emit("leave_room", payload);
         if (this.lastRoom && this.lastRoom.name == room.name)
-          store.commit("setLastRoom", {} as Room);
+        store.commit("setLastRoom", {} as Room);
         else if (this.lastPrivate && this.lastPrivate.name == room.name)
-          store.commit("setLastPrivate", {} as Room);
-          this.getRooms();
+        store.commit("setLastPrivate", {} as Room);
+        this.getRooms();
       })
       .catch((error: AxiosError) => { throw error; });
+      this.InRoom(room);
     },
     selectRoom(value: Room) {
       if (value.users.find(user => user.id === store.state.user.id))
@@ -345,6 +353,7 @@ body {
 .scroll::-webkit-scrollbar-track {
   background-color: #e4e4e434;
   border-radius: 100px;
+
 }
 
 .scroll::-webkit-scrollbar-thumb {
@@ -374,12 +383,14 @@ body {
   background: linear-gradient(135deg,#ba00fe,#3d6ced) border-box;
   color: #fff;
 }
+
 .left {
   --_d: 0%;
   border-left: var(--t) solid #0000;
   margin-right: var(--t);
   place-self: start;
 }
+
 .right {
   --_d: 100%;
   border-right: var(--t) solid #0000;
