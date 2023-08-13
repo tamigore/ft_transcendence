@@ -17,8 +17,6 @@
                 <div class="font-medium text-3xl text-900 w-6 md:w-2">{{ userData.username }}'s profile
                 </div>
                 <div v-if="userData.username !== username">
-
-
                   <Button @click="addFriend" icon="pi pi-eye" label="Add to my friends list" text/>
                 </div>
                 
