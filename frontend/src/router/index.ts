@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import Home from '@/views/Home.vue';
 import Profile from '@/views/Profile.vue';
-import SubProfile from '@/views/SubProfile.vue'
+import SubProfile from '@/views/SubProfile.vue';
+import Error404 from '@/views/Error404.vue';
 import Pong from '@/views/Pong.vue';
 import Chat from '@/views/ChatView.vue';
 import store from '@/store';
@@ -25,6 +26,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'sub',
     component: SubProfile,
     props: true
+  },
+  {
+    path: '/404NotFound',
+    name: 'ErrorNotFound',
+    component: Error404,
   },
   {
     path: '/pong',

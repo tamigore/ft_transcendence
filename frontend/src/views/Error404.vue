@@ -1,11 +1,18 @@
 <template>
   <div class="container">
-    <h1 class="neonText pulsate">
+    <h1 class="neonText pulsate mt-8">
       404
     </h1>
     <h2 class="neonText pulsate">Page Not Found</h2> 
   </div>
 </template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+export default defineComponent({
+ name: 'ErrorNotFound',
+})
+</script>
 
 <style>
 .neonText {
