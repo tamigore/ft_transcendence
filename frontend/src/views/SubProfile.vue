@@ -80,6 +80,7 @@ import { User } from '@/utils/interfaces';
 import { useRoute } from "vue-router";
 import router from '@/router';
 
+
 export default defineComponent({
 name: 'SubProfile',
 computed: {
@@ -113,6 +114,10 @@ methods:
 {
   goToPrivateProfile() {
     router.push(`/profile/`);
+  },
+
+  goTo404NotFound() {
+    router.push(`/404NotFound`);
   },
 
   getImageById(id: string | null) {
@@ -155,6 +160,8 @@ methods:
     .then((response: AxiosResponse) => {
       console.log(response);
       this.userData = response.data as User;
+      if (!this.userData)
+        this.goTo404NotFound();
     })
     .catch((error: AxiosError) => {
       console.error(error);
