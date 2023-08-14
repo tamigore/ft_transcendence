@@ -44,9 +44,10 @@ export class RoomController {
   @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @HttpCode(HttpStatus.OK)
   async findPublicRooms(): Promise<Room[]> {
-    const rooms = await this.roomService.findAllPublic();
-    console.debug(rooms);
-    return rooms;
+    // const rooms = await this.roomService.findAllPublic();
+    // console.debug(rooms);
+    // return rooms;
+    return await this.roomService.findAllPublic();
   }
 
   @Public()

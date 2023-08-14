@@ -21,6 +21,18 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
+  async login(user: any) {
+    console.log("in login from auth service !!!");
+    console.log("username is :", user.username);
+    console.log("pictureURl is :", user.pictureURL);
+    const payload = { name: user.name, sub: user.id };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      message: "Success Login",
+    };
+  }
+
   async signupLocal(dto: SignUpDto): Promise<Tokens> {
     this.logger.debug(
       `email : ${dto.email}`,

@@ -12,6 +12,7 @@
           <section class="flex">
             <Button label="Sign Up" v-on:click="ToggleSignup()" type="button" class="mr-3 p-button-raised"></Button>
             <Button label="Sing In" v-on:click="ToggleSignin()" type="button" class="p-button-outlined"></Button>
+            <Button label="Sing In 42 Intra" v-on:click="SigninIntra()" type="button" class="p-button-outlined"></Button>
           </section>
         </section>
       </div>
@@ -78,6 +79,8 @@ import store from '@/store';
 import { defineComponent } from 'vue';
 import SignIn from '@/components/SignIn.vue';
 import SignUp from '@/components/SignUp.vue';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import { server } from '@/utils/helper';
 
 export default defineComponent ({
   name: 'HomeView',
@@ -107,6 +110,18 @@ export default defineComponent ({
       if (this.signinTriggers)
         this.ToggleSignup();
       this.signupTriggers = !this.signupTriggers
+    },
+    async SigninIntra() {
+      console.log("SigninIntra");
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.get('http://localhost:3000/api/auth/login42')
+        .then((response: AxiosResponse) => {
+          console.log(response);
+        })
+        .catch((error: AxiosError) => {
+          console.log(error);
+          throw error;
+        })
     },
   }
 })

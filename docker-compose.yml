@@ -59,6 +59,8 @@ services:
       - AT_SECRET
       - RT_SECRET
       - SECRET
+      - API_UID
+      - API_SECRET
     ports:
       - '3000:3000'
       - '8081:8081'

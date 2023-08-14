@@ -2,34 +2,30 @@ import { ValidationPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-// import { AuthenticatedSocketAdapter } from "./chat/socket.adapter";
 import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
 
   // Protecting endpoints from receiving incorrect data
   app.useGlobalPipes(new ValidationPipe());
 
-  // app.useWebSocketAdapter(new AuthenticatedSocketAdapter(app)); // Add our custom socket adapter.
-
   app.enableCors({
-    origin: "*",
-    // [
-    //   "http://localhost:8080/",
-    //   "http://localhost:8080",
-    //   "http://127.0.0.1:8080",
-    //   "*",
-    // ], // add ip address to access the server
+    origin: "http://localhost:8080", // add ip address to access the server
     credentials: true,
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-    allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"],
+    // methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    // allowedHeaders: [
+    //   "Content-Type",
+    //   "Authorization",
+    //   "x-csrf-token",
+    //   "Origin",
+    //   "x-auth-token",
+    // ],
   });
 
   ConfigModule.forRoot({
     envFilePath: "../../.env",
   });
-  // console.log(process.env);
 
   // Use Cookie
   app.use(cookieParser());

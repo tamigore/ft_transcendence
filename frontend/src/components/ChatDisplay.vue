@@ -117,6 +117,7 @@ export default defineComponent({
       text: "" as string,
       toogle: false as boolean,
       password: "" as string,
+      isPrivate: false as boolean,
    };
   },
   computed: {
@@ -320,12 +321,14 @@ export default defineComponent({
       {
         store.commit("setLastRoom", value);
         this.getMessages(this.lastRoom);
+        this.isPrivate = false;
       }
     },
     selectPrivate(value: Room) {
       console.log(value);
       store.commit("setLastPrivate", value);
       this.getMessages(this.lastPrivate);
+      this.isPrivate = true;
     },
     owner(value: Room): boolean {
       return store.state.user.id === value.ownerId;

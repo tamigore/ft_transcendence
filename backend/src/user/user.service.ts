@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 import { User } from "@prisma/client";
+import { PrismaUserCreateInput } from "./user-create";
 
 @Injectable()
 export class UserService {
@@ -10,6 +11,26 @@ export class UserService {
     private prisma: PrismaService,
     private config: ConfigService,
   ) {}
+
+  async createUser(user: PrismaUserCreateInput): Promise<User> {
+    let tmpUser: User;
+
+    try {
+      tmpUser = await this.prisma.user.create({
+        data: {
+          id: user.id,
+          email: user.email,
+          hash: "",
+          username: user.username,
+          img: user.pictureURL,
+        },
+      });
+      return tmpUser;
+    } catch (err) {
+      console.log("Error creating user:", err);
+      throw err;
+    }
+  }
 
   async findAll(): Promise<User[]> {
     this.logger.log(`findAll users`);
