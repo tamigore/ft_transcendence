@@ -114,6 +114,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 /* import specific icons */
 import * as fonts from '@fortawesome/free-solid-svg-icons'
+import VueCookies from 'vue3-cookies'
 
 library.add(fonts.faUser);
 library.add(fonts.faCheck);
@@ -133,6 +134,15 @@ app.use(PrimeVue, { ripple: true });
 app.use(ConfirmationService);
 app.use(ToastService);
 app.use(DialogService);
+app.use(VueCookies, {
+  expireTimes: "30d",
+  path: "/",
+  domain: "http://localhost:8080/",
+  secure: true,
+  sameSite: "None"
+});
+
+
 
 app.directive('tooltip', Tooltip);
 app.directive('badge', BadgeDirective);
@@ -230,6 +240,7 @@ app.component('TriStateCheckbox', TriStateCheckbox);
 app.component('VirtualScroller', VirtualScroller);
 
 // LAUNCH APP
+app.config.globalProperties.window = window;
 app.use(store);
 app.use(router);
 app.mount('#app');

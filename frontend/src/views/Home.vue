@@ -79,8 +79,8 @@ import store from '@/store';
 import { defineComponent } from 'vue';
 import SignIn from '@/components/SignIn.vue';
 import SignUp from '@/components/SignUp.vue';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { server } from '@/utils/helper';
+// import axios, { AxiosError, AxiosResponse } from 'axios';
+// import { server } from '@/utils/helper';
 
 export default defineComponent ({
   name: 'HomeView',
@@ -113,15 +113,7 @@ export default defineComponent ({
     },
     async SigninIntra() {
       console.log("SigninIntra");
-      axios.defaults.baseURL = server.nestUrl;
-      await axios.get('http://localhost:3000/api/auth/login42')
-        .then((response: AxiosResponse) => {
-          console.log(response);
-        })
-        .catch((error: AxiosError) => {
-          console.log(error);
-          throw error;
-        })
+      window.location.href = 'http://localhost:3000/api/auth/login42';
     },
   }
 })

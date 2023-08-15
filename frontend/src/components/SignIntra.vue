@@ -45,32 +45,7 @@
         return store.state.user.loggedIn;
       },
       async SignInPost() {
-        axios.defaults.baseURL = server.nestUrl;
-        await axios.post('/api/auth/local/signin', {
-          email: this.email,
-          password: this.password,
-        }, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        })
-        .then((response: AxiosResponse) => {
-          console.log(response);
-          store.commit("setHash", response.data.access_token);
-          store.commit("setHashRt", response.data.refresh_token);
-          store.commit("setLogged", true);
-          store.commit("setUsername", this.email);
-          router.push({path: '/profile'});
-        })
-        .catch((error: AxiosError) => {
-          console.log(error);
-          window.alert("Signin failed : Email or password is incorrect");
-        })
-        if (!this.checked)
-        {
-          this.email = "";
-          this.password = "";
-        }
+        window.location.href = 'efwqfewqfewqfewq';
       },
     },
   });

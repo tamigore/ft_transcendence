@@ -47,14 +47,12 @@ export class AuthController {
 
   @Public()
   @Get("v1/42/callback")
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
   @UseGuards(FortyTwoAuthGuard)
   async callback(@Req() req: any, @Res() res: any) {
     console.log("callback ??");
     const token = await this.authService.login(req.user);
     res
-      .cookie("access_token", token.access_token, { httpOnly: true })
-      .redirect("http://localhost:8080/");
+      .cookie("access_token", token.access_token).redirect("http://localhost:8080");
     return token;
   }
 

@@ -5,7 +5,9 @@ import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy) {
-  constructor(private userService: UserService) {
+  constructor(
+    private userService: UserService,
+    ) {
     super({
       clientID: process.env.API_UID,
       clientSecret: process.env.API_SECRET,
@@ -30,8 +32,8 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       return await this.userService.createUser(fortyTwoUser);
     }
-    console.log("user id : ", user.id);
-    console.log("profile: ", profile.id);
+    else
+      console.log("already created in DB!");
     return user;
   }
 }
