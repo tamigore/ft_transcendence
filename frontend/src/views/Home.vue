@@ -49,9 +49,10 @@
   background-blend-mode: screen;
 }
 
+
 .box-shadow {
   border: 0.2rem solid #fff;
-  border-radius: 2rem;
+  border-radius: 1rem;
   box-shadow: 0 0 .2rem #fff,
               0 0 .2rem #fff,
               0 0 2rem #bc13fe,
@@ -61,14 +62,14 @@
 }
 
 .box-shadow-dark {
-  border: 0.2rem solid #07004b;
-  border-radius: 2rem;
+  border: 0.2rem solid #17181f;
+  border-radius: 1rem;
   box-shadow: 0 0 .2rem #07004b,
               0 0 .2rem #07004b,
-              0 0 2rem #8442ff,
-              0 0 0.8rem #8442ff,
-              0 0 2.8rem #8442ff,
-              inset 0 0 1.3rem #8442ff;
+              0 0 .2rem #8442ff,
+              0 0 .2rem #8442ff,
+              0 0 0.2rem #8442ff,
+              inset 0 0 1rem #562ca5;
 }
 </style>
 
