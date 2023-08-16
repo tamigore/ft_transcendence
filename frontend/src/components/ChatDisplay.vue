@@ -1,5 +1,5 @@
 <template>
-  <div class="myBackground1 w-full h-full">
+  <div class="myBackground3 w-full h-full">
   <!-- Connexion et création de salle -->
   <div class="flex justify-content-center">
     <div class="flex flex-column flex-wrap col">
@@ -34,45 +34,44 @@
       <!-- Colonnes des salles et du chat -->
       <div class="flex border-round align-items-start justify-content-start pl-8 pr-8 m-4">
         <!-- Colonne des salles (1/4 de la largeur) -->
-        <div class="flex flex-col w-3">
+        <div class="flex flex-col w-4">
           <TabView class= "w-full">
 
+            <TabPanel header="Rooms" >
+              <div id="roomContainer" class="scroll" style="height: 69vh;">
+              <div v-for="Room in Rooms" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
+                <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.id == lastRoom.id ? 'box-shadow' : 'box-shadow-dark']" @click="selectRoom(Room)">
+                  <div class="flex items-center" style="max-width: 53%;">
+                    <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
+                      {{ Room.name }}
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-2 ml-auto mr-2"> <!-- Ajout de la classe mr-2 -->
+                    <Button class="text-sm ml-3" label="Join" severity="success" raised v-if="!InRoom(Room)" @click="joinRoom(Room)" />
+                    <Button class="text-sm ml-3" label="Leave" severity="warning" raised v-if="InRoom(Room)" @click="leaveRoom(Room)" />
+                    <Button class="text-sm ml-3" label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
+                  </div>
+                </div>
+              </div>
+              </div>
+            </TabPanel>
 
-<TabPanel header="Rooms" >
-  <div v-for="Room in Rooms" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 mr-4" >
-    <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer bg-gray-900" :class="[Room.id == lastRoom.id ? 'box-shadow' : 'box-shadow-dark']" @click="selectRoom(Room)">
-      <div class="flex items-center" style="max-width: 56%;">
-        <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
-          {{ Room.name }}
-        </div>
-      </div>
-      <div class="flex items-center space-x-2 ml-auto mr-2"> <!-- Ajout de la classe mr-2 -->
-        <Button class="text-sm ml-3" label="Join" severity="success" raised v-if="!InRoom(Room)" @click="joinRoom(Room)" />
-        <Button class="text-sm ml-3" label="Leave" severity="warning" raised v-if="InRoom(Room)" @click="leaveRoom(Room)" />
-        <Button class="text-sm ml-3" label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
-      </div>
-    </div>
-  </div>
-</TabPanel>
-
-
-
-
-
-<TabPanel header="Private Message">
-    <div v-for="Room in Private" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 mr-4">
-      <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer bg-gray-900" v-bind:class="[Room.id == lastPrivate.id ? 'box-shadow' : 'box-shadow-dark']"  @click="selectPrivate(Room)">
-        <div class="flex item-center" style="max-width: 95%;">
-          <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
-            {{ Room.name }}
-          </div>
-        </div>
-    </div>
-  </div>
-</TabPanel>
+            <TabPanel header="Private Message">
+              <div id="roomContainer" class="scroll" style="height: 69vh;">
+                <div v-for="Room in Private" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4">
+                  <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" v-bind:class="[Room.id == lastPrivate.id ? 'box-shadow' : 'box-shadow-dark']"  @click="selectPrivate(Room)">
+                    <div class="flex item-center" style="max-width: 50%;">
+                      <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
+                        {{ Room.name }}
+                      </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+            </TabPanel>
           </TabView>
         </div>
-
+            
         <!-- Colonne du chat (3/4 de la largeur) -->
         <div class="flex flex-col w-9">
           <div class="flex flex-column col mt-6 myBackground2" style="height: 70vh" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
@@ -105,6 +104,11 @@
   </div>
 </div>
 </template>
+            
+            
+            
+
+
 
 <script lang="ts">
 import socket from "@/utils/socket";
@@ -361,14 +365,10 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  /* background-color: #000; */
-  /* background-image: url(@/assets/pp.gif); */
+  background-color: rgb(0, 0, 0);
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
-
-
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/015/452/753/non_2x/abstract-technology-futuristic-neon-diagonal-glowing-blue-and-pink-square-shape-with-speed-motion-blur-effect-on-dark-blue-background-free-vector.jpg); */
   /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
-  background-image: url(@/assets/neonPongBackground.jpg);
+  /* background-image: url(@/assets/neonPongBackground.jpg); */
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/010/407/104/large_2x/glowing-colourful-dots-circle-abstract-neon-lights-background-for-your-design-vector.jpg); */
   /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
 }
@@ -377,19 +377,30 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  background-color: #000;
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
-  
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/013/684/180/non_2x/set-of-glowing-neon-color-circles-round-smoke-shape-with-wavy-dynamic-lines-isolated-on-black-background-technology-concept-vector.jpg); */
   /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
   /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
   background-image: url(@/assets/neonPongBackground.jpg);
-  /* background-image: url(@/assets/pp.gif); */
 
 }
-.mimissicu {
+
+.myBackground3 {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
   background-color: #000;
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/013/684/180/non_2x/set-of-glowing-neon-color-circles-round-smoke-shape-with-wavy-dynamic-lines-isolated-on-black-background-technology-concept-vector.jpg); */
+  /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
+  /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
+  background-image: url(@/assets/neonPongBackground.jpg);
+
 }
 
 .scroll {

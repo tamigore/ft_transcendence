@@ -248,8 +248,8 @@ export default defineComponent({
   --body-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   --msger-bg: #000000;
   --border: 2px solid #ddd;
-  --left-msg-bg: #8324c277;
-  --right-msg-bg: #b69424af;
+  --left-msg-bg: #c2246ebb;
+  --right-msg-bg: #b69424c7;
 }
 
 html {
@@ -309,17 +309,15 @@ body {
 .msg-img {
   width: 80px;
   height: 80px;
-  margin-right: 10px;
+  margin-right: 3%;
   border-radius: 50%;
-  overflow: hidden; 
-  box-shadow: 0 0 20px #ffffff;
+  overflow: hidden;
 }
 .msg-bubble {
   max-width: 450px;
   padding: 15px;
   border-radius: 15px;
   background: var(--left-msg-bg);
-  border: 3px solid rgb(119, 94, 129);
 }
 .msg-info {
   display: flex;
@@ -330,7 +328,7 @@ body {
 .msg-info-name {
   margin-right: 10px;
   font-weight: bold;
-  color:#aa2350;
+  color:#000000;
 }
 .msg-info-time {
   font-size: 0.85em;
@@ -352,6 +350,7 @@ body {
 }
 .right-msg .msg-img {
   margin: 0 0 0 10px;
+  margin-left: 3%;
 }
 
 </style>
