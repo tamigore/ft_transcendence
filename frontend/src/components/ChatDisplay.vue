@@ -1,5 +1,5 @@
 <template>
-  <div class="myBackground3 w-full h-full">
+  <div class="w-full h-full">
   <!-- Connexion et création de salle -->
   <div class="flex justify-content-center">
     <div class="flex flex-column flex-wrap col">
@@ -365,7 +365,7 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.39);
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
   /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
   /* background-image: url(@/assets/neonPongBackground.jpg); */
@@ -377,14 +377,14 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  background-color: #000;
+  background-color: rgba(0, 0, 0, 0.39);
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
   /* background-image: url(https://static.vecteezy.com/system/resources/previews/013/684/180/non_2x/set-of-glowing-neon-color-circles-round-smoke-shape-with-wavy-dynamic-lines-isolated-on-black-background-technology-concept-vector.jpg); */
   /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
   /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
-  background-image: url(@/assets/neonPongBackground.jpg);
+  /* background-image: url(@/assets/neonPongBackground.jpg); */
 
 }
 
