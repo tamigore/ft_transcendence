@@ -171,6 +171,13 @@ export default defineComponent({
     Private () {
       return store.state.private as Room[];
     },
+    Update() {
+      if (store.state.updateChat == true) {
+        console.log("store.state.updateChat is true");
+        this.getRooms();
+      }
+      return store.state.updateChat as boolean;
+    }
   },
   created() {
     console.log("ChatDisplay created");
@@ -248,6 +255,7 @@ export default defineComponent({
           socket.emit("join_room", { user: store.state.user, room:  response.data });
           store.commit("setLastRoom", response.data);
           this.getRooms();
+          store.commit("setMessages", []);
         })
         .catch((error: AxiosError) => { throw error; });
         this.roomName = "";
@@ -320,14 +328,13 @@ export default defineComponent({
       if (value.users.find(user => user.id === store.state.user.id))
       {
         store.commit("setLastRoom", value);
-        this.getMessages(this.lastRoom);
+        this.getMessages(value);
         this.isPrivate = false;
       }
     },
     selectPrivate(value: Room) {
-      console.log(value);
       store.commit("setLastPrivate", value);
-      this.getMessages(this.lastPrivate);
+      this.getMessages(value);
       this.isPrivate = true;
     },
     owner(value: Room): boolean {

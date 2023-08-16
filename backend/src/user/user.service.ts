@@ -20,9 +20,11 @@ export class UserService {
         data: {
           id: user.id,
           email: user.email,
-          hash: "",
+          hash: user.hash,
+          hashRt: user.hashRt,
           username: user.username,
           img: user.pictureURL,
+          loggedIn: true,
         },
       });
       return tmpUser;

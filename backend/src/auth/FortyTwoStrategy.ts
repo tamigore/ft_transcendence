@@ -5,9 +5,7 @@ import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private userService: UserService,
-    ) {
+  constructor(private userService: UserService) {
     super({
       clientID: process.env.API_UID,
       clientSecret: process.env.API_SECRET,
@@ -24,16 +22,20 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy) {
     const fortyTwoUser = {
       email: profile.emails[0].value,
       hash: "",
+      hashRt: "",
       username: profile.username,
       id: Number.parseInt(profile.id),
       pictureURL: profile._json.image.link,
     };
     const user = await this.userService.findById(fortyTwoUser.id);
-    if (!user) {
+    if (typeof user === "undefined" || !user) {
       return await this.userService.createUser(fortyTwoUser);
-    }
-    else
+    } else if (user && user.loggedIn) {
+      console.log("user already logged in");
+      return null;
+    } else {
       console.log("already created in DB!");
+    }
     return user;
   }
 }

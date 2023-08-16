@@ -10,8 +10,12 @@ const store = createStore({
         lastRoom: {} as Room,
         lastPrivate: {} as Room,
         lastMessage: {} as Message,
+        updateChat: false as boolean
     },
     mutations: {
+        updateChat : function (state, bool: boolean) {
+            state.updateChat = bool;
+        },
         addMessage : function (state, chatMessage: Message) {
             state.messages.push(chatMessage);
         },

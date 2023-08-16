@@ -52,7 +52,10 @@ export class AuthController {
     console.log("callback ??");
     const token = await this.authService.login(req.user);
     res
-      .cookie("access_token", token.access_token).redirect("http://localhost:8080");
+      .cookie("userId", token.userId)
+      .cookie("access_token", token.access_token)
+      .cookie("refresh_token", token.refresh_token)
+      .redirect("http://localhost:8080");
     return token;
   }
 

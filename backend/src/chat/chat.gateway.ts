@@ -58,25 +58,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // @UseGuards(WsGuard)
-  @SubscribeMessage("privMessage")
-  async onPrivMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() body: any,
-  ) {
-    this.logger.log("onMessage");
-    this.logger.debug("body: ", body, "ConnectedSocket: ", client.id);
-    const room = await this.roomService.getPrivateRoom(body.user1, body.user2);
-    if (
-      room &&
-      room.name === `${body.user1.username} & ${body.user2.username} Room`
-    ) {
-      console.log(`Room ${room.name}`);
-    }
-    this.chatService.createMessage(body.message);
-    this.server.to(body.room.name).emit("servMessage", body);
-  }
-
-  // @UseGuards(WsGuard)
   @SubscribeMessage("join_room")
   async onJoinRoom(
     @MessageBody()
@@ -91,6 +72,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = await this.roomService.findById(payload.room.id);
     if (!room) throw new Error("onJoinRoom no room found");
     this.server.in(user.chatSocket).socketsJoin(room.name);
+    this.server.to(payload.room.name).emit("update");
   }
 
   // @UseGuards(WsGuard)
@@ -108,5 +90,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = await this.roomService.findById(payload.room.id);
     if (!room) throw new Error("onLeaveRoom no room found");
     this.server.in(user.chatSocket).socketsLeave(room.name);
+    this.server.to(payload.room.name).emit("update");
   }
 }

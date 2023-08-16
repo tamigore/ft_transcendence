@@ -11,8 +11,8 @@
 
           <section class="flex">
             <Button label="Sign Up" v-on:click="ToggleSignup()" type="button" class="mr-3 p-button-raised"></Button>
-            <Button label="Sing In" v-on:click="ToggleSignin()" type="button" class="p-button-outlined"></Button>
-            <Button label="Sing In 42 Intra" v-on:click="SigninIntra()" type="button" class="p-button-outlined"></Button>
+            <Button label="Sing In" v-on:click="ToggleSignin()" type="button" class="mr-3 p-button-outlined"></Button>
+            <Button label="Sing In 42 Intra" v-on:click="SigninIntra()" type="button" class="mr-3 p-button" rounded></Button>
           </section>
         </section>
       </div>
@@ -79,8 +79,6 @@ import store from '@/store';
 import { defineComponent } from 'vue';
 import SignIn from '@/components/SignIn.vue';
 import SignUp from '@/components/SignUp.vue';
-// import axios, { AxiosError, AxiosResponse } from 'axios';
-// import { server } from '@/utils/helper';
 
 export default defineComponent ({
   name: 'HomeView',
@@ -97,23 +95,22 @@ export default defineComponent ({
   mounted() { 
     if (store.state.user.loggedIn == true) {
       router.push("/profile");
-    return ;
+      return ;
     }
   },
   methods: {
     ToggleSignin() {
       if (this.signupTriggers)
-        this.ToggleSignup();
+        this.signupTriggers = !this.signupTriggers
       this.signinTriggers = !this.signinTriggers
     },
     ToggleSignup() {
       if (this.signinTriggers)
-        this.ToggleSignup();
+        this.signinTriggers = !this.signinTriggers
       this.signupTriggers = !this.signupTriggers
     },
     async SigninIntra() {
-      console.log("SigninIntra");
-      window.location.href = 'http://localhost:3000/api/auth/login42';
+      window.location.href = "http://localhost:3000/api/auth/login42";
     },
   }
 })

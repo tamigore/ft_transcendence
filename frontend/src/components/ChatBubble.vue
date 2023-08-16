@@ -52,7 +52,7 @@ export default defineComponent({
             command: () => {
               this.addAdmin(this.message.user);
             },
-            visible: () => store.state.lastRoom.ownerId === store.state.user.id,
+            visible: () => this.message.room.ownerId === store.state.user.id,
           },
           { label: 'Kick', icon: 'pi pi-fw pi-sign-out',
             command: () => {
@@ -120,11 +120,11 @@ export default defineComponent({
   },
   methods: {
     hasHigherRights(): boolean {
-      if (store.state.lastRoom.ownerId === store.state.user.id
-        || (store.state.lastRoom.admin
-          && store.state.lastRoom.admin?.find((user) => {user.id === store.state.user.id})
-          && !store.state.lastRoom.admin?.find((user) => {user.id === this.message.userId})
-          && store.state.lastRoom.ownerId !== this.message.userId))
+      if (this.message.room.ownerId === store.state.user.id
+        || (this.message.room.admin
+          && this.message.room.admin?.find((user) => {user.id === store.state.user.id})
+          && !this.message.room.admin?.find((user) => {user.id === this.message.userId})
+          && this.message.room.ownerId !== this.message.userId))
         return true;
       return false;
     },

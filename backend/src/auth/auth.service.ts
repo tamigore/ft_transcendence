@@ -22,15 +22,15 @@ export class AuthService {
   ) {}
 
   async login(user: any) {
+    if (!user) return null;
     console.log("in login from auth service !!!");
     console.log("username is :", user.username);
-    console.log("pictureURl is :", user.pictureURL);
-    const payload = { name: user.name, sub: user.id };
-
-    return {
-      access_token: this.jwtService.sign(payload),
-      message: "Success Login",
-    };
+    console.log("user :", user);
+    // const payload = { name: user.name, sub: user.id };
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRtHash(user.id, tokens.refresh_token);
+    await this.updateLog(user.id, true);
+    return tokens;
   }
 
   async signupLocal(dto: SignUpDto): Promise<Tokens> {
