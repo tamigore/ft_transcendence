@@ -8,10 +8,12 @@ import { ChatModule } from "./chat/chat.module";
 import { UserModule } from "./user/user.module";
 import { GameModule } from "./game/game.module";
 import { RoomModule } from "./room/room.module";
+import { TwoFAModule } from "src/tfa/twoFA.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    TwoFAModule,
     AuthModule,
     PrismaModule,
     ChatModule,

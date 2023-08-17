@@ -177,8 +177,20 @@ export default defineComponent({
       })
       .catch(err => { throw new Error(err) });
     },
-    kickUser(): void {
+    async kickUser(): Promise<void> {
       console.log("kickUser");
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/room/delUser', {
+        roomId: this.message.roomId,
+        userId: store.state.user.id,
+        otherId: this.message.userId,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => { throw new Error(err) });
     },
     async banUser(): Promise<void> {
       console.log("banUser");
@@ -195,8 +207,20 @@ export default defineComponent({
       })
       .catch(err => { throw new Error(err) });
     },
-    muteUser(): void {
+    async muteUser(): Promise<void> {
       console.log("muteUser");
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/room/addMute', {
+        roomId: this.message.roomId,
+        userId: store.state.user.id,
+        otherId: this.message.userId,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => { throw new Error(err) });
     },
     async addFriend(): Promise<void> {
       console.log("addFriend");

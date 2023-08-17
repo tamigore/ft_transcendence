@@ -9,7 +9,6 @@ async function bootstrap() {
 
   // Protecting endpoints from receiving incorrect data
   app.useGlobalPipes(new ValidationPipe());
-
   app.enableCors({
     origin: "http://localhost:8080", // add ip address to access the server
     credentials: true,

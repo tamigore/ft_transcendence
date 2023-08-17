@@ -23,7 +23,8 @@ model User {
   gameSocket String?
   loggedIn   Boolean    @default(false)
   bio        String?
-  img        String? //Path to img src
+  img        String? // img number or url
+  twoFA      String?
   friend     User[]     @relation("UserFriend")
   friendBy   User[]     @relation("UserFriend")
   blocked    User[]     @relation("UserBlocked")

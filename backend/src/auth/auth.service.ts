@@ -23,10 +23,9 @@ export class AuthService {
 
   async login(user: any) {
     if (!user) return null;
-    console.log("in login from auth service !!!");
-    console.log("username is :", user.username);
-    console.log("user :", user);
-    // const payload = { name: user.name, sub: user.id };
+    if (user.loggedIn) return null;
+    this.logger.log("user :", user);
+    if (user.twoFA && user.twoFA.length > 0) this.logger.log("add Double auth");
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
     await this.updateLog(user.id, true);
@@ -57,6 +56,8 @@ export class AuthService {
         }
         throw new HttpException("Access Denied", 403);
       });
+    if (user && user.twoFA && user.twoFA.length > 0)
+      this.logger.log("add Double auth");
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
     await this.updateLog(user.id, true);

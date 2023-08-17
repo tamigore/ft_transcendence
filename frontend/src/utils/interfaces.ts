@@ -12,6 +12,7 @@ export interface User {
   loggedIn: boolean,
   bio: string | null,
   img: string | null, //Path to img src
+  twoFA: string | null,
   friend: User[],
   friendBy: User[],
   blocked: User[],

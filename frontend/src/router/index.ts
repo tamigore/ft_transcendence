@@ -77,6 +77,7 @@ router.beforeEach(async (to, from) => {
           socket.connect();
           store.commit("setChatSocket", socket.id);
         }
+        return { path: '/profile' };
       })
       .catch((error: AxiosError) => {
         console.log(error)
@@ -88,7 +89,7 @@ router.beforeEach(async (to, from) => {
     await axios.get(`api/user/${store.state.user.id}`, {
       headers: {"Authorization": `Bearer ${store.state.user.hash}`}
     })
-    .then((response: AxiosResponse) => {
+    .then(async (response: AxiosResponse) => {
       console.log(response);
       store.commit("setUser", response.data);
       if (!socket.connected) {
@@ -97,9 +98,41 @@ router.beforeEach(async (to, from) => {
       }
     })
     .catch((error: AxiosError) => {
-      console.log(error)
+      console.log(error);
       throw new Error("router get user failed: " + error);
     })
+    if (store.state.user.twoFA && store.state.user.twoFA?.length > 0)
+    {
+      const pwd = prompt("Two factor authentification requiered");
+      await axios.post(`api/tfa/authenticate`, { id: store.state.user.id, tfa_code: pwd } ,{
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then(async (response) => {
+        if (!response.data)
+        {
+          alert("Two factor authentification is false");
+          await axios.post("api/auth/logout", {}, {
+            headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+          })
+          .then((response: AxiosResponse) => {
+            console.log("App LogoutPost response: ", response);
+            store.commit("setHash", "");
+            store.commit("setHashRt", "");
+            store.commit("setLogged", false);
+            store.commit("setUsername", "");
+            store.commit("delUser");
+          })
+          .catch((error: AxiosError) => {
+            console.log("App LogoutPost error: ", error);
+            throw new Error("Logout failed: " + error);
+          })
+          return { path: '/' };
+        }
+      })
+      .catch((error) => {
+        throw error;
+      })
+    }
   }
   if (
     !store.state.user.loggedIn &&

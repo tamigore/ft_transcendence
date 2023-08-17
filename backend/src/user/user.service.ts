@@ -24,7 +24,6 @@ export class UserService {
           hashRt: user.hashRt,
           username: user.username,
           img: user.pictureURL,
-          loggedIn: true,
         },
       });
       return tmpUser;
@@ -32,6 +31,24 @@ export class UserService {
       console.log("Error creating user:", err);
       throw err;
     }
+  }
+
+  async getTwoFA(userId: number): Promise<string | null> {
+    const res = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { twoFA: true },
+    });
+    if (!res || typeof res === "undefined") return null;
+    return res.twoFA;
+  }
+
+  async setTwoFA(userId: number, secret: string | null): Promise<boolean> {
+    const res = await this.prisma.user.update({
+      where: { id: userId },
+      data: { twoFA: secret },
+    });
+    if (!res || typeof res === "undefined") return false;
+    return true;
   }
 
   async findAll(): Promise<User[]> {

@@ -72,6 +72,7 @@ const store = createStore({
             state.user.loggedIn = user.loggedIn;
             state.user.bio = user.bio;
             state.user.img = user.img;
+            state.user.twoFA = user.twoFA;
         },
         delUser: function (state) {
             console.log('delUser');

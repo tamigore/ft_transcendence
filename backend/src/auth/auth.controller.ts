@@ -9,6 +9,7 @@ import {
   Get,
   Req,
   Res,
+  Ip,
 } from "@nestjs/common";
 import { Public, GetCurrentUserId, GetCurrentUser } from "../common/decorators";
 import { RtGuard } from "../common/guards";
@@ -22,7 +23,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   @Post("local/signup")
   @HttpCode(HttpStatus.CREATED)
   signupLocal(@Body() dto: SignUpDto): Promise<Tokens> {
@@ -30,7 +31,7 @@ export class AuthController {
   }
 
   @Public()
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   @Post("local/signin")
   @HttpCode(HttpStatus.OK)
   signinLocal(@Body() dto: SignInDto): Promise<Tokens> {
@@ -38,7 +39,7 @@ export class AuthController {
   }
 
   @Public()
-  // @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @Header("Access-Control-Allow-Origin", "*")
   @Get("login42")
   @UseGuards(FortyTwoAuthGuard)
   async login42() {
@@ -48,19 +49,27 @@ export class AuthController {
   @Public()
   @Get("v1/42/callback")
   @UseGuards(FortyTwoAuthGuard)
-  async callback(@Req() req: any, @Res() res: any) {
-    console.log("callback ??");
+  async callback(
+    @Req() req: any,
+    @Res() res: any,
+    @Ip() ip: ParameterDecorator,
+  ) {
+    console.log("callback ?? ip: " + ip);
     const token = await this.authService.login(req.user);
-    res
-      .cookie("userId", token.userId)
-      .cookie("access_token", token.access_token)
-      .cookie("refresh_token", token.refresh_token)
-      .redirect("http://localhost:8080");
+    if (!token) {
+      res.redirect(`http://localhost:8080`);
+    } else {
+      res
+        .cookie("userId", token.userId)
+        .cookie("access_token", token.access_token)
+        .cookie("refresh_token", token.refresh_token)
+        .redirect(`http://localhost:8080`);
+    }
     return token;
   }
 
   @Post("logout")
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
   logout(@GetCurrentUserId() userId: number): Promise<boolean> {
     return this.authService.logout(userId);
@@ -68,7 +77,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(RtGuard)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
   refreshTokens(

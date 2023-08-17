@@ -30,9 +30,6 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy) {
     const user = await this.userService.findById(fortyTwoUser.id);
     if (typeof user === "undefined" || !user) {
       return await this.userService.createUser(fortyTwoUser);
-    } else if (user && user.loggedIn) {
-      console.log("user already logged in");
-      return null;
     } else {
       console.log("already created in DB!");
     }

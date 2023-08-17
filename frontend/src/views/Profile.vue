@@ -1,25 +1,20 @@
 <template>
-
-<div v-if="showPopup">
+  <div v-if="showPopup">
     <div class="popup">
       <div class="popup-header">
         <span class="p-font-weight-bold text-900">Choose your avatar</span>
-        <Button
-          icon="pi pi-times"
-          rounded
-          class="p-button-secondary"
-          style="background-color: rgb(211, 177, 224); color: rgb(30, 27, 31);"
-          @click="closePopup">
+        <Button icon="pi pi-times" rounded class="p-button-secondary"
+          style="background-color: rgb(211, 177, 224); color: rgb(30, 27, 31);" @click="closePopup">
         </Button>
       </div>
       <Divider />
       <div class="image-grid">
         <div v-for="image in imageGrid" :key="image.id" @click="ModifyUserAvatarId(image)">
           <div class="image-frame">
-              <img :src="image.img" :alt="'Image ' + image.id" />
-            </div>
+            <img :src="image.img" :alt="'Image ' + image.id" />
           </div>
         </div>
+      </div>
       <Divider />
       <div>
         <div class="p-inputgroup flex-1">
@@ -29,94 +24,121 @@
         </div>
       </div>
     </div>
-</div>
+  </div>
 
-<Accordion :activeIndex="0">
-
-  <AccordionTab header="Profile">
-    <div class="surface-section border-round box-shadow" style="padding: 5em;">
-
-      <div class="grid-container">
-
-        <div class="p-card p-component card" style="background-color:#121212; width: 29em;">
-          <div class="p-card-body">
-            <div @click="openPopup" class="selected-image" :class="{ active: showPopup }"
-              style="background-color: rgb(37, 37, 37);">
-              <img :src="selectedImage.img" :alt="'Image ' + selectedImage.id" type="pointer" />
-            </div>
-          </div>
+  <div v-if="ShowTwoFA">
+    <div class="popup">
+      <div class="popup-header">
+        <span class="p-font-weight-bold text-900">Two Authorization Factor</span>
+        <div class="px-4">
+          <Button v-if="!TwoFA || TwoFA?.length === 0" @click="Enable2FA">Enable</Button>
+          <Button v-else @click="Disable2FA">Disable</Button>
         </div>
-
-      <div class="profile-details">
-
-        <ul class="list-none p-0 m-0">
-
-          <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-            <div class="font-medium text-3xl text-900 w-6 md:w-2 mr-8">My profile
-            </div>
-            <Button label="View my public profile" icon="pi pi-eye" @click="goToPublicProfile(username)" text />
-          </li>
-
-          <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 mr-8 font-medium">Username</div>
-            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1"
-              :class="{ 'whitespace-nowrap': !isEditingUsername, 'text-justify': !isEditingUsername }">
-              <span v-if="!isEditingUsername">{{ username }}</span>
-              <input v-else type="text" v-model="editedUsername" @keyup.enter="ModifyUserUsername"
-                @keyup.esc="cancelEditing('username')" ref="usernameInput" style="width: auto;" data-v-ced23842=""
-                class="p-inputtext p-component p-inputtext-sm" data-pc-name="inputtext" data-pc-section="root"
-                placeholder="username" />
-            </div>
-            <div class="ml-7 flex justify-content-end">
-              <Button class="p-button-text ml-2" icon="pi pi-pencil" @click="ModifyUserUsername">
-                {{ isEditingUsername ? (isSavingUsername ? 'Saving... ' : 'Save ') : 'Edit' }}
-              </Button>
-            </div>
-          </li>
-
-          <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 mr-8 font-medium">id</div>
-            <div class="text-900 w-full md:w-8 md:flex-order-1 flex-order-1">
-              <Chip>{{ id }}</Chip>
-            </div>
-          </li>
-
-          <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-            <div class="text-500 w-6 md:w-2 mr-8 font-medium">Email</div>
-            <div class="bio-text text-900 w-full md:w-8 md:flex-order-0 flex-order-1"
-              :class="{ 'whitespace-nowrap': !isEditingEmail, 'text-justify': !isEditingEmail }">
-              <span v-if="!isEditingEmail">{{ email }}</span>
-              <input v-else type="email" v-model="editedEmail" @keyup.enter="ModifyUserEmail"
-                @keyup.esc="cancelEditing('email')" ref="emailInput" style="width: auto;" data-v-ced23842=""
-                class="p-inputtext p-component p-inputtext-sm" data-pc-name="inputtext" data-pc-section="root"
-                placeholder="email" />
-              </div>
-              <div class="ml-7 flex justify-content-end">
-                <Button class="p-button-text ml-2" icon="pi pi-pencil" @click="ModifyUserEmail">
-                  {{ isEditingEmail ? (isSavingEmail ? 'Saving...' : 'Save') : 'Edit' }}
-                </button>
-              </div>
-            </li>
-
-            <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-              <div class="text-500 w-6 md:w-2 mr-8 font-medium">Bio</div>
-              <div class="bio-text text-900 w-full md:w-8 md:flex-order-0 flex-grow-1"
-                :class="{ 'whitespace-nowrap': !isEditingBio, 'text-justify': !isEditingBio, 'text-overflow-ellipsis': !isEditingBio }">
-                <span v-if="!isEditingBio">{{ bio }}</span>
-                <Textarea v-else v-model="editedBio" rows="3" @keyup.esc="cancelEditing('bio')" ref="bioInput"
-                  style="width: 100%;" class="p-inputtextarea p-component p-inputtextarea-sm" placeholder="bio" />
-              </div>
-              <div class="ml-7 flex justify-end">
-                <Button class="p-button-text mr-1" icon="pi pi-pencil" @click="ModifyUserBio">
-                  {{ isEditingBio ? (isSavingBio ? 'Saving...' : 'Save') : 'Edit' }}
-                </button>
-              </div>
-            </li>
-        
-          </ul>
-        
+        <Button icon="pi pi-times" rounded class="p-button-secondary"
+          style="background-color: rgb(211, 177, 224); color: rgb(30, 27, 31);" @click="close2FA">
+        </Button>
+      </div>
+      <div class="p-4 m-4">
+        <img v-if="QRcode.length" :src="QRcode" />
+      </div>
+      <div>
+        <div class="p-inputgroup flex-1">
+          <span class="p-inputgroup-addon"><i class="pi pi-qrcode"></i></span>
+          <InputText placeholder="Enter secret" v-model="TwoFASecret" id="url" />
+          <Button @click="Check2FA">Verify</Button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <Accordion :activeIndex="0">
+
+    <AccordionTab header="Profile">
+      <div class="surface-section border-round box-shadow" style="padding: 5em;">
+
+        <div class="grid-container">
+
+          <div class="p-card p-component card" style="background-color:#121212; width: 29em;">
+            <div class="p-card-body">
+              <div @click="openPopup" class="selected-image" :class="{ active: showPopup }"
+                style="background-color: rgb(37, 37, 37);">
+                <img :src="selectedImage.img" :alt="'Image ' + selectedImage.id" type="pointer" />
+              </div>
+            </div>
+          </div>
+
+          
+          <div class="profile-details">
+            
+            <ul class="list-none p-0 m-0">
+              
+              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+                <div class="font-medium text-3xl text-900 w-6 md:w-2 mr-8">My profile
+                </div>
+                <Button label="View my public profile" icon="pi pi-eye" @click="goToPublicProfile(username)" text />
+                <Button @click="open2FA" class="mx-8">2FA</Button>
+              </li>
+
+              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+                <div class="text-500 w-6 md:w-2 mr-8 font-medium">Username</div>
+                <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1"
+                  :class="{ 'whitespace-nowrap': !isEditingUsername, 'text-justify': !isEditingUsername }">
+                  <span v-if="!isEditingUsername">{{ username }}</span>
+                  <input v-else type="text" v-model="editedUsername" @keyup.enter="ModifyUserUsername"
+                    @keyup.esc="cancelEditing('username')" ref="usernameInput" style="width: auto;" data-v-ced23842=""
+                    class="p-inputtext p-component p-inputtext-sm" data-pc-name="inputtext" data-pc-section="root"
+                    placeholder="username" />
+                </div>
+                <div class="ml-7 flex justify-content-end">
+                  <Button class="p-button-text ml-2" icon="pi pi-pencil" @click="ModifyUserUsername">
+                    {{ isEditingUsername ? (isSavingUsername ? 'Saving... ' : 'Save ') : 'Edit' }}
+                  </Button>
+                </div>
+              </li>
+
+              <li class="flex align-items-center py-5 px-2 border-top-1 surface-border flex-wrap">
+                <div class="text-500 w-6 md:w-2 mr-8 font-medium">id</div>
+                <div class="text-900 w-full md:w-8 md:flex-order-1 flex-order-1">
+                  <Chip>{{ id }}</Chip>
+                </div>
+              </li>
+
+              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+                <div class="text-500 w-6 md:w-2 mr-8 font-medium">Email</div>
+                <div class="bio-text text-900 w-full md:w-8 md:flex-order-0 flex-order-1"
+                  :class="{ 'whitespace-nowrap': !isEditingEmail, 'text-justify': !isEditingEmail }">
+                  <span v-if="!isEditingEmail">{{ email }}</span>
+                  <input v-else type="email" v-model="editedEmail" @keyup.enter="ModifyUserEmail"
+                    @keyup.esc="cancelEditing('email')" ref="emailInput" style="width: auto;" data-v-ced23842=""
+                    class="p-inputtext p-component p-inputtext-sm" data-pc-name="inputtext" data-pc-section="root"
+                    placeholder="email" />
+                </div>
+                <div class="ml-7 flex justify-content-end">
+                  <Button class="p-button-text ml-2" icon="pi pi-pencil" @click="ModifyUserEmail">
+                    {{ isEditingEmail ? (isSavingEmail ? 'Saving...' : 'Save') : 'Edit' }}
+                  </button>
+                </div>
+              </li>
+
+              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+                <div class="text-500 w-6 md:w-2 mr-8 font-medium">Bio</div>
+                <div class="bio-text text-900 w-full md:w-8 md:flex-order-0 flex-grow-1"
+                  :class="{ 'whitespace-nowrap': !isEditingBio, 'text-justify': !isEditingBio, 'text-overflow-ellipsis': !isEditingBio }">
+                  <span v-if="!isEditingBio">{{ bio }}</span>
+                  <Textarea v-else v-model="editedBio" rows="3" @keyup.esc="cancelEditing('bio')" ref="bioInput"
+                    style="width: 100%;" class="p-inputtextarea p-component p-inputtextarea-sm" placeholder="bio" />
+                </div>
+                <div class="ml-7 flex justify-end">
+                  <Button class="p-button-text mr-1" icon="pi pi-pencil" @click="ModifyUserBio">
+                    {{ isEditingBio ? (isSavingBio ? 'Saving...' : 'Save') : 'Edit' }}
+                  </button>
+                </div>
+              </li>
+
+            </ul>
+
+          </div>
+        </div>
       </div>
     </AccordionTab>
 
@@ -127,14 +149,14 @@
           <span class="p-inputgroup-addon">
             <i class="pi pi-user"></i>
           </span>
-            <Dropdown v-model="selectedFriend" editable :options="filteredUsernames" @input="filterUsernames"
-              placeholder="Find by: Username / Id" class="w-full md:w-14rem" />
-            <Button @click="addFriend" style="background-color: rgb(197, 72, 255)">Add</Button>
-          </div>
-        
+          <Dropdown v-model="selectedFriend" editable :options="filteredUsernames" @input="filterUsernames"
+            placeholder="Find by: Username / Id" class="w-full md:w-14rem" />
+          <Button @click="addFriend" style="background-color: rgb(197, 72, 255)">Add</Button>
+        </div>
+
         <ul class="list-none p-0 m-0">
 
-        <!-- New list tiles -->
+          <!-- New list tiles -->
 
           <li class="h-32 flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap"
             v-for="(friend, index) in userFriends" :key="index" @mouseover="showDeleteIcon[index + 1] = true"
@@ -142,14 +164,14 @@
             <div class="text-500 w-6 md:w-2 font-medium">
               <div class="friend-container">
                 <div class="image-frame"
-                     style="width: 75px; height: 75px; float: left; margin-right: 50px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
-                  <img :src="getImageById(friend.img).img"
-                       :alt="'Avatar ' + friend.username"
-                       style="width: 100%; height: 100%; object-fit: cover;" />
+                  style="width: 75px; height: 75px; float: left; margin-right: 50px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
+                  <img :src="getImageById(friend.img)?.img" :alt="'Avatar ' + friend.username"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 w-8 md:w-4 font-medium" style="overflow: hidden;">
-                  <span style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
-                        title="{{ friend.username }}">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="{{ friend.username }}">
                     {{ friend.username }}
                   </span>
                 </div>
@@ -157,8 +179,8 @@
             </div>
             <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1 ">
               <span v-if="friend.loggedIn">
-                <Tag class="pr-6" icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)"
-                  value="Online"></Tag>
+                <Tag class="pr-6" icon="pi pi-circle-fill"
+                  style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)" value="Online"></Tag>
               </span>
               <span v-if="friend.loggedIn">
                 <Tag icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)"
@@ -200,7 +222,7 @@
       </p>
     </AccordionTab>
 
-</Accordion>
+  </Accordion>
 </template>
  
 <script lang="ts">
@@ -212,461 +234,538 @@ import { User } from '@/utils/interfaces';
 import router from '@/router';
 import socket from '@/utils/socket';
 
-
 export default defineComponent({
- name: 'ProfileView',
- computed: {
-   username() {
-     return store.state.user.username;
-   },
-   email() {
-     return store.state.user.email;
-   },
-   bio() {
-     return store.state.user.bio;
-   },
-   id() {
-     return store.state.user.id;
-   },
-   imgId() {
-     return store.state.user.img;
-   },
-   selectedImage() {
-     return this.getImageById(this.imgId);
-   },
- },
- mounted() {
-   this.getAllFriends();
-   this.getAllUsernames();
- },
- data() {
-   return {
+  name: 'ProfileView',
+  computed: {
+    username() {
+      return store.state.user.username;
+    },
+    email() {
+      return store.state.user.email;
+    },
+    bio() {
+      return store.state.user.bio;
+    },
+    id() {
+      return store.state.user.id;
+    },
+    imgId() {
+      return store.state.user.img;
+    },
+    selectedImage() {
+      return this.getImageById(this.imgId);
+    },
+    TwoFA() {
+      return store.state.user.twoFA;
+    }
+  },
+  mounted() {
+    this.getAllFriends();
+    this.getAllUsernames();
+  },
+  data() {
+    return {
+      ShowTwoFA: false as boolean,
+      TwoFASecret: "" as string,
+      QRcode: "" as string,
 
-     isEditingEmail: false as boolean,
-     isSavingEmail: false as boolean,
-     editedEmail: store.state.user.email as string | null,
+      isEditingEmail: false as boolean,
+      isSavingEmail: false as boolean,
+      editedEmail: store.state.user.email as string | null,
 
-     isEditingBio: false as boolean,
-     isSavingBio: false as boolean,
-     editedBio: store.state.user.bio as string | null,
+      isEditingBio: false as boolean,
+      isSavingBio: false as boolean,
+      editedBio: store.state.user.bio as string | null,
 
-     isEditingUsername: false as boolean,
-     isSavingUsername: false as boolean,
-     editedUsername: store.state.user.username as string | null,
+      isEditingUsername: false as boolean,
+      isSavingUsername: false as boolean,
+      editedUsername: store.state.user.username as string | null,
 
-     showPopup: false as boolean,
-     imageGrid: [
-       { id: "1", img: require('@/assets/profiles/profil_1.jpg') },
-       { id: "2", img: require('@/assets/profiles/profil_2.jpg') },
-       { id: "3", img: require('@/assets/profiles/profil_3.jpg') },
-       { id: "4", img: require('@/assets/profiles/profil_4.jpg') },
-       { id: "5", img: require('@/assets/profiles/profil_5.jpg') },
-       { id: "6", img: require('@/assets/profiles/profil_6.jpg') },
-       { id: "7", img: require('@/assets/profiles/profil_7.jpg') },
-       { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
-       { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
-     ],
-     url:'' as string | null,
+      showPopup: false as boolean,
+      imageGrid: [
+        { id: "1", img: require('@/assets/profiles/profil_1.jpg') },
+        { id: "2", img: require('@/assets/profiles/profil_2.jpg') },
+        { id: "3", img: require('@/assets/profiles/profil_3.jpg') },
+        { id: "4", img: require('@/assets/profiles/profil_4.jpg') },
+        { id: "5", img: require('@/assets/profiles/profil_5.jpg') },
+        { id: "6", img: require('@/assets/profiles/profil_6.jpg') },
+        { id: "7", img: require('@/assets/profiles/profil_7.jpg') },
+        { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
+        { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
+      ],
+      url: '' as string | null,
 
-     userFriends: [] as User[],
-     isInputAddFriendsFocused: false,
-     selectedFriend: '' as string,
-     usernames: [] as string[],
-     filteredUsernames: [] as string[],
-     showDeleteIcon: [] as boolean[],
-   }
- },
- methods:
- {
-   openPopup() {
-     this.showPopup = true;
-   },
+      userFriends: [] as User[],
+      isInputAddFriendsFocused: false,
+      selectedFriend: '' as string,
+      usernames: [] as string[],
+      filteredUsernames: [] as string[],
+      showDeleteIcon: [] as boolean[],
+    }
+  },
+  methods:
+  {
+    open2FA() {
+      this.ShowTwoFA = true;
+    },
 
-   closePopup() {
-     this.showPopup = false;
-   },
+    close2FA() {
+      this.ShowTwoFA = false;
+    },
 
-   getImageById(id: string | null) {
-     if (!id) {
-       return { id: 1, img: require('@/assets/welc.jpeg') };
-     } else if (id && id.length < 2) {
-       return this.imageGrid.find(image => image.id === id);
-     } else {
-       if (id.length > 2) {
-         return { id: id, img: id };
-       } else {
-         return { id: 1, img: require('@/assets/welc.jpeg') };
-       }
-     }
-   },
+    async Check2FA() {
+      console.log("Check2FA");
+      if (!this.TwoFASecret.length)
+        return;
+      await axios
+        .post(`/api/tfa/activation`,
+          { secret: this.TwoFASecret },
+          {
+            headers: {
+              Authorization: `Bearer ${store.state.user.hash}`,
+            },
+          })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          if (response.data === true)
+          {
+            alert("Connexion with 2FA activated");
+            this.close2FA();
+          }
+          else alert("Connexion with 2FA failed");
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+      this.TwoFASecret = "";
+    },
 
-   async loadURLImage() {
-     if (this.url) {
-       if (await this.isValidURL(this.url)) {
-         this.imageGrid.push({ id: this.url, img: this.url });
-         this.ModifyUserAvatarId(this.imageGrid[this.imageGrid.length - 1]);
-         this.showPopup = false;
-       } else {
-         alert('Invalid URL');
-         this.url = '';
-       }
-     }
-   },
+    async Enable2FA() {
+      console.log("Enable2FA");
+      await axios
+        .get(`/api/tfa/on`,
+          {
+            headers: {
+              Authorization: `Bearer ${store.state.user.hash}`,
+              'content-type': 'image/png',
+              'accept': 'image/png'
+            },
+            responseType: 'blob',
+          })
+        .then((response: AxiosResponse) => {
+          const urlCreator = window.URL || window.webkitURL
+          this.QRcode = urlCreator.createObjectURL(response.data)
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
 
-   async isValidURL(url: string) {
-     try {
-       const response = await axios.head(url);
-       return response.status === 200;
-     } catch (error) {
-       return false;
-     }
-   },
+    async Disable2FA() {
+      console.log("Disable2FA");
+      await axios
+        .get(`/api/tfa/off`,
+          {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          this.QRcode = "";
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
 
-   goToPublicProfile(username: string | null) {
-     if (username)
-       router.push(`/profile/${username}`);
-   },
+    openPopup() {
+      this.showPopup = true;
+    },
 
-   
-   async privateMessage(index: number, user: User) {
-     await axios
-       .post(`/api/room/private`, { user1: store.state.user, user2: user },
-       {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-       .then((response: AxiosResponse) => {
-         console.log(response);
-         socket.emit("join_room", { user: store.state.user, room: response.data });
-         socket.emit("join_room", { user: user, room: response.data });
-         router.push('Chat');
-       })
-       .catch((error: AxiosError) => {
-         throw error;
-       });
-   },
+    closePopup() {
+      this.showPopup = false;
+    },
 
-   cancelEditing(field : string) {
-     if (field === 'username') {
-       this.editedUsername = this.username;
-       this.isEditingUsername = false;
-     } else if (field === 'email') {
-       this.editedEmail = this.email;
-       this.isEditingEmail = false;
-     } else if (field === 'bio') {
-       this.editedBio = this.bio;
-       this.isEditingBio = false;
-     }
-   },
+    getImageById(id: string | null) {
+      if (!id) {
+        return { id: 1, img: require('@/assets/welc.jpeg') };
+      } else if (id && id.length < 2) {
+        return this.imageGrid.find(image => image.id === id);
+      } else {
+        if (id.length > 2) {
+          return { id: id, img: id };
+        } else {
+          return { id: 1, img: require('@/assets/welc.jpeg') };
+        }
+      }
+    },
 
-   async ModifyUserAvatarId(image) {
-     this.ModifyStoreAvatarId(image.id);
-     const user = store.state.user;
-     axios.defaults.baseURL = server.nestUrl;
-     await axios.post('/api/user/update', user,
-       { headers: { "Authorization": `Bearer ${store.state.user.hash}` } })
-       .then((response: AxiosResponse) => {
-         console.log(response);
-       })
-       .catch((error: AxiosError) => {
-         console.log(error);
-       })
-     this.showPopup = false;
-   },
+    async loadURLImage() {
+      if (this.url) {
+        if (await this.isValidURL(this.url)) {
+          this.imageGrid.push({ id: this.url, img: this.url });
+          this.ModifyUserAvatarId(this.imageGrid[this.imageGrid.length - 1]);
+          this.showPopup = false;
+        } else {
+          alert('Invalid URL');
+          this.url = '';
+        }
+      }
+    },
 
-   async ModifyUserBio() {
-     if (this.isEditingBio) {
-       if (this.editedBio !== null) {
-         if (this.editedBio.length > 1000) {
-           alert("Bio cannot exceed 1000 characters.");
-           return;
-         }
-       }
-       this.ModifyStoreBio();
-       const user = store.state.user;
-       axios.defaults.baseURL = server.nestUrl;
-       await axios.post('/api/user/update', user, {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-         .then((response: AxiosResponse) => {
-           console.log(response);
-         })
-         .catch((error: AxiosError) => {
-           console.log(error);
-         });
-       this.isSavingBio = false;
-     }
-     this.isEditingBio = !this.isEditingBio;
-   },
+    async isValidURL(url: string) {
+      try {
+        const response = await axios.head(url);
+        return response.status === 200;
+      } catch (error) {
+        return false;
+      }
+    },
 
-   async ModifyUserEmail() {
-     if (this.isEditingEmail) {
-       if (this.editedEmail !== null) {
-         if (this.editedEmail.trim() === '') {
-           alert("Email cannot be empty.");
-           return;
-         }
-         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.editedEmail)) {
-           alert("Invalid email format.");
-           return;
-         }
-       }
-       this.ModifyStoreEmail();
-       const user = store.state.user;
-       axios.defaults.baseURL = server.nestUrl;
-       await axios.post('/api/user/update', user, {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-         .then((response: AxiosResponse) => {
-           console.log(response);
-         })
-         .catch((error: AxiosError) => {
-           console.log(error);
-         });
-       this.isSavingEmail = false;
-     }
-     this.isEditingEmail = !this.isEditingEmail;
-     if (this.isEditingEmail) {
-       this.$nextTick(() => {
-         const emailInput = this.$refs.emailInput as HTMLInputElement | null;
-         if (emailInput) {
-           emailInput.focus();
-         }
-       });
-     }
-   },
+    goToPublicProfile(username: string | null) {
+      if (username)
+        router.push(`/profile/${username}`);
+    },
 
-   async ModifyUserUsername() {
-     if (this.isEditingUsername) {
-       if (this.editedUsername !== null) {
-         if (this.editedUsername.trim() === '') {
-           alert("Username cannot be empty.");
-           return;
-         }
-         if (this.editedUsername.length > 50) {
-           alert("Username cannot exceed 50 characters.");
-           return;
-         }
-         if (/\s/.test(this.editedUsername)) {
-           alert("Username cannot contain whitespace.");
-           return;
-         }
-       }
-       this.ModifyStoreUsername();
-       const user = store.state.user;
-       axios.defaults.baseURL = server.nestUrl;
-       await axios.post('/api/user/update', user, {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-         .then((response: AxiosResponse) => {
-           console.log(response);
-         })
-         .catch((error: AxiosError) => {
-           console.log(error);
-         });
-       this.isSavingUsername = false;
-     }
-     this.isEditingUsername = !this.isEditingUsername;
-     if (this.isEditingUsername) {
-       this.$nextTick(() => {
-         const usernameInput = this.$refs.usernameInput as HTMLInputElement | null;
-         if (usernameInput) {
-           usernameInput.focus();
-         }
-       });
-     }
-   },
 
-   async getAllUsernames() {
-     axios.defaults.baseURL = server.nestUrl;
-     await axios
-       .get(`/api/user/`, {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-       .then((response: AxiosResponse) => {
-         console.log(response);
-         this.usernames = response.data.map((user) => user.username);
-       })
-       .catch((error: AxiosError) => {
-         throw error;
-       });
-   },
+    async privateMessage(index: number, user: User) {
+      await axios
+        .post(`/api/room/private`, { user1: store.state.user, user2: user },
+          {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          socket.emit("join_room", { user: store.state.user, room: response.data });
+          socket.emit("join_room", { user: user, room: response.data });
+          router.push('Chat');
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
 
-   async getAllFriends() {
-     axios.defaults.baseURL = server.nestUrl;
-     await axios
-       .get(`/api/user/friends`, {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-       .then((response: AxiosResponse) => {
-         console.log(response);
-         if (response.data)
-           this.userFriends = response.data[0].friend.map((user) => user);
-       })
-       .catch((error: AxiosError) => {
-         throw error;
-       });
-   },
+    cancelEditing(field: string) {
+      if (field === 'username') {
+        this.editedUsername = this.username;
+        this.isEditingUsername = false;
+      } else if (field === 'email') {
+        this.editedEmail = this.email;
+        this.isEditingEmail = false;
+      } else if (field === 'bio') {
+        this.editedBio = this.bio;
+        this.isEditingBio = false;
+      }
+    },
 
-   filterUsernames() {
-     const searchQuery = this.selectedFriend.toLowerCase();
-     if (searchQuery != '') {
-       this.filteredUsernames = this.usernames.filter((username) =>
-         username.toLowerCase().includes(searchQuery)
-       ).slice(0, 4);
-     } else {
-       this.filteredUsernames = [];
-     }
-   },
+    async ModifyUserAvatarId(image) {
+      this.ModifyStoreAvatarId(image.id);
+      const user = store.state.user;
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/user/update', user,
+        { headers: { "Authorization": `Bearer ${store.state.user.hash}` } })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+        })
+        .catch((error: AxiosError) => {
+          console.log(error);
+        })
+      this.showPopup = false;
+    },
 
-   async getUserById(id: number): Promise<User | null> {
-     axios.defaults.baseURL = server.nestUrl;
-     return await axios
-       .get(`/api/user/${id}`, {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-       .then((response: AxiosResponse) => {
-         console.log(response);
-         return response.data as User;
-       })
-       .catch((error: AxiosError) => {
-         throw error;
-       });
-   },
+    async ModifyUserBio() {
+      if (this.isEditingBio) {
+        if (this.editedBio !== null) {
+          if (this.editedBio.length > 1000) {
+            alert("Bio cannot exceed 1000 characters.");
+            return;
+          }
+        }
+        this.ModifyStoreBio();
+        const user = store.state.user;
+        axios.defaults.baseURL = server.nestUrl;
+        await axios.post('/api/user/update', user, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+          .then((response: AxiosResponse) => {
+            console.log(response);
+          })
+          .catch((error: AxiosError) => {
+            console.log(error);
+          });
+        this.isSavingBio = false;
+      }
+      this.isEditingBio = !this.isEditingBio;
+    },
 
-   async getUserByUsername(username: string): Promise<User | null> {
-     axios.defaults.baseURL = server.nestUrl;
-     return await axios
-       .get(`/api/user/username/${username}`, {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-       .then((response: AxiosResponse) => {
-         console.log(response);
-         return response.data as User;
-       })
-       .catch((error: AxiosError) => {
-         throw error;
-       });
-   },
+    async ModifyUserEmail() {
+      if (this.isEditingEmail) {
+        if (this.editedEmail !== null) {
+          if (this.editedEmail.trim() === '') {
+            alert("Email cannot be empty.");
+            return;
+          }
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.editedEmail)) {
+            alert("Invalid email format.");
+            return;
+          }
+        }
+        this.ModifyStoreEmail();
+        const user = store.state.user;
+        axios.defaults.baseURL = server.nestUrl;
+        await axios.post('/api/user/update', user, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+          .then((response: AxiosResponse) => {
+            console.log(response);
+          })
+          .catch((error: AxiosError) => {
+            console.log(error);
+          });
+        this.isSavingEmail = false;
+      }
+      this.isEditingEmail = !this.isEditingEmail;
+      if (this.isEditingEmail) {
+        this.$nextTick(() => {
+          const emailInput = this.$refs.emailInput as HTMLInputElement | null;
+          if (emailInput) {
+            emailInput.focus();
+          }
+        });
+      }
+    },
 
-   async addFriend() {
-     if (this.selectedFriend.trim() === '') {
-       return;}
-     const id = parseInt(this.selectedFriend);
-     let friend = null as User | null;
-     if (!isNaN(id)) {
-       friend = await this.handleIdSearch(id);
-     } else {
-       friend = await this.handleUsernameSearch(this.selectedFriend);
-     }
-     if (friend)
-     {
-       axios.defaults.baseURL = server.nestUrl;
-       return axios
-         .post(`/api/user/friends/add`, friend, {
-           headers: { Authorization: `Bearer ${store.state.user.hash}` },
-         })
-         .then((response: AxiosResponse) => {
-           console.log(response);
-         })
-         .catch((error: AxiosError) => {
-           console.error(error);
-         });
-     }
-   },
+    async ModifyUserUsername() {
+      if (this.isEditingUsername) {
+        if (this.editedUsername !== null) {
+          if (this.editedUsername.trim() === '') {
+            alert("Username cannot be empty.");
+            return;
+          }
+          if (this.editedUsername.length > 50) {
+            alert("Username cannot exceed 50 characters.");
+            return;
+          }
+          if (/\s/.test(this.editedUsername)) {
+            alert("Username cannot contain whitespace.");
+            return;
+          }
+        }
+        this.ModifyStoreUsername();
+        const user = store.state.user;
+        axios.defaults.baseURL = server.nestUrl;
+        await axios.post('/api/user/update', user, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+          .then((response: AxiosResponse) => {
+            console.log(response);
+          })
+          .catch((error: AxiosError) => {
+            console.log(error);
+          });
+        this.isSavingUsername = false;
+      }
+      this.isEditingUsername = !this.isEditingUsername;
+      if (this.isEditingUsername) {
+        this.$nextTick(() => {
+          const usernameInput = this.$refs.usernameInput as HTMLInputElement | null;
+          if (usernameInput) {
+            usernameInput.focus();
+          }
+        });
+      }
+    },
 
-   async handleIdSearch(id: number): Promise<User | null> {
-     const user = await this.getUserById(id);
-     if (user && user.username && (user.username !== this.username)) {
-       if (!this.userFriends.some((friend) => friend.id === user.id)) {
-         this.userFriends.push(user);
-         this.showDeleteIcon.push(false);
-         this.selectedFriend = '';
-         return (user);
-       } 
-       else
-       alert('This friend is already registered in your friends list.');
-     }
-     else if (user && user.username && (user.username === this.username))
-       alert("You can't add yourself in your friends list.");
-     else {
-       alert('User with provided id not found.');
-     }
-     return null;
-   },
+    async getAllUsernames() {
+      axios.defaults.baseURL = server.nestUrl;
+      await axios
+        .get(`/api/user/`, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          this.usernames = response.data.map((user) => user.username);
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
 
-   async handleUsernameSearch(username: string): Promise<User | null> {
-     const user = await this.getUserByUsername(username);
-     if (user && user.username && (user.username !== this.username)) {
-       if (!this.userFriends.some((friend) => friend.id === user.id)) {
-         this.userFriends.push(user);
-         this.showDeleteIcon.push(false);
-         this.selectedFriend = '';
-         return (user);
-       }
-       else
-       alert('This friend is already registered in your friends list.');
-     }
-     else if (user && user.username && (user.username === this.username))
-       alert("You can't add yourself in your friends list.");
-     else {
-       alert('User with provided username not found.');
-     }
-     return null;
-   },
+    async getAllFriends() {
+      axios.defaults.baseURL = server.nestUrl;
+      await axios
+        .get(`/api/user/friends`, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          if (response.data)
+            this.userFriends = response.data[0].friend.map((user) => user);
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
 
-   async blockFriend(index: number, user: User) {
-     this.removeFriend(index, user);
-     axios.defaults.baseURL = server.nestUrl;
-     return await axios
-       .post(`/api/user/block/add`, user,
-       {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-       .then((response: AxiosResponse) => {
-         console.log(response);
-       })
-       .catch((error: AxiosError) => {
-         throw error;
-       });
-   },
+    filterUsernames() {
+      const searchQuery = this.selectedFriend.toLowerCase();
+      if (searchQuery != '') {
+        this.filteredUsernames = this.usernames.filter((username) =>
+          username.toLowerCase().includes(searchQuery)
+        ).slice(0, 4);
+      } else {
+        this.filteredUsernames = [];
+      }
+    },
 
-   async removeFriend(index: number, user: User) {
-     this.userFriends.splice(index, 1);
-     this.showDeleteIcon.splice(index + 1, 1);
-     return await axios
-       .post(`/api/user/friends/del`, user,
-       {
-         headers: { Authorization: `Bearer ${store.state.user.hash}` },
-       })
-       .then((response: AxiosResponse) => {
-         console.log(response);
-       })
-       .catch((error: AxiosError) => {
-         throw error;
-       });
-   },
+    async getUserById(id: number): Promise<User | null> {
+      axios.defaults.baseURL = server.nestUrl;
+      return await axios
+        .get(`/api/user/${id}`, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          return response.data as User;
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
 
-   displayFriendsList() {
-     if (this.userFriends.length > 0) {
-       console.log("friends list : ", this.userFriends);
-     } else {
-       console.log("No friends registered.");
-     }
-   },
+    async getUserByUsername(username: string): Promise<User | null> {
+      axios.defaults.baseURL = server.nestUrl;
+      return await axios
+        .get(`/api/user/username/${username}`, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          return response.data as User;
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
 
-   ModifyStoreUsername() {
-     store.commit('setUsername', this.editedUsername);
-   },
-   ModifyStoreEmail() {
-     store.commit('setEmail', this.editedEmail);
-   },
-   ModifyStoreBio() {
-     store.commit('setBio', this.editedBio);
-   },
-   ModifyStoreAvatarId(id) {
-     store.commit('setAvatarId', id);
-   },
- },
+    async addFriend() {
+      if (this.selectedFriend.trim() === '') {
+        return;
+      }
+      const id = parseInt(this.selectedFriend);
+      let friend = null as User | null;
+      if (!isNaN(id)) {
+        friend = await this.handleIdSearch(id);
+      } else {
+        friend = await this.handleUsernameSearch(this.selectedFriend);
+      }
+      if (friend) {
+        axios.defaults.baseURL = server.nestUrl;
+        return axios
+          .post(`/api/user/friends/add`, friend, {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+          .then((response: AxiosResponse) => {
+            console.log(response);
+          })
+          .catch((error: AxiosError) => {
+            console.error(error);
+          });
+      }
+    },
+
+    async handleIdSearch(id: number): Promise<User | null> {
+      const user = await this.getUserById(id);
+      if (user && user.username && (user.username !== this.username)) {
+        if (!this.userFriends.some((friend) => friend.id === user.id)) {
+          this.userFriends.push(user);
+          this.showDeleteIcon.push(false);
+          this.selectedFriend = '';
+          return (user);
+        }
+        else
+          alert('This friend is already registered in your friends list.');
+      }
+      else if (user && user.username && (user.username === this.username))
+        alert("You can't add yourself in your friends list.");
+      else {
+        alert('User with provided id not found.');
+      }
+      return null;
+    },
+
+    async handleUsernameSearch(username: string): Promise<User | null> {
+      const user = await this.getUserByUsername(username);
+      if (user && user.username && (user.username !== this.username)) {
+        if (!this.userFriends.some((friend) => friend.id === user.id)) {
+          this.userFriends.push(user);
+          this.showDeleteIcon.push(false);
+          this.selectedFriend = '';
+          return (user);
+        }
+        else
+          alert('This friend is already registered in your friends list.');
+      }
+      else if (user && user.username && (user.username === this.username))
+        alert("You can't add yourself in your friends list.");
+      else {
+        alert('User with provided username not found.');
+      }
+      return null;
+    },
+
+    async blockFriend(index: number, user: User) {
+      this.removeFriend(index, user);
+      axios.defaults.baseURL = server.nestUrl;
+      return await axios
+        .post(`/api/user/block/add`, user,
+          {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
+
+    async removeFriend(index: number, user: User) {
+      this.userFriends.splice(index, 1);
+      this.showDeleteIcon.splice(index + 1, 1);
+      return await axios
+        .post(`/api/user/friends/del`, user,
+          {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
+
+    displayFriendsList() {
+      if (this.userFriends.length > 0) {
+        console.log("friends list : ", this.userFriends);
+      } else {
+        console.log("No friends registered.");
+      }
+    },
+
+    ModifyStoreUsername() {
+      store.commit('setUsername', this.editedUsername);
+    },
+    ModifyStoreEmail() {
+      store.commit('setEmail', this.editedEmail);
+    },
+    ModifyStoreBio() {
+      store.commit('setBio', this.editedBio);
+    },
+    ModifyStoreAvatarId(id) {
+      store.commit('setAvatarId', id);
+    },
+  },
 })
 
 </script>
@@ -685,17 +784,20 @@ export default defineComponent({
   text-align: center;
   z-index: 2;
 }
+
 .popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 }
+
 .image-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
+
 .image-frame {
   width: 200px;
   height: 200px;
@@ -703,6 +805,7 @@ export default defineComponent({
   overflow: hidden;
   background: #000;
 }
+
 .image-frame img {
   position: absolute;
   top: 50%;
@@ -713,6 +816,7 @@ export default defineComponent({
   object-fit: contain;
   cursor: pointer;
 }
+
 .selected-image {
   cursor: pointer;
   z-index: 1;
@@ -720,20 +824,24 @@ export default defineComponent({
   outline-style: outset;
   outline-width: 14px;
 }
+
 .grid-container {
   display: grid;
   grid-template-columns: 32em;
   grid-gap: 1em;
 }
+
 .card {
   grid-column: 1;
 }
+
 .selected-image {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
 }
+
 .selected-image img {
   width: 500px;
   height: 500px;
@@ -741,14 +849,17 @@ export default defineComponent({
   object-fit: cover;
   padding: 45px;
 }
+
 .profile-details {
   grid-column: 2;
 }
+
 .bio-text {
   overflow-wrap: break-word;
   word-break: break-all;
   max-width: 100%;
 }
+
 .myBackground {
   background:
     linear-gradient(#290526, transparent),
@@ -757,5 +868,4 @@ export default defineComponent({
     linear-gradient(to left, #00000000, #19032583);
   background-blend-mode: screen;
 }
-
 </style>

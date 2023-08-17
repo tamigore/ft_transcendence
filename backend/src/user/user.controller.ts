@@ -5,7 +5,7 @@ import {
   Post,
   Header,
   Get,
-  // UseGuards,
+  UseGuards,
   // Delete,
   Body,
   Param,
@@ -13,7 +13,7 @@ import {
 import { GetCurrentUserId } from "../common/decorators";
 import { UserService } from "./user.service";
 import { User } from "@prisma/client";
-// import { AtGuard } from "../common/guards";
+import { AtGuard } from "../common/guards";
 
 @Controller("user")
 export class UserController {
@@ -21,8 +21,8 @@ export class UserController {
 
   // @Public()
   @Get()
-  // @UseGuards(AtGuard)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
   findUsers(): Promise<User[]> {
     return this.userService.findAll();
@@ -30,35 +30,35 @@ export class UserController {
 
   // @Public()
   @Get("username/:name")
-  // @UseGuards(AtGuard)
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   findUserWithName(@Param("name") param: string): Promise<User> {
     return this.userService.findByUsername(param);
   }
 
   @Get("!self")
-  // @UseGuards(AtGuard)
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   findAllButSelf(@GetCurrentUserId() userId: number): Promise<User[]> {
     return this.userService.findAllButSelf(userId);
   }
 
   // @Public()
   @Get("friends")
-  // @UseGuards(AtGuard)
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   findAllFriends(@GetCurrentUserId() userId: number): Promise<User[]> {
     return this.userService.findFriends(userId);
   }
 
   // @Public()
   @Get("friends/:id")
-  // @UseGuards(AtGuard)
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   findFriends(
     @GetCurrentUserId() userId: number,
     @Param("id") param: string,
@@ -69,9 +69,9 @@ export class UserController {
 
   // @Public()
   @Get(":id")
-  // @UseGuards(AtGuard)
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  @Header("Access-Control-Allow-Origin", "*")
   findUser(@Param("id") param: string): Promise<User> {
     const id = parseInt(param);
     return this.userService.findById(id);
@@ -79,8 +79,8 @@ export class UserController {
 
   // @Public()
   @Post("update")
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   updateUser(@GetCurrentUserId() userId: number, @Body() updateUserDto: User) {
     this.userService.update(userId, updateUserDto);
@@ -88,8 +88,8 @@ export class UserController {
 
   // @Public()
   @Post("friends/add")
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   addFriend(@GetCurrentUserId() userId: number, @Body() friend: User) {
     this.userService.addFriends(userId, friend.id);
@@ -97,16 +97,16 @@ export class UserController {
 
   // @Public()
   @Post("friends/del")
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   delFriend(@GetCurrentUserId() userId: number, @Body() friend: User) {
     this.userService.removeFriends(userId, friend.id);
   }
 
   @Post("chatsocket")
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   updateChatSocket(
     @GetCurrentUserId() userId: number,
@@ -117,8 +117,8 @@ export class UserController {
   }
 
   @Post("block/add")
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   addBlock(@GetCurrentUserId() userId: number, @Body() friend: User) {
     this.userService.addBlocked(userId, friend.id);
@@ -126,8 +126,8 @@ export class UserController {
 
   // @Public()
   @Post("block/del")
-  @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
-  // @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   delBlock(@GetCurrentUserId() userId: number, @Body() friend: User) {
     this.userService.removeBlocked(userId, friend.id);
@@ -137,7 +137,7 @@ export class UserController {
   // @Delete(":id")
   // // @UseGuards(AtGuard)
   // @HttpCode(HttpStatus.OK)
-  // @Header("Access-Control-Allow-Origin", "*") // Allow origin for other client than localhost
+  // @Header("Access-Control-Allow-Origin", "*")
   // deleteUser(@GetCurrentUserId() userId: number, @Param("id") param: string) {
   //   const id = parseInt(param.split("=")[1]);
   //   return this.userService.remove(userId, id);
