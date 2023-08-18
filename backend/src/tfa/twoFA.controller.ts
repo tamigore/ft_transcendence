@@ -1,6 +1,14 @@
-import { Controller, Response, Body, Get, Post } from "@nestjs/common";
-import { GetCurrentUserId, Public } from "../common/decorators";
+import {
+  Controller,
+  Response,
+  Body,
+  Get,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
+import { GetCurrentUserId } from "../common/decorators";
 import { TfaService } from "./twoFA.service";
+import { AtGuard } from "src/common/guards";
 
 @Controller("tfa")
 export class TfaController {
@@ -12,6 +20,7 @@ export class TfaController {
   }
 
   @Get("on")
+  @UseGuards(AtGuard)
   async turnOn(
     @GetCurrentUserId() id: number,
     @Response() res: any,
@@ -22,6 +31,7 @@ export class TfaController {
   }
 
   @Post("activation")
+  @UseGuards(AtGuard)
   async confirmActivation(
     @GetCurrentUserId() id: number,
     @Body() body: { secret: string },
@@ -30,6 +40,7 @@ export class TfaController {
   }
 
   @Post("authenticate")
+  @UseGuards(AtGuard)
   async authenticateApi(
     @GetCurrentUserId() id: number,
     @Body() body: { tfa_code: string },

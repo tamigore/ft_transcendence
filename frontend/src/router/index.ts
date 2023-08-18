@@ -73,10 +73,6 @@ router.beforeEach(async (to, from) => {
       .then((response: AxiosResponse) => {
         console.log(response);
         store.commit("setUser", response.data);
-        if (!socket.connected) {
-          socket.connect();
-          store.commit("setChatSocket", socket.id);
-        }
         return { path: '/profile' };
       })
       .catch((error: AxiosError) => {

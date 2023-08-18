@@ -26,10 +26,7 @@
   
   <script lang="ts">
   import { defineComponent } from 'vue';
-  import axios, { AxiosResponse, AxiosError } from 'axios';
   import store from '@/store';
-  import { server } from "@/utils/helper";
-  import router from '@/router';
   
   export default defineComponent ({
     name: "SignIntraCompon",

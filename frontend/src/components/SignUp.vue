@@ -37,7 +37,6 @@
 import { defineComponent } from 'vue';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import store from '@/store';
-import { server } from "@/utils/helper";
 import router from '@/router';
 
 export default defineComponent ({
@@ -52,7 +51,7 @@ export default defineComponent ({
   },
   methods: {
     async SignUpPost() {
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post('/api/auth/local/signup', {
         email: this.email,
         username: this.username,

@@ -107,7 +107,6 @@
 import { defineComponent, ref } from 'vue';
 import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { server } from "@/utils/helper";
 import router from './router';
 import { useToast } from 'primevue/usetoast';
 import socket from './utils/socket';
@@ -155,7 +154,6 @@ export default defineComponent({
   },
   methods: {
     async LogoutPost() {
-        axios.defaults.baseURL = server.nestUrl;
         await axios.post("api/auth/logout", {}, {
           headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })

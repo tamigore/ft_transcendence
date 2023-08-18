@@ -23,7 +23,6 @@ import { defineComponent, ref } from 'vue';
 import { Message } from "@/utils/interfaces";
 import axios from 'axios';
 import store from "@/store";
-import { server } from '@/utils/helper';
 import socket from '@/utils/socket';
 import router from '@/router';
 import LoadAvatar from '@/components/LoadAvatar.vue';
@@ -44,56 +43,61 @@ export default defineComponent({
           },
           { label: 'Block', icon: 'pi pi-fw pi-lock',
             command: () => {
-              this.blockUser(this.message.user);
+              this.blockUser();
             },
             visible: () => !this.isBlock,
           },
           { label: 'Admin', icon: 'pi pi-fw pi-sign-out',
             command: () => {
-              this.addAdmin(this.message.user);
+              this.addAdmin();
             },
-            visible: () => this.message.room.ownerId === store.state.user.id,
+            visible: () => {
+              if (!this.message || !this.message.room || !this.message.room.ownerId)
+                return (false);
+              this.message.room.ownerId === store.state.user.id;
+            },
           },
           { label: 'Kick', icon: 'pi pi-fw pi-sign-out',
             command: () => {
-              this.kickUser(this.message.user);
+              this.kickUser();
             },
             visible: () => this.hasHigherRights(),
           },
           { label: 'Ban', icon: 'pi pi-fw pi-trash',
             command: () => {
-              this.banUser(this.message.user);
+              this.banUser();
             },
             visible: () => this.hasHigherRights(),
           },
           { label: 'Mute', icon: 'pi pi-fw pi-eye-slash',
             command: () => {
-              this.muteUser(this.message.user);
+              this.muteUser();
             },
             visible: () => this.hasHigherRights(),
           },
           { label: 'Add Friend', icon: 'pi pi-fw pi-user-plus',
             command: () => {
               if (!this.isFriend)
-                this.addFriend(this.message.user);
+                this.addFriend();
             },
             visible: () => !this.isFriend,
           },
           { label: 'Remove Friend', icon: 'pi pi-fw pi-user-minus',
             command: () => {
               if (this.isFriend)
-                this.removeFriend(this.message.user);
+                this.removeFriend();
             },
             visible: () => this.isFriend,
           },
           { label: 'Invite Pong', icon: 'pi pi-fw pi-circle-fill',
             command: () => {
-              this.invitePong(this.message.user);
+              this.invitePong();
             },
+            // visible: () => this.message.user.,
           },
           { label: 'Private Message', icon: 'pi pi-fw pi-comments',
             command: () => {
-              this.privateMessage(this.message.user);
+              this.privateMessage();
             },
           },
       ]),
@@ -120,6 +124,9 @@ export default defineComponent({
   },
   methods: {
     hasHigherRights(): boolean {
+      if (!this.message || !this.message.room || (!this.message.room.ownerId && !this.message.room.admin)
+        || (!this.message.room.ownerId && this.message.room.admin?.find((user) => {user.id === store.state.user.id})))
+        return false;
       if (this.message.room.ownerId === store.state.user.id
         || (this.message.room.admin
           && this.message.room.admin?.find((user) => {user.id === store.state.user.id})
@@ -151,7 +158,6 @@ export default defineComponent({
     },
     async blockUser(): Promise<void> {
       console.log("blockUser");
-      axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/user/block/add', {
         id: this.message.userId,
       }, {
@@ -164,7 +170,6 @@ export default defineComponent({
     },
     async addAdmin(): Promise<void> {
       console.log("addAdmin");
-      axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/room/addAdmin', {
         roomId: this.message.roomId,
         userId: store.state.user.id,
@@ -179,7 +184,7 @@ export default defineComponent({
     },
     async kickUser(): Promise<void> {
       console.log("kickUser");
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post('/api/room/delUser', {
         roomId: this.message.roomId,
         userId: store.state.user.id,
@@ -194,7 +199,7 @@ export default defineComponent({
     },
     async banUser(): Promise<void> {
       console.log("banUser");
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post('/api/room/addBan', {
         roomId: this.message.roomId,
         userId: store.state.user.id,
@@ -207,9 +212,8 @@ export default defineComponent({
       })
       .catch(err => { throw new Error(err) });
     },
-    async muteUser(): Promise<void> {
+    async muteUser() {
       console.log("muteUser");
-      axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/room/addMute', {
         roomId: this.message.roomId,
         userId: store.state.user.id,
@@ -224,7 +228,7 @@ export default defineComponent({
     },
     async addFriend(): Promise<void> {
       console.log("addFriend");
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post('/api/user/friends/add', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
@@ -235,7 +239,7 @@ export default defineComponent({
     },
     async removeFriend(): Promise<void> {
       console.log("removeFriend");
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post('/api/user/friends/del', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
@@ -249,7 +253,7 @@ export default defineComponent({
     },
     async privateMessage(): Promise<void> {
       console.log("privateMessage");
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post('/api/room/private', {
         user1: store.state.user,
         user2: this.message.user,

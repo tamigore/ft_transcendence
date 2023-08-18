@@ -114,7 +114,11 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 /* import specific icons */
 import * as fonts from '@fortawesome/free-solid-svg-icons'
+
 import VueCookies from 'vue3-cookies'
+
+import axios from 'axios';
+import { server } from './utils/helper';
 
 library.add(fonts.faUser);
 library.add(fonts.faCheck);
@@ -243,4 +247,7 @@ app.component('VirtualScroller', VirtualScroller);
 app.config.globalProperties.window = window;
 app.use(store);
 app.use(router);
+
+axios.defaults.baseURL = server.nestUrl;
+
 app.mount('#app');

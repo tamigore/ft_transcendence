@@ -204,6 +204,64 @@
       </div>
     </AccordionTab>
 
+    <AccordionTab header="Bloqued">
+
+      <div class="surface-section border-round box-shadow " style="padding: 5em">
+        <div class="p-inputgroup flex-1 mb-4">
+          <span class="p-inputgroup-addon">
+            <i class="pi pi-lock"></i>
+          </span>
+          <Dropdown v-model="selectedBlock" editable :options="filteredUsernames" @input="filterUsernames"
+            placeholder="Find by: Username / Id" class="w-full md:w-14rem" />
+          <Button @click="addFriend" style="background-color: rgb(197, 72, 255)">Add</Button>
+        </div>
+
+        <ul class="list-none p-0 m-0">
+
+          <!-- New list tiles -->
+
+          <li class="h-32 flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap"
+            v-for="(blocked, index) in userBlocked" :key="index" @mouseover="showDeleteIcon[index + 1] = true"
+            @mouseout="showDeleteIcon[index + 1] = false">
+            <div class="text-500 w-6 md:w-2 font-medium">
+              <div class="friend-container">
+                <div class="image-frame"
+                  style="width: 75px; height: 75px; float: left; margin-right: 50px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
+                  <img :src="getImageById(blocked.img)?.img" :alt="'Avatar ' + blocked.username"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <div class="text-500 w-8 md:w-4 font-medium" style="overflow: hidden;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="{{ friend.username }}">
+                    {{ blocked.username }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1 ">
+              <span v-if="blocked.loggedIn">
+                <Tag class="pr-6" icon="pi pi-circle-fill"
+                  style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)" value="Online"></Tag>
+              </span>
+              <span v-if="blocked.loggedIn">
+                <Tag icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)"
+                  value="In game"></Tag>
+              </span>
+            </div>
+            <div class="w-6 md:w-2 flex justify-content-end space-x-2">
+              <Button v-show="showDeleteIcon[index + 1]" icon="pi pi-eye" rounded class="mr-3" aria-label="ViewProfile"
+                style="background-color: rgb(197, 72, 255)" @click="goToPublicProfile(blocked.username)"></Button>
+              <Button icon="pi pi-times" v-show="showDeleteIcon[index + 1]" rounded class="mr-3" aria-label="Delete"
+                style="background-color: rgb(247, 82, 118)" @click="removeBlock(index, blocked)"></Button>
+            </div>
+          </li>
+
+        </ul>
+
+      </div>
+    </AccordionTab>
+
     <AccordionTab header="History">
       <p>
         At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque
@@ -228,7 +286,6 @@
 <script lang="ts">
 import store from '@/store';
 import { defineComponent } from 'vue';
-import { server } from "@/utils/helper";
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { User } from '@/utils/interfaces';
 import router from '@/router';
@@ -261,6 +318,7 @@ export default defineComponent({
   },
   mounted() {
     this.getAllFriends();
+    this.getAllBlocked();
     this.getAllUsernames();
   },
   data() {
@@ -301,6 +359,9 @@ export default defineComponent({
       usernames: [] as string[],
       filteredUsernames: [] as string[],
       showDeleteIcon: [] as boolean[],
+
+      selectedBlock: '' as string,
+      userBlocked: [] as User[],
     }
   },
   methods:
@@ -371,6 +432,64 @@ export default defineComponent({
         .then((response: AxiosResponse) => {
           console.log(response);
           this.QRcode = "";
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
+
+    async getAllBlocked() {
+      
+      await axios
+        .get(`/api/user/blocked`, {
+          headers: { Authorization: `Bearer ${store.state.user.hash}` },
+        })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          if (response.data)
+            this.userBlocked = response.data[0].blocked.map((user) => user);
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
+
+    async addBlock() {
+      if (this.selectedBlock.trim() === '') {
+        return;
+      }
+      const id = parseInt(this.selectedBlock);
+      let friend = null as User | null;
+      if (!isNaN(id)) {
+        friend = await this.handleIdSearch(id);
+      } else {
+        friend = await this.handleUsernameSearch(this.selectedBlock);
+      }
+      if (friend) {
+        
+        return axios
+          .post(`/api/user/block/del`, friend, {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+          .then((response: AxiosResponse) => {
+            console.log(response);
+          })
+          .catch((error: AxiosError) => {
+            console.error(error);
+          });
+      }
+    },
+
+    async removeBlock(index: number, user: User) {
+      this.userBlocked.splice(index, 1);
+      this.showDeleteIcon.splice(index + 1, 1);
+      return await axios
+        .post(`/api/user/block/del`, user,
+          {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+        .then((response: AxiosResponse) => {
+          console.log(response);
         })
         .catch((error: AxiosError) => {
           throw error;
@@ -460,7 +579,7 @@ export default defineComponent({
     async ModifyUserAvatarId(image) {
       this.ModifyStoreAvatarId(image.id);
       const user = store.state.user;
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post('/api/user/update', user,
         { headers: { "Authorization": `Bearer ${store.state.user.hash}` } })
         .then((response: AxiosResponse) => {
@@ -482,7 +601,7 @@ export default defineComponent({
         }
         this.ModifyStoreBio();
         const user = store.state.user;
-        axios.defaults.baseURL = server.nestUrl;
+        
         await axios.post('/api/user/update', user, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
         })
@@ -511,7 +630,7 @@ export default defineComponent({
         }
         this.ModifyStoreEmail();
         const user = store.state.user;
-        axios.defaults.baseURL = server.nestUrl;
+        
         await axios.post('/api/user/update', user, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
         })
@@ -552,7 +671,7 @@ export default defineComponent({
         }
         this.ModifyStoreUsername();
         const user = store.state.user;
-        axios.defaults.baseURL = server.nestUrl;
+        
         await axios.post('/api/user/update', user, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
         })
@@ -576,7 +695,7 @@ export default defineComponent({
     },
 
     async getAllUsernames() {
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios
         .get(`/api/user/`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -591,7 +710,7 @@ export default defineComponent({
     },
 
     async getAllFriends() {
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios
         .get(`/api/user/friends`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -618,7 +737,7 @@ export default defineComponent({
     },
 
     async getUserById(id: number): Promise<User | null> {
-      axios.defaults.baseURL = server.nestUrl;
+      
       return await axios
         .get(`/api/user/${id}`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -633,7 +752,7 @@ export default defineComponent({
     },
 
     async getUserByUsername(username: string): Promise<User | null> {
-      axios.defaults.baseURL = server.nestUrl;
+      
       return await axios
         .get(`/api/user/username/${username}`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -659,7 +778,7 @@ export default defineComponent({
         friend = await this.handleUsernameSearch(this.selectedFriend);
       }
       if (friend) {
-        axios.defaults.baseURL = server.nestUrl;
+        
         return axios
           .post(`/api/user/friends/add`, friend, {
             headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -715,7 +834,7 @@ export default defineComponent({
 
     async blockFriend(index: number, user: User) {
       this.removeFriend(index, user);
-      axios.defaults.baseURL = server.nestUrl;
+      
       return await axios
         .post(`/api/user/block/add`, user,
           {

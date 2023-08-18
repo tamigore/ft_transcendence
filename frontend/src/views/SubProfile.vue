@@ -74,7 +74,6 @@
 
 import store from '@/store';
 import { defineComponent } from 'vue';
-import { server } from "@/utils/helper";
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { User } from '@/utils/interfaces';
 import { useRoute } from "vue-router";
@@ -135,7 +134,6 @@ methods:
   },
 
   async addFriend() {
-    axios.defaults.baseURL = server.nestUrl;
     return axios
     .post(`/api/user/friends/add`, this.userData, {
       headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -152,7 +150,6 @@ methods:
     const route = useRoute();
     const username = route.params.username;
     console.log(username);
-    axios.defaults.baseURL = server.nestUrl;
     return axios
     .get(`/api/user/username/${username}`, {
       headers: { Authorization: `Bearer ${store.state.user.hash}` },

@@ -224,6 +224,19 @@ export class UserService {
     return users;
   }
 
+  async findBlocked(userId: number) {
+    this.logger.log(`findBlocked user: ${userId}`);
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: userId,
+      },
+      include: {
+        blocked: true,
+      },
+    });
+    return users;
+  }
+
   async addBlocked(userId: number, blockedId: number) {
     this.logger.log(`user id : ${userId} wants to addBlocked: ${blockedId}`);
     await this.prisma

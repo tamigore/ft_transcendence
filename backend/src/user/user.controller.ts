@@ -19,7 +19,6 @@ import { AtGuard } from "../common/guards";
 export class UserController {
   constructor(private userService: UserService) {}
 
-  // @Public()
   @Get()
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
@@ -28,7 +27,6 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  // @Public()
   @Get("username/:name")
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
@@ -45,7 +43,6 @@ export class UserController {
     return this.userService.findAllButSelf(userId);
   }
 
-  // @Public()
   @Get("friends")
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
@@ -54,7 +51,14 @@ export class UserController {
     return this.userService.findFriends(userId);
   }
 
-  // @Public()
+  @Get("blocked")
+  @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Header("Access-Control-Allow-Origin", "*")
+  findAllBlocked(@GetCurrentUserId() userId: number): Promise<User[]> {
+    return this.userService.findBlocked(userId);
+  }
+
   @Get("friends/:id")
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
@@ -67,7 +71,6 @@ export class UserController {
     return this.userService.findFriendsById(userId, id);
   }
 
-  // @Public()
   @Get(":id")
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
@@ -77,7 +80,6 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  // @Public()
   @Post("update")
   @Header("Access-Control-Allow-Origin", "*")
   @UseGuards(AtGuard)
@@ -86,7 +88,6 @@ export class UserController {
     this.userService.update(userId, updateUserDto);
   }
 
-  // @Public()
   @Post("friends/add")
   @Header("Access-Control-Allow-Origin", "*")
   @UseGuards(AtGuard)
@@ -95,7 +96,6 @@ export class UserController {
     this.userService.addFriends(userId, friend.id);
   }
 
-  // @Public()
   @Post("friends/del")
   @Header("Access-Control-Allow-Origin", "*")
   @UseGuards(AtGuard)
@@ -124,7 +124,6 @@ export class UserController {
     this.userService.addBlocked(userId, friend.id);
   }
 
-  // @Public()
   @Post("block/del")
   @Header("Access-Control-Allow-Origin", "*")
   @UseGuards(AtGuard)

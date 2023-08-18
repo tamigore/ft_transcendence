@@ -2,7 +2,6 @@
 import { defineComponent } from 'vue';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import store from '@/store';
-import { server } from "@/utils/helper";
 import router from '@/router';
 import socket from "@/utils/socket"
 
@@ -11,7 +10,7 @@ export default defineComponent ({
   methods: {
     async LogoutPost() {
       console.log("LogoutPost")
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post("api/auth/logout", {}, {
           timeout: 1000,
           headers: {"Authorization": `Bearer ${store.state.user.hash}`}

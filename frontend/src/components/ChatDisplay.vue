@@ -100,7 +100,6 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { defineComponent } from "vue";
 import { Room, Message, User } from "@/utils/interfaces";
 import store from "@/store";
-import { server } from "@/utils/helper";
 import { useToast } from "primevue/usetoast";
 import ChatBubble from "@/components/ChatBubble.vue"
 
@@ -209,7 +208,7 @@ export default defineComponent({
       this.text = "";
     },
     async getPrivate() {
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.get(`api/room/private/${store.state.user.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -220,7 +219,7 @@ export default defineComponent({
         .catch((error: AxiosError) => { throw error; });
     },
     async getRooms() {
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.get("api/room/public", {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -231,7 +230,7 @@ export default defineComponent({
         .catch((error: AxiosError) => { throw error; });
     },
     async getMessages(room: Room) {
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.get(`api/chat/room/${room.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -262,7 +261,7 @@ export default defineComponent({
         this.roomPassword = "";
     },
     async deleteRoom(room: Room) {
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.delete(`api/room/${room.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -278,7 +277,7 @@ export default defineComponent({
       console.log(`joinRoom: ${room}`);
       let pwd = null as string | null;
       if (room.hash) pwd = prompt("Input the room password: ", "pwd");
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post(`api/room/addUser`, {
         userId: store.state.user.id,
         roomId: room.id,
@@ -302,11 +301,13 @@ export default defineComponent({
       .catch((error: AxiosError) => { throw error; });
     },
     async leaveRoom(room: Room) {
-      axios.defaults.baseURL = server.nestUrl;
+      
       await axios.post(`/api/room/delUser`, {
         userId: store.state.user.id as number,
         roomId: room.id as number,
         otherId: store.state.user.id as number,
+      }, {
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
       .then((res) => {
         console.log(`leaveRoom success ${res.data}`);
@@ -338,6 +339,8 @@ export default defineComponent({
       this.isPrivate = true;
     },
     owner(value: Room): boolean {
+      if (!value || typeof value === 'undefined' || !value.ownerId)
+        return false;
       return store.state.user.id === value.ownerId;
     },
   },
