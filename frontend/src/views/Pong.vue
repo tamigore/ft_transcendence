@@ -47,9 +47,12 @@ export default defineComponent({
 
 
 <template>
-	<div>Is ingame ? {{ inGame }}</div>
-	<MatchMaking />
-	<PongGame />
+    <div v-if="!inGame">
+        <MatchMaking />
+    </div>
+    <div v-if="!InQueue">
+        <PongGame />
+    </div>
 </template>
 
 <script lang="ts">
@@ -67,11 +70,13 @@ export default defineComponent({
 	},
 	data() {
 		return {
-			inGame: store.state.ingame as boolean,
+			inQueue: store.state.inQueue as boolean,
+            inGame: store.state.ingame as boolean,
 		}
 	},
 	updated() {
 		this.inGame = store.state.ingame;
+        this.inQueue = store.state.inQueue;
         
 		// if (this.inGame) {
 		// 	socket.connect();

@@ -28,6 +28,9 @@ export class GameController {
   setGameFromId(@Body() dto: Matchmaker): Promise<Game> {
     return this.gameService.matchMaker(dto);
   }
+
+  @Public()
+  @Post("spectate")
   setGameSpectator(@Body() dto: Spectate): Promise<Game> {
     return this.gameService.SpectateGame(dto);
   }

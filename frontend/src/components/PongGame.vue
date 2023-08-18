@@ -158,7 +158,7 @@
 import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
 import useFPS from './useFPS';
 import store from "@/store";
-import socket from "@/utils/gameSocket"
+import socket from "@/utils/gameSocket";
 import { GameMove, PaddleState, BallState, BlockState } from "@/utils/interfaces"
 import {
   SetPongWidth,
@@ -443,7 +443,7 @@ class BallClass {
           this.veloX = ballMaxSpeedX * sign;
         if (!store.state.ingame && this.pong.gameIsBlocks && Math.random() < 0.5)
           this.pong.generateBlocks();
-        if (store.state.ingame && this.pong.gameIsBlocks && store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
+        if (store.state.ingame && store.state.game.isBlocked && store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
           this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
 
@@ -877,6 +877,7 @@ export class PongGameClass {
     this.gameIsRunning = true;
     store.commit("setGameConnect", true);
     console.log("startMultiOnline-----------");
+    console.log("game", store.state.game);
     this.leftPlayerKeyDown = '';
     this.leftPlayerKeyUp = '';
     this.rightPlayerKeyDown = '';
@@ -1397,14 +1398,14 @@ export default defineComponent({
     /*******************Mounted and unMounted*******************/
 
     onMounted(() => {
+      store.commit("setGameConnect", false);
 
-     
       paddleSprite.src = require('@/assets/sprites/blanc.png'); // Adjust the path as needed
       hitSound.src = require('@/assets/sounds/hitSound.wav');
  
       socket.on("gameRoomJoiner", (data) => {
         // console.log("GameRoomJoiner", data.room);
-        store.commit("setGameRoom", data.room);
+      store.commit("setGameRoom", data.room);
         if (store.state.playerNum == 2)
         {
           store.commit("setGameConnect", true);
@@ -1423,8 +1424,6 @@ export default defineComponent({
         Pong.value.theBall.setBallState(e);
       });
 
-      if (store.state.ingame)
-      {
       
         socket.on("servMessage", (e:GameMove ) => {
           Pong.value.handleKeyOnline(e.player, e.notPressed, e.key);
@@ -1458,7 +1457,6 @@ export default defineComponent({
           if (Pong.value.scoreA >= 100 || Pong.value.scoreB >= 100)
           {
             Pong.value.endGameOnline();
-            store.commit("setGameConnect", false);
           }
         });
 
@@ -1501,7 +1499,6 @@ export default defineComponent({
         });
 
 
-      }
 
 
       if (myCanvas.value) {

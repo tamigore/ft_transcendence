@@ -23,14 +23,14 @@ export interface User {
 export interface Game {
 	id: number,
 	created_at: Date,
-  
+
+  isBlocked:   Boolean,
 	name: string,
 	player1Id: number,
 	player1: User,
 	player2Id: number,
 	player2: User,
 	spectator: User[],
-	historic: Historic,
 }
 
 export interface GameMove {

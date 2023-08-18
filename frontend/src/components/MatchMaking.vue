@@ -128,10 +128,8 @@ export default defineComponent({
           userId: store.state.user.id as number,
           userName: store.state.user.username as string,
           userPlaying: "trotro" as string,
-        }, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
+        }, 
+          { headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
         .then((response: AxiosResponse) => {
           socket.emit("joinGameRoom", {
