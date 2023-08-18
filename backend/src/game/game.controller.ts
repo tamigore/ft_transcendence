@@ -12,7 +12,7 @@ import { GameService } from "./game.service";
 import { Public } from "../common/decorators";
 import { Historic, Game } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { Matchamker } from "./dto";
+import { Matchmaker, Spectate } from "./game.interfaces";
 
 @Controller("game")
 export class GameController {
@@ -25,7 +25,10 @@ export class GameController {
   @Public()
   @Post("matchmaker")
   @HttpCode(HttpStatus.OK)
-  setGameFromId(@Body() dto: Matchamker): Promise<Game> {
+  setGameFromId(@Body() dto: Matchmaker): Promise<Game> {
     return this.gameService.matchMaker(dto);
+  }
+  setGameSpectator(@Body() dto: Spectate): Promise<Game> {
+    return this.gameService.SpectateGame(dto);
   }
 }

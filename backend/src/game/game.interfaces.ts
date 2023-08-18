@@ -1,7 +1,19 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { Game, User, Room } from "@prisma/client";
-import { Matchamker } from "./dto";
+
+
+export class Matchmaker {
+  userId: string;
+  userName: string;
+  isBlocked: boolean;
+}
+
+export class Spectate{
+  userId: string;
+  userName: string;
+  userPlaying: number;
+}
 
 export interface GameMove {
     player: number,
@@ -36,6 +48,7 @@ export interface GameMove {
   {
     player: number,
     posY: number,
+    height: number,
   }
 
   export interface GameScore

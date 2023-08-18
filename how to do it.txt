@@ -1,3 +1,18 @@
+
+
+//rendre room du jeu unique
+//parfois la balle sort du jeu
+
+//parfois la game online se lance, mais les joeurs ne sont pas connectes, seul la premiere direction de la balle est syncro
+
+//finir le mode spec, puis ajouter front pour lancer depuis le menu
+//detruire les games quand elles sont finies
+
+//vitesse des nouvelles balles a regler
+
+
+
+
 BACK :
 
 game.gateway : 

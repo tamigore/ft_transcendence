@@ -48,7 +48,7 @@ export interface BlockState
   y: number,
   width: number,
   height: number,
-  color: string,
+  num: number,
   id: number,
 }
 
@@ -66,6 +66,7 @@ export interface BallState
   {
     player: number,
     posY: number,
+    height: number,
   }
 
 

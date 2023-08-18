@@ -52,8 +52,8 @@ model Historic {
   looserID    Int
   looser      User     @relation(name: "looser", fields: [looserID], references: [id])
   score       String
-  gameId      Int      @unique
-  game        Game     @relation(fields: [gameId], references: [id])
+  //gameId      Int      @unique
+  //game        Game     @relation(fields: [gameId], references: [id])
   @@map("historics")
 }
 
@@ -61,13 +61,14 @@ model Game {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
+  isBlocked   Boolean  @default(false)
   name        String
   player1Id   Int
   player1     User      @relation(name: "player1", fields: [player1Id], references: [id])
   player2Id   Int?
   player2     User?     @relation(name: "player2", fields: [player2Id], references: [id])
   spectator   User[]    @relation(name: "spectator")
-  historic    Historic?
+  //historic    Historic?
   @@map("games")
 }
 

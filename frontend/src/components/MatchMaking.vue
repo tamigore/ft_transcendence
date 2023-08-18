@@ -9,6 +9,7 @@
       <Button @click="SearchGame()"> Multiplayer </Button>
       <Button @click="LaunchSingle()"> Single Player </Button>
       <Button @click="LeaveGame()"> Leave game </Button>
+      <Button @click="Spectate()"> Spectate </Button>
 
       <div class="flex align-items-center justify-content-between mb-6">
         <div class="flex align-items-center text-indigo-300">
@@ -50,8 +51,8 @@ export default defineComponent({
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/matchmaker', {
           userId: store.state.user.id as number,
-          gameSettings: this.boxes as boolean,
           userName: store.state.user.username as string,
+          isBlocked: false,
         }, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -61,7 +62,7 @@ export default defineComponent({
           console.log("response from Mathmaker : ", response.data.name);
           console.log("socket connecting room : ", response.data.player1.username);
 
-
+          //rendre la room unique ?
           socket.emit("joinGameRoom", {
           user : store.state.user,
           room : response.data.player1.username as string,
@@ -95,6 +96,7 @@ export default defineComponent({
             store.commit("setGameConnect", false);
             store.commit("setInQueue", true);
           }
+          console.log("player num : ", store.state.playerNum);
           store.commit("setGame", response.data);
         })
         .catch((error: AxiosError) => {
@@ -115,6 +117,36 @@ export default defineComponent({
       store.commit("setGameConnect", false);
       store.commit("setGameRoom", "");
     },
+    async Spectate()
+    {
+      socket.connect();
+    
+      store.commit("setUserGameSocket", socket.id);
+      // console.log(`typeof ${typeof(store.state.user.id)}`);
+      axios.defaults.baseURL = server.nestUrl;
+      await axios.post('/api/game/spectate', {
+          userId: store.state.user.id as number,
+          userName: store.state.user.username as string,
+          userPlaying: "trotro" as string,
+        }, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        })
+        .then((response: AxiosResponse) => {
+          socket.emit("joinGameRoom", {
+            user : store.state.user,
+            room : response.data.player1.username as string,
+          });
+          //reucperer les infos de la game (tous les blocks)
+
+          store.commit("setPlayerNum", 0);
+          store.commit("setGameConnect", true);
+        })
+        .catch((error: AxiosError) => {
+          console.log(error);
+        });
+    }
   },
 });
 </script>
