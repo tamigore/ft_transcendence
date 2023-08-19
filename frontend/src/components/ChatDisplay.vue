@@ -40,7 +40,7 @@
             <TabPanel header="Rooms" >
               <div id="roomContainer" class="scroll" style="height: 69vh;">
               <div v-for="Room in Rooms" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
-                <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.id == lastRoom.id ? 'box-shadow' : 'box-shadow-dark']" @click="selectRoom(Room)">
+                <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.id == lastRoom.id ? 'box-shadow' : '']" @click="selectRoom(Room)">
                   <div class="flex items-center" style="max-width: 53%;">
                     <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
                       {{ Room.name }}
