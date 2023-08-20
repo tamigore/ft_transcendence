@@ -274,10 +274,10 @@ export default defineComponent({
 <style>
 :root {
   --body-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  --msger-bg: #fff;
+  --msger-bg: #000000;
   --border: 2px solid #ddd;
-  --left-msg-bg: #d894e4;
-  --right-msg-bg: #579ffb;
+  --left-msg-bg: #cb5aed8b;
+  --right-msg-bg: #4c6fed96;
 }
 
 html {
@@ -312,7 +312,7 @@ body {
   border: var(--border);
   border-radius: 5px;
   background: var(--msger-bg);
-  box-shadow: 0 15px 15px -5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 15px -5px rgba(255, 255, 255, 0.2);
 }
 .msg-text{
   display:block;
@@ -324,15 +324,7 @@ body {
   overflow-y: auto;
   padding: 10px;
 }
-.msger-chat::-webkit-scrollbar {
-  width: 6px;
-}
-.msger-chat::-webkit-scrollbar-track {
-  background: #ddd;
-}
-.msger-chat::-webkit-scrollbar-thumb {
-  background: #bdbdbd;
-}
+
 .msg {
   display: flex;
   align-items: flex-end;
@@ -341,11 +333,13 @@ body {
 .msg:last-of-type {
   margin: 0;
 }
+
 .msg-img {
-  width: 50px;
-  height: 50px;
-  margin-right: 10px;
+  width: 80px;
+  height: 80px;
+  margin-right: 3%;
   border-radius: 50%;
+  overflow: hidden;
 }
 .msg-bubble {
   max-width: 450px;
@@ -362,18 +356,21 @@ body {
 .msg-info-name {
   margin-right: 10px;
   font-weight: bold;
+  color:#000000;
 }
 .msg-info-time {
   font-size: 0.85em;
 }
 
-.left-msg .msg-bubble {
-  border-bottom-left-radius: 0;
-}
-
 .right-msg {
   flex-direction: row-reverse;
 }
+
+.left-msg .msg-bubble {
+  border-bottom-left-radius: 0;
+  color: #ffffff;
+}
+
 .right-msg .msg-bubble {
   background: var(--right-msg-bg);
   color: #ffffff;
@@ -381,9 +378,7 @@ body {
 }
 .right-msg .msg-img {
   margin: 0 0 0 10px;
+  margin-left: 3%;
 }
 
-.msger-chat {
-  background-color: #fcfcfe00;
-}
 </style>

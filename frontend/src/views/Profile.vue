@@ -67,11 +67,11 @@
             </div>
           </div>
 
-          
+
           <div class="profile-details">
-            
+
             <ul class="list-none p-0 m-0">
-              
+
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
                 <div class="font-medium text-3xl text-900 w-6 md:w-2 mr-8">My profile
                 </div>
@@ -157,18 +157,17 @@
         <ul class="list-none p-0 m-0">
 
           <!-- New list tiles -->
-
           <li class="h-32 flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap"
             v-for="(friend, index) in userFriends" :key="index" @mouseover="showDeleteIcon[index + 1] = true"
             @mouseout="showDeleteIcon[index + 1] = false">
-            <div class="text-500 w-6 md:w-2 font-medium">
-              <div class="friend-container">
-                <div class="image-frame"
-                  style="width: 75px; height: 75px; float: left; margin-right: 50px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
-                  <img :src="getImageById(friend.img)?.img" :alt="'Avatar ' + friend.username"
+            <div class="text-500 w-6 md:w-2 ">
+              <div class="friend-container align-items-center flex">
+                <div class="image-frame m2"
+                  style="width: 75px; height: 75px; float: left; margin-right: 15%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
+                  <img :src="getImageById(friend.img).img" :alt="'Avatar ' + friend.username"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
-                <div class="text-500 w-8 md:w-4 font-medium" style="overflow: hidden;">
+                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
                   <span
                     style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
                     title="{{ friend.username }}">
@@ -177,16 +176,19 @@
                 </div>
               </div>
             </div>
-            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1 ">
+
+            <div class="text-900 w-full md:w-8 flex items-center">
               <span v-if="friend.loggedIn">
-                <Tag class="pr-6" icon="pi pi-circle-fill"
+                <Tag class="pr-6 mt-1" icon="pi pi-circle-fill"
                   style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)" value="Online"></Tag>
               </span>
-              <span v-if="friend.loggedIn">
-                <Tag icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)"
-                  value="In game"></Tag>
+              <span v-if="friend.inGame">
+                <Tag class="mt-1" icon="pi pi-circle-fill"
+                  style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)" value="In game"></Tag>
               </span>
             </div>
+
+
             <div class="w-6 md:w-2 flex justify-content-end space-x-2">
               <Button icon="pi pi-comment" v-show="showDeleteIcon[index + 1]" rounded class="mr-3" aria-label="Delete"
                 style="background-color: rgb(93, 104, 225)" @click="privateMessage(index, friend)"></Button>
@@ -262,22 +264,297 @@
       </div>
     </AccordionTab>
 
-    <AccordionTab header="History">
-      <p>
-        At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque
-        corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
-        culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et
-        expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
-      </p>
+    <AccordionTab header="Leaderboard">
+
+      <div class="surface-section border-round box-shadow" style="padding: 5em;">
+
+        <div class="surface-section">
+          <ul class="list-none p-0 m-0">
+
+
+            <li class="rankTab flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap opacity-60 mb-3"
+              style="background: linear-gradient(to top right, #bd34e7, #0052b0);">
+              <div class="text-900 w-6 md:w-2 text-2xl font-medium">Rank</div>
+              <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
+                <div class="text-900 w-6 md:w-2 text-2xl font-medium">Username</div>
+              </div>
+              <div class="w-6 md:w-2 flex justify-content-end">
+                <div class="text-900 text-2xl font-medium">Games won</div>
+              </div>
+            </li>
+
+            <!-- leaderBoard tile -->
+            <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
+              <div class="text-500 w-6 md:w-2 font-medium">index</div>
+              <div class="align-items-center flex w-8">
+                <div
+                  style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+              </div>
+              <div class="w-6 md:w-2 flex justify-content-end">
+                <span>win nbr</span>
+              </div>
+            </li>
+
+            <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
+              <div class="text-500 w-6 md:w-2 font-medium">index</div>
+              <div class="align-items-center flex w-8">
+                <div
+                  style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+              </div>
+              <div class="w-6 md:w-2 flex justify-content-end">
+                <span>win nbr</span>
+              </div>
+            </li>
+
+
+          </ul>
+        </div>
+      </div>
     </AccordionTab>
 
-    <AccordionTab header="statistics">
-      <p>
-        At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque
-        corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
-        culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et
-        expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
-      </p>
+    <AccordionTab header="History">
+      <div class="surface-section border-round box-shadow" style="padding: 5em;">
+
+        <div class="surface-section">
+          <ul class="list-none p-0 m-0">
+
+            <!-- leaderBoard tile -->
+
+
+            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 opacity-60 mb-4"
+              style="background: linear-gradient(to top right, #bd34e7, #0052b0);">
+
+              <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center"
+                style="width: 200px;">Score P1</div>
+              <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center"
+                style="width: 200px;">Player 1</div>
+              <div class="font-bold flex align-items-center justify-content-center" style="width: 200px;">
+                <h2 class="neonText pulsate mt-2">VS</h2>
+              </div>
+              <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center"
+                style="width: 200px;">Player 2</div>
+              <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center"
+                style="width: 200px;">Score P2</div>
+            </li>
+
+            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
+              style="background: linear-gradient(to top right, #e73434ae, #b90d6ba2);">
+
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                300
+              </div>
+
+              <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
+                <div
+                  style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+              </div>
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                <h2 class="neonText pulsate mt-2">VS</h2>
+              </div>
+
+              <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
+                <div class="text-500 font-medium text-left flex items-center"
+                  style="overflow: hidden; margin-right: 20%;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+                <div
+                  style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+              </div>
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                200
+              </div>
+            </li>
+
+            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
+              style="background: linear-gradient(to top right, #e73434ae, #b90d6ba2);">
+
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                300
+              </div>
+
+              <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
+                <div
+                  style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+              </div>
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                <h2 class="neonText pulsate mt-2">VS</h2>
+              </div>
+
+              <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
+                <div class="text-500 font-medium text-left flex items-center"
+                  style="overflow: hidden; margin-right: 20%;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+                <div
+                  style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+              </div>
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                200
+              </div>
+            </li>
+
+            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
+              style="background: linear-gradient(to top right, #34e764ae, #0db985a2);">
+
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                300
+              </div>
+
+              <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
+                <div
+                  style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+              </div>
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                <h2 class="neonText pulsate mt-2">VS</h2>
+              </div>
+
+              <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
+                <div class="text-500 font-medium text-left flex items-center"
+                  style="overflow: hidden; margin-right: 20%;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+                <div
+                  style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+              </div>
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                200
+              </div>
+            </li>
+
+            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
+              style="background: linear-gradient(to top right, #e73434ae, #b90d6ba2);">
+
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                300
+              </div>
+
+              <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
+                <div
+                  style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+              </div>
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                <h2 class="neonText pulsate mt-2">VS</h2>
+              </div>
+
+              <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
+                <div class="text-500 font-medium text-left flex items-center"
+                  style="overflow: hidden; margin-right: 20%;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+                <div
+                  style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
+                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+              </div>
+              <div class="font-bold flex align-items-center justify-content-center"
+                style="width: 200px; min-height: 50px">
+                200
+              </div>
+            </li>
+
+
+
+
+          </ul>
+        </div>
+      </div>
     </AccordionTab>
 
   </Accordion>
@@ -388,8 +665,7 @@ export default defineComponent({
           })
         .then((response: AxiosResponse) => {
           console.log(response);
-          if (response.data === true)
-          {
+          if (response.data === true) {
             alert("Connexion with 2FA activated");
             this.close2FA();
           }
@@ -439,7 +715,7 @@ export default defineComponent({
     },
 
     async getAllBlocked() {
-      
+
       await axios
         .get(`/api/user/blocked`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -466,7 +742,7 @@ export default defineComponent({
         friend = await this.handleUsernameSearch(this.selectedBlock);
       }
       if (friend) {
-        
+
         return axios
           .post(`/api/user/block/del`, friend, {
             headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -579,7 +855,7 @@ export default defineComponent({
     async ModifyUserAvatarId(image) {
       this.ModifyStoreAvatarId(image.id);
       const user = store.state.user;
-      
+
       await axios.post('/api/user/update', user,
         { headers: { "Authorization": `Bearer ${store.state.user.hash}` } })
         .then((response: AxiosResponse) => {
@@ -601,7 +877,7 @@ export default defineComponent({
         }
         this.ModifyStoreBio();
         const user = store.state.user;
-        
+
         await axios.post('/api/user/update', user, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
         })
@@ -630,7 +906,7 @@ export default defineComponent({
         }
         this.ModifyStoreEmail();
         const user = store.state.user;
-        
+
         await axios.post('/api/user/update', user, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
         })
@@ -671,7 +947,7 @@ export default defineComponent({
         }
         this.ModifyStoreUsername();
         const user = store.state.user;
-        
+
         await axios.post('/api/user/update', user, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
         })
@@ -695,7 +971,7 @@ export default defineComponent({
     },
 
     async getAllUsernames() {
-      
+
       await axios
         .get(`/api/user/`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -710,7 +986,7 @@ export default defineComponent({
     },
 
     async getAllFriends() {
-      
+
       await axios
         .get(`/api/user/friends`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -737,7 +1013,7 @@ export default defineComponent({
     },
 
     async getUserById(id: number): Promise<User | null> {
-      
+
       return await axios
         .get(`/api/user/${id}`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -752,7 +1028,7 @@ export default defineComponent({
     },
 
     async getUserByUsername(username: string): Promise<User | null> {
-      
+
       return await axios
         .get(`/api/user/username/${username}`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -778,7 +1054,7 @@ export default defineComponent({
         friend = await this.handleUsernameSearch(this.selectedFriend);
       }
       if (friend) {
-        
+
         return axios
           .post(`/api/user/friends/add`, friend, {
             headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -834,7 +1110,7 @@ export default defineComponent({
 
     async blockFriend(index: number, user: User) {
       this.removeFriend(index, user);
-      
+
       return await axios
         .post(`/api/user/block/add`, user,
           {
@@ -986,5 +1262,4 @@ export default defineComponent({
     linear-gradient(to top right, #1e1546, transparent),
     linear-gradient(to left, #00000000, #19032583);
   background-blend-mode: screen;
-}
-</style>
+}</style>

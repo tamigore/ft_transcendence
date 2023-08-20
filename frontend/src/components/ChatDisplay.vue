@@ -1,17 +1,18 @@
 <template>
-  <Toast />
-  
-  <div class="flex justify-content-center p-2">
+  <div class="w-full h-full">
+  <!-- Connexion et création de salle -->
+  <div class="flex justify-content-center">
     <div class="flex flex-column flex-wrap col">
-      <div class="flex flex-row flex-wrap col-24 h-4rem justify-content-cente">
-        <div class="flex flex-row flex-wrap col-2 justify-content-cente">
+      <div class="flex flex-row flex-wrap col-24 h-4rem justify-content-left mb-2">
+        <div class="flex flex-row flex-wrap col-2 justify-content-center">
           <div v-if="connected">
-            <Button icon="pi pi-check" rounded aria-label="Filter" />
+            <Tag class="pr-6" icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)"
+                    value="Connected"></Tag>
           </div>
           <div v-else>
-            <Button icon="pi pi-times" severity="danger" rounded aria-label="Cancel" />
+            <Tag class="pr-6" icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 102)"
+                    value="Not Connected"></Tag>
           </div>
-          <label for="ingredient1" class="ml-2">Connected</label>
         </div>
         <div class="flex justify-content-center">
           <form v-on:submit.prevent>
@@ -24,50 +25,59 @@
                 <i class="pi pi-unlock"></i>
               </span>
               <InputText v-model="roomPassword" placeholder="Password" />
-              <Button @click="createRoom()">Create Room</button>
+              <Button @click="createRoom()">Create Room</Button>
             </div>
           </form>
         </div>
       </div>
-      <div class="flex flex-row flex-wrap col">
-        <TabView>
-          <TabPanel header="Rooms">
-            <div class="flex flex-column flex-wrap col-4 w-full" style="height: 70vh;">
-              <div v-for="Room in Rooms" :key="Room.id" class="p-2">
-                <div class="flex flex-row" v-bind:class="[Room.id == lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
-                  <div class="flex flex-row p-2 m-2">
-                    <div class="flex flex-row px-4 mx-4 cursor-pointer" @click="selectRoom(Room)">
-                      {{ Room.name }}
-                    </div>
-                    <div class="flex flex-row px-2 mx-2">
-                      <Button class="px-1 mx-1" label="Join" severity="success" raised v-if="!InRoom(Room)" @click="joinRoom(Room)" />
-                      <Button class="px-1 mx-1" label="Leave" severity="warning" raised v-if="InRoom(Room)" @click="leaveRoom(Room)" />
-                      <Button class="px-1 mx-1" label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabPanel>
-          <TabPanel header="Private Message">
-            <div class="flex flex-column flex-wrap col-4 w-full"  style="height: 70vh;">
-              <div v-for="Room in Private" :key="Room.id" class="p-2">
-                <div class="flex flex-row" v-bind:class="[Room.id == lastPrivate.id  ? 'box-shadow' : 'box-shadow-dark']">
-                  <div class="flex flex-row p-2 m-2">
-                    <div class="flex flex-row px-4 mx-4 cursor-pointer" @click="selectPrivate(Room)">
+
+      <!-- Colonnes des salles et du chat -->
+      <div class="flex border-round align-items-start justify-content-start pl-8 pr-8 m-4">
+        <!-- Colonne des salles (1/4 de la largeur) -->
+        <div class="flex flex-col w-4">
+          <TabView class= "w-full">
+
+            <TabPanel header="Rooms" >
+              <div id="roomContainer" class="scroll" style="height: 69vh;">
+              <div v-for="Room in Rooms" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
+                <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.id == lastRoom.id ? 'box-shadow' : '']" @click="selectRoom(Room)">
+                  <div class="flex items-center" style="max-width: 53%;">
+                    <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
                       {{ Room.name }}
                     </div>
                   </div>
+                  <div class="flex items-center space-x-2 ml-auto mr-2"> <!-- Ajout de la classe mr-2 -->
+                    <Button class="text-sm ml-3" label="Join" severity="success" raised v-if="!InRoom(Room)" @click="joinRoom(Room)" />
+                    <Button class="text-sm ml-3" label="Leave" severity="warning" raised v-if="InRoom(Room)" @click="leaveRoom(Room)" />
+                    <Button class="text-sm ml-3" label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
+                  </div>
+                </div>
+              </div>
+              </div>
+            </TabPanel>
+
+            <TabPanel header="Private Message">
+              <div id="roomContainer" class="scroll" style="height: 69vh;">
+                <div v-for="Room in Private" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4">
+                  <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" v-bind:class="[Room.id == lastPrivate.id ? 'box-shadow' : 'box-shadow-dark']"  @click="selectPrivate(Room)">
+                    <div class="flex item-center" style="max-width: 50%;">
+                      <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
+                        {{ Room.name }}
+                      </div>
+                    </div>
                 </div>
               </div>
             </div>
-          </TabPanel>
-        </TabView>
-        <div class="flex flex-row flex-wrap col-8" style="height: 70vh;">
-          <div class="flex flex-column col" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
+            </TabPanel>
+          </TabView>
+        </div>
+            
+        <!-- Colonne du chat (3/4 de la largeur) -->
+        <div class="flex flex-col w-9">
+          <div class="flex flex-column col mt-6 myBackground2" style="height: 70vh" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
             <div v-for="Room in Rooms" :key="Room.id">
               <div v-if="Room.name == lastRoom.name">
-                <div id="messageContainer" class="scroll">
+                <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
                   <div v-for="msg in Messages" :key="msg.id">
                     <div class="flex">
                       <ChatBubble :message="msg" :owner="msg.userId == User.id" />
@@ -83,7 +93,7 @@
                     <i class="pi pi-comment"></i>
                   </span>
                   <InputText v-model="text" placeholder="Message" />
-                  <Button @click="onSubmit()">Submit</button>
+                  <Button @click="onSubmit()">Submit</Button>
                 </div>
               </form>
             </div>
@@ -92,7 +102,13 @@
       </div>
     </div>
   </div>
+</div>
 </template>
+            
+            
+            
+
+
 
 <script lang="ts">
 import socket from "@/utils/socket";
@@ -347,9 +363,57 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style scoped>
 body {
   color: white;
+}
+
+/* #messageContainer {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url(@/assets/neonPongBackground.jpg);
+} */
+.myBackground1 {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-color: rgba(0, 0, 0, 0.39);
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
+  /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
+  /* background-image: url(@/assets/neonPongBackground.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/010/407/104/large_2x/glowing-colourful-dots-circle-abstract-neon-lights-background-for-your-design-vector.jpg); */
+  /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
+}
+
+.myBackground2 {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-color: rgba(0, 0, 0, 0.39);
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/013/684/180/non_2x/set-of-glowing-neon-color-circles-round-smoke-shape-with-wavy-dynamic-lines-isolated-on-black-background-technology-concept-vector.jpg); */
+  /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
+  /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
+  /* background-image: url(@/assets/neonPongBackground.jpg); */
+
+}
+
+.myBackground3 {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-color: #000;
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
+  /* background-image: url(https://static.vecteezy.com/system/resources/previews/013/684/180/non_2x/set-of-glowing-neon-color-circles-round-smoke-shape-with-wavy-dynamic-lines-isolated-on-black-background-technology-concept-vector.jpg); */
+  /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
+  /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
+  background-image: url(@/assets/neonPongBackground.jpg);
+
 }
 
 .scroll {
@@ -364,7 +428,7 @@ body {
 }
 
 .scroll::-webkit-scrollbar-track {
-  background-color: #e4e4e434;
+  background-color: #e4e4e43f;
   border-radius: 100px;
 
 }
