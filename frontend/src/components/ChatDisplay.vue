@@ -121,9 +121,11 @@ import ChatBubble from "@/components/ChatBubble.vue"
 
 export default defineComponent({
   name: "ChatDisplay",
+
   components: {
     ChatBubble,
   },
+
   data() {
     return {
       toast: useToast(),
@@ -135,6 +137,7 @@ export default defineComponent({
       isPrivate: false as boolean,
    };
   },
+
   computed: {
     connected () {
       if (socket.connected)
@@ -147,12 +150,15 @@ export default defineComponent({
           life: 3000 });
       return socket.connected as boolean;
     },
+
     lastRoom() {
       return store.state.lastRoom as Room;
     },
+
     lastPrivate() {
       return store.state.lastPrivate as Room;
     },
+
     lastMessage () { // TODO
       if (store.state.lastMessage.roomId !== store.state.lastRoom.id) 
       {
@@ -167,6 +173,7 @@ export default defineComponent({
       }
       return store.state.lastMessage as Message;
     },
+
     Rooms () {
       const obj = [] as { isIn: boolean; room: Room; }[];
       for (let i = 0; i < store.state.rooms.length; i++) {
@@ -180,12 +187,15 @@ export default defineComponent({
     Messages () {
       return store.state.messages as Message[];
     },
+
     User () {
       return store.state.user as User;
     },
+
     Private () {
       return store.state.private as Room[];
     },
+
     Update() {
       if (store.state.updateChat == true) {
         console.log("store.state.updateChat is true");
@@ -194,20 +204,24 @@ export default defineComponent({
       return store.state.updateChat as boolean;
     }
   },
+
   created() {
     console.log("ChatDisplay created");
     this.getRooms();
     this.getPrivate();
   },
+
   updated() {
     const objDiv = document.getElementById("messageContainer");
     if (objDiv)
       objDiv.scrollTop = objDiv.scrollHeight;
   },
+
   methods: {
     InRoom (room: Room) {
       return room.users.find(user => user.id === store.state.user.id) ? true : false;
     },
+
     onSubmit() {
       if (!this.lastRoom || !this.lastRoom.name || !this.text || this.text === "")
         return ;
@@ -223,8 +237,8 @@ export default defineComponent({
       socket.emit("cliMessage", message);
       this.text = "";
     },
+
     async getPrivate() {
-      
       await axios.get(`api/room/private/${store.state.user.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -234,8 +248,8 @@ export default defineComponent({
         })
         .catch((error: AxiosError) => { throw error; });
     },
+
     async getRooms() {
-      
       await axios.get("api/room/public", {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -245,6 +259,7 @@ export default defineComponent({
         })
         .catch((error: AxiosError) => { throw error; });
     },
+
     async getMessages(room: Room) {
       
       await axios.get(`api/chat/room/${room.id}`, {
@@ -256,6 +271,7 @@ export default defineComponent({
         })
         .catch((error: AxiosError) => { throw error; });
     },
+
     async createRoom() {
       if (this.roomName == "") {
         this.toast.add({severity: "error", summary: "Invalide Name", detail: "Room must have a valide name", life: 2000});
@@ -276,8 +292,8 @@ export default defineComponent({
         this.roomName = "";
         this.roomPassword = "";
     },
+
     async deleteRoom(room: Room) {
-      
       await axios.delete(`api/room/${room.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -289,11 +305,11 @@ export default defineComponent({
         })
         .catch((error: AxiosError) => { throw error; });
     },
+
     async joinRoom(room: Room) {
       console.log(`joinRoom: ${room}`);
       let pwd = null as string | null;
       if (room.hash) pwd = prompt("Input the room password: ", "pwd");
-      
       await axios.post(`api/room/addUser`, {
         userId: store.state.user.id,
         roomId: room.id,
@@ -316,8 +332,8 @@ export default defineComponent({
       })
       .catch((error: AxiosError) => { throw error; });
     },
+
     async leaveRoom(room: Room) {
-      
       await axios.post(`/api/room/delUser`, {
         userId: store.state.user.id as number,
         roomId: room.id as number,
@@ -339,8 +355,8 @@ export default defineComponent({
         this.getRooms();
       })
       .catch((error: AxiosError) => { throw error; });
-      this.InRoom(room);
     },
+
     selectRoom(value: Room) {
       if (value.users.find(user => user.id === store.state.user.id))
       {
@@ -349,11 +365,13 @@ export default defineComponent({
         this.isPrivate = false;
       }
     },
+
     selectPrivate(value: Room) {
       store.commit("setLastPrivate", value);
       this.getMessages(value);
       this.isPrivate = true;
     },
+
     owner(value: Room): boolean {
       if (!value || typeof value === 'undefined' || !value.ownerId)
         return false;
@@ -368,22 +386,12 @@ body {
   color: white;
 }
 
-/* #messageContainer {
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: url(@/assets/neonPongBackground.jpg);
-} */
 .myBackground1 {
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  border-radius: 25px;
   background-color: rgba(0, 0, 0, 0.39);
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
-  /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
-  /* background-image: url(@/assets/neonPongBackground.jpg); */
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/010/407/104/large_2x/glowing-colourful-dots-circle-abstract-neon-lights-background-for-your-design-vector.jpg); */
-  /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
 }
 
 .myBackground2 {
@@ -391,14 +399,6 @@ body {
   background-position: center;
   background-size: cover;
   background-color: rgba(0, 0, 0, 0.39);
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/013/684/180/non_2x/set-of-glowing-neon-color-circles-round-smoke-shape-with-wavy-dynamic-lines-isolated-on-black-background-technology-concept-vector.jpg); */
-  /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
-  /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
-  /* background-image: url(@/assets/neonPongBackground.jpg); */
-
 }
 
 .myBackground3 {
@@ -406,14 +406,7 @@ body {
   background-position: center;
   background-size: cover;
   background-color: #000;
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/014/456/982/large_2x/brick-wall-background-and-neon-light-vector.jpg); */
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/012/732/670/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-vector.jpg); */
-  /* background-image: url(https://static.vecteezy.com/system/resources/previews/013/684/180/non_2x/set-of-glowing-neon-color-circles-round-smoke-shape-with-wavy-dynamic-lines-isolated-on-black-background-technology-concept-vector.jpg); */
-  /* background-image: url('https://static.vecteezy.com/system/resources/previews/012/732/592/large_2x/rainbow-leopard-seamless-pattern-colorful-neon-background-gradient-wallpaper-free-vector.jpg'); */
-  /* background-image: url(https://img.freepik.com/premium-vector/neon-leopard-pattern-rainbow-colored-spotted-background-vector-animal-print-wallpaper_501173-435.jpg); */
   background-image: url(@/assets/neonPongBackground.jpg);
-
 }
 
 .scroll {
@@ -430,7 +423,6 @@ body {
 .scroll::-webkit-scrollbar-track {
   background-color: #e4e4e43f;
   border-radius: 100px;
-
 }
 
 .scroll::-webkit-scrollbar-thumb {
@@ -459,6 +451,17 @@ body {
       0 0/var(--r) var(--r) space padding-box;
   background: linear-gradient(135deg,#ba00fe,#3d6ced) border-box;
   color: #fff;
+}
+
+.box-shadow {
+  border: 0.2rem solid #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0 .2rem #fff,
+              0 0 .2rem #fff,
+              0 0 1.2rem #bc13fe,
+              0 0 0.8rem #bc13fe,
+              0 0 1.2rem #bc13fe,
+              inset 0 0 1.2rem #bc13fe;
 }
 
 .left {

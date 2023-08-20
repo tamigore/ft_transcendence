@@ -55,9 +55,7 @@
 
     <AccordionTab header="Profile">
       <div class="surface-section border-round box-shadow" style="padding: 5em;">
-
         <div class="grid-container">
-
           <div class="p-card p-component card" style="background-color:#121212; width: 29em;">
             <div class="p-card-body">
               <div @click="openPopup" class="selected-image" :class="{ active: showPopup }"
@@ -67,11 +65,8 @@
             </div>
           </div>
 
-
           <div class="profile-details">
-
             <ul class="list-none p-0 m-0">
-
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
                 <div class="font-medium text-3xl text-900 w-6 md:w-2 mr-8">My profile
                 </div>
@@ -134,16 +129,13 @@
                   </button>
                 </div>
               </li>
-
             </ul>
-
           </div>
         </div>
       </div>
     </AccordionTab>
 
     <AccordionTab header="Friends">
-
       <div class="surface-section border-round box-shadow " style="padding: 5em">
         <div class="p-inputgroup flex-1 mb-4">
           <span class="p-inputgroup-addon">
@@ -188,7 +180,6 @@
               </span>
             </div>
 
-
             <div class="w-6 md:w-2 flex justify-content-end space-x-2">
               <Button icon="pi pi-comment" v-show="showDeleteIcon[index + 1]" rounded class="mr-3" aria-label="Delete"
                 style="background-color: rgb(93, 104, 225)" @click="privateMessage(index, friend)"></Button>
@@ -200,14 +191,11 @@
                 style="background-color: rgb(247, 82, 118)" @click="removeFriend(index, friend)"></Button>
             </div>
           </li>
-
         </ul>
-
       </div>
     </AccordionTab>
 
     <AccordionTab header="Bloqued">
-
       <div class="surface-section border-round box-shadow " style="padding: 5em">
         <div class="p-inputgroup flex-1 mb-4">
           <span class="p-inputgroup-addon">
@@ -221,7 +209,6 @@
         <ul class="list-none p-0 m-0">
 
           <!-- New list tiles -->
-
           <li class="h-32 flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap"
             v-for="(blocked, index) in userBlocked" :key="index" @mouseover="showDeleteIcon[index + 1] = true"
             @mouseout="showDeleteIcon[index + 1] = false">
@@ -258,20 +245,14 @@
                 style="background-color: rgb(247, 82, 118)" @click="removeBlock(index, blocked)"></Button>
             </div>
           </li>
-
         </ul>
-
       </div>
     </AccordionTab>
 
     <AccordionTab header="Leaderboard">
-
       <div class="surface-section border-round box-shadow" style="padding: 5em;">
-
         <div class="surface-section">
           <ul class="list-none p-0 m-0">
-
-
             <li class="rankTab flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap opacity-60 mb-3"
               style="background: linear-gradient(to top right, #bd34e7, #0052b0);">
               <div class="text-900 w-6 md:w-2 text-2xl font-medium">Rank</div>
@@ -325,8 +306,6 @@
                 <span>win nbr</span>
               </div>
             </li>
-
-
           </ul>
         </div>
       </div>
@@ -334,13 +313,10 @@
 
     <AccordionTab header="History">
       <div class="surface-section border-round box-shadow" style="padding: 5em;">
-
         <div class="surface-section">
           <ul class="list-none p-0 m-0">
 
             <!-- leaderBoard tile -->
-
-
             <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 opacity-60 mb-4"
               style="background: linear-gradient(to top right, #bd34e7, #0052b0);">
 
@@ -548,15 +524,10 @@
                 200
               </div>
             </li>
-
-
-
-
           </ul>
         </div>
       </div>
     </AccordionTab>
-
   </Accordion>
 </template>
  
@@ -574,30 +545,38 @@ export default defineComponent({
     username() {
       return store.state.user.username;
     },
+
     email() {
       return store.state.user.email;
     },
+
     bio() {
       return store.state.user.bio;
     },
+
     id() {
       return store.state.user.id;
     },
+
     imgId() {
       return store.state.user.img;
     },
+
     selectedImage() {
       return this.getImageById(this.imgId);
     },
+
     TwoFA() {
       return store.state.user.twoFA;
     }
   },
+
   mounted() {
     this.getAllFriends();
     this.getAllBlocked();
     this.getAllUsernames();
   },
+
   data() {
     return {
       ShowTwoFA: false as boolean,
@@ -641,6 +620,7 @@ export default defineComponent({
       userBlocked: [] as User[],
     }
   },
+
   methods:
   {
     open2FA() {
@@ -1262,4 +1242,5 @@ export default defineComponent({
     linear-gradient(to top right, #1e1546, transparent),
     linear-gradient(to left, #00000000, #19032583);
   background-blend-mode: screen;
-}</style>
+}
+</style>
