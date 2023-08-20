@@ -13,7 +13,6 @@ import { UserService } from "src/user/user.service";
 import { ChatService } from "./chat.service";
 import { RoomService } from "src/room/room.service";
 import { User, Room } from "@prisma/client";
-// import * as argon2 from "argon2/argon2";
 // import { WsGuard } from "src/common/guards/ws.guard";
 
 @WebSocketGateway(8082)
@@ -72,7 +71,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = await this.roomService.findById(payload.room.id);
     if (!room) throw new Error("onJoinRoom no room found");
     this.server.in(user.chatSocket).socketsJoin(room.name);
-    this.server.to(payload.room.name).emit("update");
+    this.server.emit("update");
   }
 
   // @UseGuards(WsGuard)
@@ -90,6 +89,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = await this.roomService.findById(payload.room.id);
     if (!room) throw new Error("onLeaveRoom no room found");
     this.server.in(user.chatSocket).socketsLeave(room.name);
-    this.server.to(payload.room.name).emit("update");
+    this.server.emit("update");
   }
 }

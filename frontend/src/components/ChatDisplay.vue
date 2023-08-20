@@ -38,17 +38,19 @@
           <TabView class= "w-full">
             <TabPanel header="Rooms" >
               <div id="roomContainer" class="scroll" style="height: 69vh;">
-              <div v-for="Room in Rooms" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
-                <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.id == lastRoom.id ? 'box-shadow' : '']" @click="selectRoom(Room)">
+              <div v-for="Room in Rooms" :key="Room.room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
+                <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.room.id == lastRoom.id ? 'box-shadow' : '']" @click="selectRoom(Room.room)">
                   <div class="flex items-center" style="max-width: 53%;">
                     <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
-                      {{ Room.name }}
+                      {{ Room.room.name }}
                     </div>
                   </div>
                   <div class="flex items-center space-x-2 ml-auto mr-2"> <!-- Ajout de la classe mr-2 -->
-                    <Button class="text-sm ml-3" label="Join" severity="success" raised v-if="!InRoom(Room)" @click="joinRoom(Room)" />
-                    <Button class="text-sm ml-3" label="Leave" severity="warning" raised v-if="InRoom(Room)" @click="leaveRoom(Room)" />
-                    <Button class="text-sm ml-3" label="Delete" severity="danger" raised v-if="owner(Room)" @click="deleteRoom(Room)" />
+                    <Button class="text-sm ml-3" label="Join" severity="success" raised v-if="!Room.isIn" @click="joinRoom(Room.room)" />
+                    <Button class="text-sm ml-3" label="Leave" severity="warning" raised v-else @click="leaveRoom(Room.room)" />
+                    <!-- <Button class="text-sm ml-3" label="Join" severity="success" raised v-if="!InRoom(Room)" @click="joinRoom(Room)" />
+                    <Button class="text-sm ml-3" label="Leave" severity="warning" raised v-if="InRoom(Room)" @click="leaveRoom(Room)" /> -->
+                    <Button class="text-sm ml-3" label="Delete" severity="danger" raised v-if="owner(Room.room)" @click="deleteRoom(Room.room)" />
                   </div>
                 </div>
               </div>
@@ -74,8 +76,8 @@
         <!-- Colonne du chat (3/4 de la largeur) -->
         <div class="flex flex-col w-9">
           <div class="flex flex-column col mt-6 myBackground2" style="height: 70vh" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
-            <div v-for="Room in Rooms" :key="Room.id">
-              <div v-if="Room.name == lastRoom.name">
+            <div v-for="Room in Rooms" :key="Room.room.id">
+              <div v-if="Room.room.name == lastRoom.name">
                 <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
                   <div v-for="msg in Messages" :key="msg.id">
                     <div class="flex">
@@ -139,7 +141,8 @@ export default defineComponent({
 
   computed: {
     connected () {
-      if (socket.connected)
+      const connect = socket.connected;
+      if (connect)
         this.toast.add({severity: 'success', summary: 'Connected',
           detail: `The chat socket is lissening`,
           life: 3000 });
@@ -147,7 +150,7 @@ export default defineComponent({
         this.toast.add({severity: 'error', summary: 'Disconected',
           detail: `The chat socket isn't connected`,
           life: 3000 });
-      return socket.connected as boolean;
+      return connect as boolean;
     },
 
     lastRoom() {
@@ -159,7 +162,8 @@ export default defineComponent({
     },
 
     lastMessage () { // TODO
-      if (store.state.lastMessage.roomId !== store.state.lastRoom.id) 
+      if (store.state.lastMessage.roomId !== store.state.lastRoom.id
+        && store.state.lastMessage.roomId !== store.state.lastPrivate.id) 
       {
         if (store.state.lastMessage.room.private)
           this.toast.add({severity: 'info', summary: 'New message',
@@ -181,7 +185,7 @@ export default defineComponent({
         };
       }
       console.log(obj); 
-      return store.state.rooms as Room[];
+      return obj as { isIn: boolean; room: Room; }[];
     },
 
     Messages () {
@@ -212,9 +216,15 @@ export default defineComponent({
   },
 
   updated() {
+    console.log("Caht Display updated");
     const objDiv = document.getElementById("messageContainer");
     if (objDiv)
       objDiv.scrollTop = objDiv.scrollHeight;
+    if (this.Update) {
+      console.log("WTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+      this.getRooms();
+      store.commit("updateChat", false);
+    }
   },
 
   methods: {

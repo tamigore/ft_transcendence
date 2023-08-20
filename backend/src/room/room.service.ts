@@ -146,6 +146,13 @@ export class RoomService implements OnModuleInit {
     });
   }
 
+  async findByName(name: string): Promise<Room> {
+    this.logger.log(`findByName room: ${name}`);
+    return await this.prisma.room.findUnique({
+      where: { name: name },
+    });
+  }
+
   async findById(id: number): Promise<Room> {
     this.logger.log(`findById room: ${id}`);
     return await this.prisma.room.findUnique({
@@ -180,6 +187,9 @@ export class RoomService implements OnModuleInit {
   async createRoom(room: Room): Promise<Room> {
     this.logger.log("createRoom: " + room);
     if (!room) return null;
+    const findRoom = await this.findByName(room.name);
+    if (typeof findRoom !== "undefined" && findRoom && findRoom.id)
+      return findRoom;
     let password = null;
     if (room.hash) {
       password = await argon2.hash(room.hash);
