@@ -91,7 +91,7 @@ model Room {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  name        String
+  name        String    @unique()
   private     Boolean   @default(false)
   hash        String?
   ownerId     Int?

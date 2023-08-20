@@ -60,7 +60,9 @@
             <div class="p-card-body">
               <div @click="openPopup" class="selected-image" :class="{ active: showPopup }"
                 style="background-color: rgb(37, 37, 37);">
-                <img :src="selectedImage.img" :alt="'Image ' + selectedImage.id" type="pointer" />
+                <div v-if="selectedImage">
+                  <img :src="selectedImage.img" :alt="'Image ' + selectedImage.id" type="pointer" />
+                </div>
               </div>
             </div>
           </div>
@@ -270,7 +272,7 @@
               <div class="align-items-center flex w-8">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId)?.img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
@@ -291,7 +293,7 @@
               <div class="align-items-center flex w-8">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId)?.img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
@@ -315,8 +317,6 @@
       <div class="surface-section border-round box-shadow" style="padding: 5em;">
         <div class="surface-section">
           <ul class="list-none p-0 m-0">
-
-            <!-- leaderBoard tile -->
             <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 opacity-60 mb-4"
               style="background: linear-gradient(to top right, #bd34e7, #0052b0);">
 
@@ -344,7 +344,7 @@
               <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
@@ -371,7 +371,7 @@
                 </div>
                 <div
                   style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
               </div>
@@ -392,7 +392,7 @@
               <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
@@ -419,7 +419,7 @@
                 </div>
                 <div
                   style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
               </div>
@@ -440,7 +440,7 @@
               <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
@@ -467,7 +467,7 @@
                 </div>
                 <div
                   style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
               </div>
@@ -488,7 +488,7 @@
               <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
@@ -515,7 +515,7 @@
                 </div>
                 <div
                   style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(username.img).img" :alt="'Avatar'"
+                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
               </div>

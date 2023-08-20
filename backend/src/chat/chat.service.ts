@@ -81,23 +81,5 @@ export class ChatService {
     });
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;
-    // return await this.prisma
-    //   .$transaction(async (prisma) => {
-    //     const messages = await prisma.message
-    //       .findMany({
-    //         where: {
-    //           roomId: roomId,
-    //         },
-    //       })
-    //       .catch((error) => {
-    //         throw new Error(error);
-    //       });
-    //     if (typeof room !== "undefined" && room) {
-    //       return room;
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     throw new Error(`getPrivateRoom failure: ${error}`);
-    //   });
   }
 }

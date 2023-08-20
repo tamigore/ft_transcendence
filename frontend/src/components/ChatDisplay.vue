@@ -36,7 +36,6 @@
         <!-- Colonne des salles (1/4 de la largeur) -->
         <div class="flex flex-col w-4">
           <TabView class= "w-full">
-
             <TabPanel header="Rooms" >
               <div id="roomContainer" class="scroll" style="height: 69vh;">
               <div v-for="Room in Rooms" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
@@ -184,6 +183,7 @@ export default defineComponent({
       console.log(obj); 
       return store.state.rooms as Room[];
     },
+
     Messages () {
       return store.state.messages as Message[];
     },
@@ -390,7 +390,7 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  border-radius: 25px;
+  border-radius: 1rem;
   background-color: rgba(0, 0, 0, 0.39);
 }
 
@@ -398,6 +398,7 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  border-radius: 1rem;
   background-color: rgba(0, 0, 0, 0.39);
 }
 
