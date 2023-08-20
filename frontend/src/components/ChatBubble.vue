@@ -248,8 +248,8 @@ export default defineComponent({
   --body-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   --msger-bg: #000000;
   --border: 2px solid #ddd;
-  --left-msg-bg: #c2246ebb;
-  --right-msg-bg: #b69424c7;
+  --left-msg-bg: #cb5aed8b;
+  --right-msg-bg: #4c6fed96;
 }
 
 html {
