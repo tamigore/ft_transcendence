@@ -121,67 +121,91 @@ export class RoomService implements OnModuleInit {
 
   async findAllIncludes(): Promise<Room[]> {
     this.logger.log("findAll Include rooms");
-    return await this.prisma.room.findMany({
-      include: {
-        owner: true,
-        admins: true,
-        users: true,
-        ban: true,
-        messages: true,
-      },
-    });
+    return await this.prisma.room
+      .findMany({
+        include: {
+          owner: true,
+          admins: true,
+          users: true,
+          ban: true,
+          messages: true,
+        },
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
   async findAllPublic(): Promise<Room[]> {
     this.logger.log("findAllPublic rooms");
-    return await this.prisma.room.findMany({
-      where: { private: false },
-      include: {
-        owner: true,
-        admins: true,
-        users: true,
-        ban: true,
-        messages: true,
-      },
-    });
+    return await this.prisma.room
+      .findMany({
+        where: { private: false },
+        include: {
+          owner: true,
+          admins: true,
+          users: true,
+          ban: true,
+          messages: true,
+        },
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
   async findByName(name: string): Promise<Room> {
     this.logger.log(`findByName room: ${name}`);
-    return await this.prisma.room.findUnique({
-      where: { name: name },
-    });
+    return await this.prisma.room
+      .findUnique({
+        where: { name: name },
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
   async findById(id: number): Promise<Room> {
     this.logger.log(`findById room: ${id}`);
-    return await this.prisma.room.findUnique({
-      where: { id: id },
-    });
+    return await this.prisma.room
+      .findUnique({
+        where: { id: id },
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
   async findByIdWithAll(id: number): Promise<Room> {
     this.logger.log(`findById room: ${id}`);
-    return await this.prisma.room.findUnique({
-      where: { id: id },
-      include: {
-        owner: true,
-        admins: true,
-        users: true,
-        ban: true,
-        messages: true,
-      },
-    });
+    return await this.prisma.room
+      .findUnique({
+        where: { id: id },
+        include: {
+          owner: true,
+          admins: true,
+          users: true,
+          ban: true,
+          messages: true,
+        },
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
   async findByIdWithUser(id: number): Promise<RoomTypes.RoomWithUsers> {
     this.logger.log(`findById room: ${id}`);
-    return await this.prisma.room.findUnique({
-      where: { id: id },
-      include: {
-        users: true,
-      },
-    });
+    return await this.prisma.room
+      .findUnique({
+        where: { id: id },
+        include: {
+          users: true,
+        },
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
   async createRoom(room: Room): Promise<Room> {

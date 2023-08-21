@@ -48,8 +48,6 @@
                   <div class="flex items-center space-x-2 ml-auto mr-2"> <!-- Ajout de la classe mr-2 -->
                     <Button class="text-sm ml-3" label="Join" severity="success" raised v-if="!Room.isIn" @click="joinRoom(Room.room)" />
                     <Button class="text-sm ml-3" label="Leave" severity="warning" raised v-else @click="leaveRoom(Room.room)" />
-                    <!-- <Button class="text-sm ml-3" label="Join" severity="success" raised v-if="!InRoom(Room)" @click="joinRoom(Room)" />
-                    <Button class="text-sm ml-3" label="Leave" severity="warning" raised v-if="InRoom(Room)" @click="leaveRoom(Room)" /> -->
                     <Button class="text-sm ml-3" label="Delete" severity="danger" raised v-if="owner(Room.room)" @click="deleteRoom(Room.room)" />
                   </div>
                 </div>
@@ -75,28 +73,56 @@
             
         <!-- Colonne du chat (3/4 de la largeur) -->
         <div class="flex flex-col w-9">
-          <div class="flex flex-column col mt-6 myBackground2" style="height: 70vh" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
-            <div v-for="Room in Rooms" :key="Room.room.id">
-              <div v-if="Room.room.name == lastRoom.name">
-                <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
-                  <div v-for="msg in Messages" :key="msg.id">
-                    <div class="flex">
-                      <ChatBubble :message="msg" :owner="msg.userId == User.id" />
+          <div v-if="!isPrivate" class="flex flex-column col">
+            <div class="flex flex-column col mt-6 myBackground2" style="height: 70vh" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
+              <div v-for="Room in Rooms" :key="Room.room.id">
+                <div v-if="Room.room.name == lastRoom.name">
+                  <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
+                    <div v-for="msg in Messages" :key="msg.id">
+                      <div class="flex">
+                        <ChatBubble :message="msg" :owner="msg.userId == User.id" />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <div class="flex flex-column-reverse col">
+                <form v-on:submit.prevent>
+                  <div class="p-inputgroup flex-1">
+                    <span class="p-inputgroup-addon">
+                      <i class="pi pi-comment"></i>
+                    </span>
+                    <InputText v-model="text" placeholder="Message" />
+                    <Button @click="onSubmit()">Submit</Button>
+                  </div>
+                </form>
+              </div>
             </div>
-            <div class="flex flex-column-reverse col">
-              <form v-on:submit.prevent>
-                <div class="p-inputgroup flex-1">
-                  <span class="p-inputgroup-addon">
-                    <i class="pi pi-comment"></i>
-                  </span>
-                  <InputText v-model="text" placeholder="Message" />
-                  <Button @click="onSubmit()">Submit</Button>
+          </div>
+          <div v-else class="flex flex-column col">
+            <div v-for="Room in Private" :key="Room.id">
+              <div class="flex flex-column col mt-6 myBackground2" style="height: 70vh" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
+                <div v-if="Room.name == lastPrivate.name">
+                  <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
+                    <div v-for="msg in Messages" :key="msg.id">
+                      <div class="flex">
+                        <ChatBubble :message="msg" :owner="msg.userId == User.id" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </form>
+                <div class="flex flex-column-reverse col">
+                  <form v-on:submit.prevent>
+                    <div class="p-inputgroup flex-1">
+                      <span class="p-inputgroup-addon">
+                        <i class="pi pi-comment"></i>
+                      </span>
+                      <InputText v-model="text" placeholder="Message" />
+                      <Button @click="onSubmitPrivate()">Submit</Button>
+                    </div>
+                  </form>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -162,19 +188,20 @@ export default defineComponent({
     },
 
     lastMessage () { // TODO
-      if (store.state.lastMessage.roomId !== store.state.lastRoom.id
-        && store.state.lastMessage.roomId !== store.state.lastPrivate.id) 
+      const message = store.state.lastMessage;
+      if (message.roomId !== store.state.lastRoom.id
+        && message.roomId !== store.state.lastPrivate.id) 
       {
-        if (store.state.lastMessage.room.private)
+        if (message.room.private)
           this.toast.add({severity: 'info', summary: 'New message',
-            detail: `From user ${store.state.lastMessage.user.username}`,
+            detail: `From user ${message.user.username}`,
             life: 3000 });
         else
           this.toast.add({severity: 'info', summary: 'New message',
-            detail: `In room ${store.state.lastMessage.room.name}`,
+            detail: `In room ${message.room.name}`,
             life: 3000 });
       }
-      return store.state.lastMessage as Message;
+      return message as Message;
     },
 
     Rooms () {
@@ -199,14 +226,6 @@ export default defineComponent({
     Private () {
       return store.state.private as Room[];
     },
-
-    Update() {
-      if (store.state.updateChat == true) {
-        console.log("store.state.updateChat is true");
-        this.getRooms();
-      }
-      return store.state.updateChat as boolean;
-    }
   },
 
   created() {
@@ -220,15 +239,12 @@ export default defineComponent({
     const objDiv = document.getElementById("messageContainer");
     if (objDiv)
       objDiv.scrollTop = objDiv.scrollHeight;
-    if (this.Update) {
-      console.log("WTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-      this.getRooms();
-      store.commit("updateChat", false);
-    }
   },
 
   methods: {
     InRoom (room: Room) {
+      if (!room || !room.users)
+        return false;
       return room.users.find(user => user.id === store.state.user.id) ? true : false;
     },
 
@@ -241,6 +257,22 @@ export default defineComponent({
         text: this.text,
         roomId: this.lastRoom.id,
         room: this.lastRoom,
+        userId: store.state.user.id,
+        user: store.state.user,
+      } as Message;
+      socket.emit("cliMessage", message);
+      this.text = "";
+    },
+
+    onSubmitPrivate() {
+      if (!this.lastPrivate || !this.lastPrivate.name || !this.text || this.text === "")
+        return ;
+      const message: Message = {
+        id: 0,
+        created_at: new Date(),
+        text: this.text,
+        roomId: this.lastPrivate.id,
+        room: this.lastPrivate,
         userId: store.state.user.id,
         user: store.state.user,
       } as Message;
@@ -271,7 +303,6 @@ export default defineComponent({
     },
 
     async getMessages(room: Room) {
-      
       await axios.get(`api/chat/room/${room.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -292,11 +323,13 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
+          if (!this.InRoom(response.data))
+            alert("alert the room already exists");
           console.log(`createRoom success: ${response.data}`);
-          socket.emit("join_room", { user: store.state.user, room:  response.data });
           store.commit("setLastRoom", response.data);
-          this.getRooms();
+          socket.emit("join_room", { user: store.state.user, room:  response.data });
           store.commit("setMessages", []);
+          this.getRooms();
         })
         .catch((error: AxiosError) => { throw error; });
         this.roomName = "";
@@ -337,8 +370,8 @@ export default defineComponent({
         };
         socket.emit("join_room", payload);
         store.commit("setLastRoom", room);
-        this.getMessages(room);
         this.getRooms();
+        this.getMessages(room);
       })
       .catch((error: AxiosError) => { throw error; });
     },
