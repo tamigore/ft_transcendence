@@ -3,14 +3,18 @@ import { ConfigModule } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import * as cookieParser from "cookie-parser";
+import axios, { AxiosResponse, AxiosError } from 'axios';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  ConfigModule.forRoot({
+    envFilePath: "../../.env",
+  });
   // Protecting endpoints from receiving incorrect data
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: "http://localhost:8080", // add ip address to access the server
+    origin: ["http://localhost:8080", "http://78.198.202.4:8080"],
     credentials: true,
     // methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     // allowedHeaders: [
@@ -20,10 +24,6 @@ async function bootstrap() {
     //   "Origin",
     //   "x-auth-token",
     // ],
-  });
-
-  ConfigModule.forRoot({
-    envFilePath: "../../.env",
   });
 
   // Use Cookie

@@ -55,15 +55,17 @@ export class AuthController {
     @Ip() ip: ParameterDecorator,
   ) {
     console.log("callback ?? ip: " + ip);
+    console.log();
     const token = await this.authService.login(req.user);
     if (!token) {
-      res.redirect(`http://localhost:8080`);
+      console.log("NOTOKEN");
+      res.redirect('http://' + req.headers.host.split(":")[0] + `:8080`);
     } else {
       res
         .cookie("userId", token.userId)
         .cookie("access_token", token.access_token)
         .cookie("refresh_token", token.refresh_token)
-        .redirect(`http://localhost:8080`);
+        .redirect('http://' + req.headers.host.split(":")[0] + `:8080`);
     }
     return token;
   }

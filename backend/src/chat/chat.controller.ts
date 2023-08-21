@@ -9,7 +9,7 @@ import {
 import { ChatService } from "./chat.service";
 import { Message } from "@prisma/client";
 import { AtGuard } from "src/common/guards";
-import { GetCurrentUserId } from "src/common/decorators";
+import { GetCurrentUserId, Public } from "src/common/decorators";
 
 @Controller("chat")
 export class ChatController {
@@ -26,8 +26,9 @@ export class ChatController {
     return await this.chatService.getRoomMessages(id, roomId);
   }
 
+  @Public()
   @Get("user/:id")
-  @UseGuards(AtGuard)
+  // @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   async getUserMessages(@Param("id") param: string): Promise<Message[]> {
     const userId: number = parseInt(param);

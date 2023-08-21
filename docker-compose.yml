@@ -61,6 +61,8 @@ services:
       - SECRET
       - API_UID
       - API_SECRET
+      - IP_PUBLIC
+      - DOMAIN
     ports:
       - '3000:3000'
       - '8081:8081'

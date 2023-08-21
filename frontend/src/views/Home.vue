@@ -115,7 +115,11 @@ export default defineComponent ({
       this.signupTriggers = !this.signupTriggers
     },
     async SigninIntra() {
-      window.location.href = "http://localhost:3000/api/auth/login42";
+      console.log(window.location.href.split(":")[0]);
+      if (window.location.href.split(":")[0] == "http")
+        window.location.href = window.location.href.split(":")[1] + ":3000/api/auth/login42";
+      else
+        window.location.href = window.location.href.split(":")[0] + ":3000/api/auth/login42";
     },
   }
 })
