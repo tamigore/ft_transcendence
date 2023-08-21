@@ -57,6 +57,7 @@
     "sass": "^1.65.1",
     "sass-loader": "^13.3.2",
     "typescript": "~5.1.6",
-    "vue-cli-plugin-vuetify": "~2.5.8"
+    "vue-cli-plugin-vuetify": "~2.5.8",
+    "vue-drawing-canvas": "^1.0.14"
   }
 }
