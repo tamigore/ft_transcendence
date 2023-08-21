@@ -66,7 +66,7 @@ export class TfaService {
 
   async authenticateApi(id: number, tfa_code: string): Promise<boolean> {
     console.log(this.attempts);
-    let message = "";
+    // let message = "";
     const attempt = this.checkAttempt(id);
     console.log(attempt);
     // if (attempt === LIMIT_ATTEMPTS_ERROR)

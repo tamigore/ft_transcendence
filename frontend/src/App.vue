@@ -1,4 +1,5 @@
 <template>
+  <Toast />
   <div class="myBackground h-screen w-screen">
     <nav v-if="isLogged">
       <div id="menuU" class="user-menu">

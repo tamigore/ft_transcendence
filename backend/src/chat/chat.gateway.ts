@@ -50,8 +50,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.debug("body: ", body, "ConnectedSocket: ", client.id);
     const user = await this.userService.findById(body.user.id);
     if (!user) throw new Error("onMessage no user found");
+    if (user.chatSocket != client.id)
+      this.userService.updateChatSocket(user.id, client.id);
     const room = await this.roomService.findById(body.room.id);
     if (!room) throw new Error("onMessage no room found");
+    // client.join(body.room.name);
+    // this.server.in(user.chatSocket).socketsJoin(body.room.name);
     this.chatService.createMessage(body);
     this.server.to(body.room.name).emit("servMessage", body);
   }

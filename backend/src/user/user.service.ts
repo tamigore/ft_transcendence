@@ -107,10 +107,14 @@ export class UserService {
       });
   }
 
-  async update(userId: number, updateUserDto: any) {
+  async update(userId: number, updateUserDto: any): Promise<User> {
     this.logger.log(
       `user id : ${userId} wants to update user: ${updateUserDto}`,
     );
+    const find = await this.prisma.user.findUnique({
+      where: { username: updateUserDto.username },
+    });
+    if (typeof find !== "undefined" && find && find.username) return find; // not updated cause user is already in use
     await this.prisma.user
       .update({
         where: { id: userId },
@@ -124,6 +128,7 @@ export class UserService {
       })
       .then((user) => {
         this.logger.log("User update success: ", user);
+        return user;
       })
       .catch((error) => {
         throw new Error(error);

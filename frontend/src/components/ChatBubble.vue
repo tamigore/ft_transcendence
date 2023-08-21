@@ -5,7 +5,7 @@
         <LoadAvatar class="msg-img" @click="display" v-if="message.user" :user="message.user"></LoadAvatar>
       <div class="msg-bubble">
         <div class="msg-info">
-          <div class="msg-info-name">{{ message.user.username }}</div>
+          <div class="msg-info-name">{{ message.user?.username }}</div>
           <div class="msg-info-time">{{ parsDate(new Date(message.created_at ? message.created_at : 0)) }}</div>
         </div>
 
