@@ -33,14 +33,14 @@ export class ChatService {
       });
   }
 
-  async getMessages(): Promise<Message[]> {
+  async getMessages() {
     this.logger.log("getMessages");
     const messages = await this.prisma.message.findMany({});
     if (!messages) throw new ForbiddenException("No messages found");
     return messages;
   }
 
-  async getUserMessages(userId: number): Promise<Message[]> {
+  async getUserMessages(userId: number) {
     this.logger.log("getUserMessages");
     const messages = await this.prisma.message.findMany({
       where: {
@@ -51,7 +51,7 @@ export class ChatService {
     return messages;
   }
 
-  async getRoomMessages(userId: number, roomId: number): Promise<Message[]> {
+  async getRoomMessages(userId: number, roomId: number) {
     this.logger.log("getChannelMessages");
     const messages = await this.prisma.message.findMany({
       where: {

@@ -20,11 +20,11 @@
               <span class="p-inputgroup-addon">
                 <i class="pi pi-box"> Room </i>
               </span>
-              <InputText v-model="roomName" placeholder="Name" />
+              <InputText v-model="roomName" placeholder="Name" @keyup.enter="createRoom()" />
               <span class="p-inputgroup-addon">
                 <i class="pi pi-unlock"></i>
               </span>
-              <InputText v-model="roomPassword" placeholder="Password" />
+              <InputText v-model="roomPassword" placeholder="Password" @keyup.enter="createRoom()" />
               <Button @click="createRoom()">Create Room</Button>
             </div>
           </form>
@@ -92,7 +92,7 @@
                     <span class="p-inputgroup-addon">
                       <i class="pi pi-comment"></i>
                     </span>
-                    <InputText v-model="text" placeholder="Message" />
+                    <InputText v-model="text" placeholder="Message" @keyup.enter="onSubmit()" />
                     <Button @click="onSubmit()">Submit</Button>
                   </div>
                 </form>
@@ -117,7 +117,7 @@
                       <span class="p-inputgroup-addon">
                         <i class="pi pi-comment"></i>
                       </span>
-                      <InputText v-model="text" placeholder="Message" />
+                      <InputText v-model="text" placeholder="Message" @keyup.enter="onSubmitPrivate()"/>
                       <Button @click="onSubmitPrivate()">Submit</Button>
                     </div>
                   </form>
@@ -168,14 +168,14 @@ export default defineComponent({
   computed: {
     connected () {
       const connect = socket.connected;
-      if (connect)
-        this.toast.add({severity: 'success', summary: 'Connected',
-          detail: `The chat socket is lissening`,
-          life: 3000 });
-      else
-        this.toast.add({severity: 'error', summary: 'Disconected',
-          detail: `The chat socket isn't connected`,
-          life: 3000 });
+      // if (connect)
+      //   this.toast.add({severity: 'success', summary: 'Connected',
+      //     detail: `The chat socket is lissening`,
+      //     life: 3000 });
+      // else
+      //   this.toast.add({severity: 'error', summary: 'Disconected',
+      //     detail: `The chat socket isn't connected`,
+      //     life: 3000 });
       return connect as boolean;
     },
 
@@ -243,6 +243,7 @@ export default defineComponent({
 
   methods: {
     InRoom (room: Room) {
+      console.log(room);
       if (!room || !room.users)
         return false;
       return room.users.find(user => user.id === store.state.user.id) ? true : false;
@@ -323,8 +324,10 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          if (!this.InRoom(response.data))
-            alert("alert the room already exists");
+          if (!this.InRoom(response.data)) {
+            this.toast.add({severity: "warn", summary: "Room name invalid", detail: "Room must have a unique name", life: 2000});
+            return ;
+          }
           console.log(`createRoom success: ${response.data}`);
           store.commit("setLastRoom", response.data);
           socket.emit("join_room", { user: store.state.user, room:  response.data });

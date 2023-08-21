@@ -7,10 +7,10 @@
 
     <div>
       <label for="email1" class="block text-900 font-medium mb-2">Email</label>
-      <InputText v-model="email" id="email1" type="text" class="w-full mb-3" />
+      <InputText v-model="email" id="email1" type="text" class="w-full mb-3" @keyup.enter="SignInPost()"/>
 
       <label for="password1" class="block text-900 font-medium mb-2">Password</label>
-      <InputText v-model="password" id="password1" type="password" class="w-full mb-3" />
+      <InputText v-model="password" id="password1" type="password" class="w-full mb-3" @keyup.enter="SignInPost()" />
 
       <div class="flex align-items-center justify-content-between mb-6">
         <div class="flex align-items-center text-indigo-300">

@@ -19,7 +19,7 @@
       <div>
         <div class="p-inputgroup flex-1">
           <span class="p-inputgroup-addon"><i class="pi pi-download"></i></span>
-          <InputText placeholder="Enter the URL of your image" v-model="url" id="url" />
+          <InputText placeholder="Enter the URL of your image" v-model="url" id="url" @keyup.enter="loadURLImage()" />
           <Button @click="loadURLImage">download</Button>
         </div>
       </div>
@@ -44,7 +44,7 @@
       <div>
         <div class="p-inputgroup flex-1">
           <span class="p-inputgroup-addon"><i class="pi pi-qrcode"></i></span>
-          <InputText placeholder="Enter secret" v-model="TwoFASecret" id="url" />
+          <InputText placeholder="Enter secret" v-model="TwoFASecret" id="url" @keyup.enter="Check2FA()" />
           <Button @click="Check2FA">Verify</Button>
         </div>
       </div>

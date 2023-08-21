@@ -208,7 +208,7 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async createRoom(room: Room): Promise<Room> {
+  async createRoom(room: Room) {
     this.logger.log("createRoom: " + room);
     if (!room) return null;
     const findRoom = await this.findByName(room.name);
@@ -233,6 +233,9 @@ export class RoomService implements OnModuleInit {
             },
           },
           hash: password,
+        },
+        include: {
+          users: true,
         },
       })
       .then((newRoom) => {
