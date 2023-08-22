@@ -361,10 +361,14 @@ export class PongGameClass {
     }
     const theScore = this.scoreA + " - " + this.scoreB as string;
     console.log("endGameOnline----------- score  = ", theScore);
-    socket.emit("endGame", {
-      room: store.state.gameRoom,
-      game: store.state.game, winner: winnerId, looser: looserId, score: theScore
-    });
+    if (store.state.playerNum == 1)
+      socket.emit("endGame", {
+        room: store.state.gameRoom,
+        game: store.state.game,
+        winner: winnerId,
+        looser: looserId,
+        score: theScore
+      });
     this.restartMatch();
   }
 

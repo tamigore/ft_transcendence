@@ -32,6 +32,10 @@ const store = createStore({
         setPlayerNum : function (state, num: number) {
         state.playerNum = num;
         },
+        setPlayer2Game : function (state, player2: User) {
+            state.game.player2Id = player2.id;
+            state.game.player2 = player2;
+        },
         setGame : function (state, game: Game) {
             state.game = game;
         },

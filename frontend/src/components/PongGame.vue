@@ -253,6 +253,8 @@ export default defineComponent({
 
         socket.on("gameRoomJoiner", (data) => {
           console.log("====================gameRoomJoiner", data);
+          if (store.state.playerNum == 1 && store.state.gameRoom != "")
+            store.commit("setPlayer2Game", data.player2);
           store.commit("setGameRoom", data.room);
           if (store.state.playerNum == 2) {
             store.commit("setGameConnect", true);
