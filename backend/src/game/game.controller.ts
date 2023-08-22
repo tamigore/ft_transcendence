@@ -9,14 +9,10 @@ import {
 import { HistoricService } from "./game.service";
 import { Public } from "../common/decorators";
 import { Historic } from "@prisma/client";
-import { PrismaService } from "../prisma/prisma.service";
 
 @Controller("historic")
 export class GameController {
-  constructor(
-    private historicService: HistoricService,
-    private prismaService: PrismaService,
-  ) {}
+  constructor(private historicService: HistoricService) {}
 
   @Public()
   @Get("ID")

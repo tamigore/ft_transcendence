@@ -348,6 +348,7 @@ export class RoomService implements OnModuleInit {
           const verif = await argon2.verify(room.hash, pwd);
           if (!verif) return false;
         }
+        if (room.ban.find((user) => user.id === userId)) return false;
         return await this.prisma.room.update({
           where: { id: roomId },
           data: {

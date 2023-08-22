@@ -53,13 +53,23 @@ const store = createStore({
             state.private = rooms;
         },
         addPrivate: function (state, room: Room) {
-            console.log('addRoom: ', room);
+            console.log('addPrivate: ', room);
             state.private.push(room);
+        },
+        setFriend: function (state, users: User[]) {
+            console.log('setFriend: ', users);
+            state.user.friend = users;
+            state.user.friendBy = users;
+        },
+        setBlocked: function (state, users: User[]) {
+            console.log('setBlocked: ', users);
+            state.user.friend = users;
+            state.user.friendBy = users;
         },
         setUser: function (state, user: User) {
             console.log('setUser: ', user);
-            state.user.id = user.id;
-            state.user.created_at = user.created_at;
+            // state.user.id = user.id;
+            // state.user.created_at = user.created_at;
             state.user.updated_at = user.updated_at;
             state.user.email = user.email;
             state.user.username = user.username;
@@ -69,9 +79,12 @@ const store = createStore({
             state.user.bio = user.bio;
             state.user.img = user.img;
             state.user.twoFA = user.twoFA;
+            if (user.blocked)
+                state.user.blocked = user.blocked;
+            if (user.friend)
+                state.user.friend = user.friend;
         },
         delUser: function (state) {
-            console.log('delUser');
             state.user = {} as User;
         },
         setUserID: function (state, id: number) {

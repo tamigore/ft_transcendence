@@ -21,7 +21,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { Message } from "@/utils/interfaces";
-import axios from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 import store from "@/store";
 import socket from '@/utils/socket';
 import router from '@/router';
@@ -54,7 +54,7 @@ export default defineComponent({
             visible: () => {
               if (!this.message || !this.message.room || !this.message.room.ownerId)
                 return (false);
-              this.message.room.ownerId === store.state.user.id;
+              return this.message.room.ownerId === store.state.user.id;
             },
           },
           { label: 'Kick', icon: 'pi pi-fw pi-sign-out',
@@ -77,15 +77,13 @@ export default defineComponent({
           },
           { label: 'Add Friend', icon: 'pi pi-fw pi-user-plus',
             command: () => {
-              if (!this.isFriend)
-                this.addFriend();
+              this.addFriend();
             },
             visible: () => !this.isFriend,
           },
           { label: 'Remove Friend', icon: 'pi pi-fw pi-user-minus',
             command: () => {
-              if (this.isFriend)
-                this.removeFriend();
+              this.removeFriend();
             },
             visible: () => this.isFriend,
           },
@@ -165,6 +163,8 @@ export default defineComponent({
       })
       .then((res) => {
         console.log(res);
+        if (res && res.data && res.data.friend)
+          store.commit("setBlocked", res.data.friend);
       })
       .catch(err => { throw new Error(err) });
     },
@@ -228,23 +228,25 @@ export default defineComponent({
     },
     async addFriend(): Promise<void> {
       console.log("addFriend");
-      
       await axios.post('/api/user/friends/add', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then((res) => {
         console.log(res);
+        if (res && res.data && res.data.friend)
+          store.commit("setFriend", res.data.friend);
       })
       .catch(err => { throw new Error(err) });
     },
     async removeFriend(): Promise<void> {
       console.log("removeFriend");
-      
       await axios.post('/api/user/friends/del', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then((res) => {
         console.log(res);
+        if (res && res.data && res.data.friend)
+          store.commit("setFriend", res.data.friend);
       })
       .catch(err => { throw new Error(err) });
     },
@@ -260,12 +262,20 @@ export default defineComponent({
       }, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
-      .then((res) => {
+      .then(async (res: AxiosResponse) => {
         console.log(res);
         socket.emit("join_room", { user: store.state.user, room: res.data });
         socket.emit("join_room", { user: this.message.user, room: res.data });
+        await axios.get(`api/room/private/${store.state.user.id}`, {
+          headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+        })
+          .then((response: AxiosResponse) => {
+            console.log(`getPrivate response: ${response.data}`);
+            store.commit("setPrivate", response.data);
+          })
+          .catch((error: AxiosError) => { throw error; });
       })
-      .catch(err => { throw new Error(err) });
+      .catch((err: AxiosError) => { throw err });
     },
   }
 })

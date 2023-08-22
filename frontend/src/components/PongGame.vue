@@ -236,4 +236,3 @@ export default defineComponent({
   }
 });
 </script>
-../class/PongClass../class/PongSettings../class/useFPS

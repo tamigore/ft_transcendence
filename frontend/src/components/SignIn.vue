@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import store from '@/store';
 import router from '@/router';
 
@@ -60,13 +60,13 @@ export default defineComponent ({
         store.commit("setUserID", response.data.userId);
         router.push({path: '/profile'});
       })
-      .catch((error: AxiosError) => {
-        console.log(error);
-        window.alert("Signin failed : Email or password is incorrect");
+      .catch(() => {
+        this.$toast.add({severity: 'error', summary: 'Signin failed',
+            detail: `Email or password is incorrect`,
+            life: 3000 });
       })
       if (!this.checked)
       {
-        console.log("SignInPost: finished and data safe");
         this.email = "";
         this.password = "";
       }

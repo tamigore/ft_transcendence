@@ -22,7 +22,7 @@ export class AuthService {
   ) {}
 
   async login(user: any) {
-    if (!user) return null;
+    if (!user || user.loggedIn) return null;
     // if (user.loggedIn) return null;
     this.logger.log("user :", user);
     if (user.twoFA && user.twoFA.length > 0) this.logger.log("add Double auth");

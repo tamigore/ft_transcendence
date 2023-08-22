@@ -59,16 +59,12 @@ export class UserController {
     return this.userService.findBlocked(userId);
   }
 
-  @Get("friends/:id")
+  @Get("all/:id")
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*")
-  findFriends(
-    @GetCurrentUserId() userId: number,
-    @Param("id") param: string,
-  ): Promise<User[]> {
-    const id = parseInt(param);
-    return this.userService.findFriendsById(userId, id);
+  findFriends(@GetCurrentUserId() userId: number) {
+    return this.userService.findWithAllById(userId);
   }
 
   @Get(":id")
@@ -85,7 +81,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   updateUser(@GetCurrentUserId() userId: number, @Body() updateUserDto: User) {
-    this.userService.update(userId, updateUserDto);
+    return this.userService.update(userId, updateUserDto);
   }
 
   @Post("friends/add")
@@ -93,7 +89,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   addFriend(@GetCurrentUserId() userId: number, @Body() friend: User) {
-    this.userService.addFriends(userId, friend.id);
+    return this.userService.addFriends(userId, friend.id);
   }
 
   @Post("friends/del")
@@ -101,7 +97,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   delFriend(@GetCurrentUserId() userId: number, @Body() friend: User) {
-    this.userService.removeFriends(userId, friend.id);
+    return this.userService.removeFriends(userId, friend.id);
   }
 
   @Post("chatsocket")
@@ -112,8 +108,7 @@ export class UserController {
     @GetCurrentUserId() userId: number,
     @Body() chatSocket: any,
   ) {
-    console.log(chatSocket.socket);
-    this.userService.updateChatSocket(userId, chatSocket.socket);
+    return this.userService.updateChatSocket(userId, chatSocket.socket);
   }
 
   @Post("block/add")
@@ -121,7 +116,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   addBlock(@GetCurrentUserId() userId: number, @Body() friend: User) {
-    this.userService.addBlocked(userId, friend.id);
+    return this.userService.addBlocked(userId, friend.id);
   }
 
   @Post("block/del")
@@ -129,16 +124,6 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   delBlock(@GetCurrentUserId() userId: number, @Body() friend: User) {
-    this.userService.removeBlocked(userId, friend.id);
+    return this.userService.removeBlocked(userId, friend.id);
   }
-
-  // // @Public()
-  // @Delete(":id")
-  // // @UseGuards(AtGuard)
-  // @HttpCode(HttpStatus.OK)
-  // @Header("Access-Control-Allow-Origin", "*")
-  // deleteUser(@GetCurrentUserId() userId: number, @Param("id") param: string) {
-  //   const id = parseInt(param.split("=")[1]);
-  //   return this.userService.remove(userId, id);
-  // }
 }

@@ -109,7 +109,6 @@ import { defineComponent, ref } from 'vue';
 import store from '@/store';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import router from './router';
-import { useToast } from 'primevue/usetoast';
 import socket from './utils/socket';
 
 export default defineComponent({
@@ -145,7 +144,6 @@ export default defineComponent({
           }
         },
       ]),
-      toast: useToast(),
     };
   },
   computed: {

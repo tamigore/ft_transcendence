@@ -16,7 +16,7 @@ export default defineComponent ({
           headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then((response: AxiosResponse) => {
-          console.log(response)
+          console.log(`LogoutPost response.data: ${response.data}`);
           store.commit("setHash", "");
           store.commit("setHashRt", "");
           store.commit("setLogged", false);
@@ -24,11 +24,9 @@ export default defineComponent ({
           store.commit("delUser", false);
           if (socket.connected)
             socket.disconnect();
-          console.log(store.state.user) // -> empty
           router.push("/");
       })
       .catch((error: AxiosError) => {
-          console.log(error)
           throw new Error("Logout failed: " + error);
       })
     },

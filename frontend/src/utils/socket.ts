@@ -27,12 +27,34 @@ class SocketioChat {
       }
     );
     this.socket.on('servMessage', (msg: Message) => {
+      console.log("new servMessage" + msg);
+
       if (store.state.lastRoom.id === msg.room.id)
-        store.commit("addMessage", msg);
+      {
+        console.log("last Room == message.room");
+        if (store.state.lastRoom.mute && store.state.lastRoom.mute.find(user => user.id === msg.user.id))
+          store.commit("setLastMessage", msg);
+        else
+          store.commit("addMessage", msg);
+      }
       else if (store.state.lastPrivate.id === msg.room.id)
+      {
+        console.log("last private == message.room");
         store.commit("addMessage", msg);
-      else
-        store.commit("setLastMessage", msg);
+      }
+      // else {
+      //   console.log("message.room joined but not selected");
+      //   if (msg.room.private)
+      //     this.$toast.add({severity: 'info', summary: 'New message',
+      //       detail: `From user ${msg.user.username}`,
+      //       life: 3000 });
+      //   else
+      //     this.$toast.add({severity: 'info', summary: 'New message',
+      //       detail: `In room ${msg.room.name}`,
+      //       life: 3000 });
+      // }
+
+      store.commit("setLastMessage", msg);
     });
     this.socket.on('update', async () => {
       await axios.get("api/room/public", {
