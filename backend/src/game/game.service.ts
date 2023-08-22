@@ -95,7 +95,7 @@ export class GameService {
           },
         });
       }
-      return (null);
+      return (game);
     });
     return game;
   }

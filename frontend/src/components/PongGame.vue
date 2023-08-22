@@ -265,7 +265,7 @@ export default defineComponent({
         })
 
         socket.on("LaunchGame", (e: BallState) => {
-
+          console.log("LaunchGame", e);
           store.commit("setGameConnect", true);
           store.commit("setInQueue", false);
           Pong.value.startMultiOnline();
