@@ -561,18 +561,19 @@ export class RoomService implements OnModuleInit {
     this.logger.log(`del user: ${userId} from room: ${roomId}`);
     await this.prisma
       .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: {
+            owner: true,
+            admins: true,
+            users: true,
+            ban: true,
+            mute: true,
+            messages: true,
+          },
+        });
+        if (!room) return false;
         if (userId !== removeId) {
-          const room = await prisma.room.findUnique({
-            where: { id: roomId },
-            include: {
-              owner: true,
-              admins: true,
-              users: true,
-              ban: true,
-              mute: true,
-              messages: true,
-            },
-          });
           if (!this.higherRights(room, userId, removeId))
             throw new Error(
               `User ${userId} donesn't have rights on room ${roomId}`,
