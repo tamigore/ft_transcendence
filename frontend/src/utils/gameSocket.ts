@@ -38,6 +38,7 @@ export interface ClientToServerEvents {
   paddlePosMessage(e: { state: PaddleState, room: string }): void;
   pingMessage(e: { ballInfo: BallState, room: string }): void;
   joinGameRoom(e: { user: User; room: string }): void;
+  leaveGameRoom(e: { room: string }): void;
   ballSetter(e: { ballInfo: BallState, room: string }): void;
   gameLeave(e: { room: string, player: number }): void;
 

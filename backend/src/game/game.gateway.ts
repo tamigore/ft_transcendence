@@ -80,6 +80,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return true;
   }
 
+  @SubscribeMessage("leaveGameRoom")
+  async onLeaveRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    payload: {
+      room: string;
+    },
+  ): Promise<void> {
+    this.server.in(client.id).socketsLeave(payload.room);
+  }
+
   @SubscribeMessage("ReadyGame")
   async onlaunchGame(
     @ConnectedSocket() client: Socket,

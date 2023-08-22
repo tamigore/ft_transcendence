@@ -347,7 +347,7 @@ export default defineComponent({
           socket.emit("onSpecPaddle",{ room: store.state.gameRoom, paddle: Pong.value.getPaddleState(1) });
           socket.emit("onSpecPaddle",{ room: store.state.gameRoom, paddle: Pong.value.getPaddleState(2) });
           for (const block of Pong.value.myBlocks) {
-            socket.emit("onSpecBlock",{ room: store.state.gameRoom, block: block.blockState() });
+            socket.emit("onSpecBlock",{ room: store.state.gameRoom, block: block.getBlockState() });
           }
         });
 

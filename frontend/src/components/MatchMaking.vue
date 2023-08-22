@@ -93,15 +93,32 @@ export default defineComponent({
       store.commit("setGameConnect", true);
     },
     LeaveGame() {
-      if (store.state.ingame) {
-        const looser = store.state.playerNum == 1 ? 2 : 1;
-        const winner = store.state.playerNum == 1 ? 1 : 2;
+        socket.emit("leaveGameRoom", { room: store.state.gameRoom });
+      if (store.state.ingame && store.state.playerNum != 0) {
+        console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
+        let looser = store.state.game.player1Id;
+        let winner = store.state.game.player2Id;
+        if (store.state.game.player2Id === store.state.user.id)
+        {
+          looser = store.state.game.player2Id;
+          winner = store.state.game.player1Id;
+        }
         socket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
       }
       store.commit("setInQueue", false);
       store.commit("setGameConnect", false);
       store.commit("setGameRoom", "");
     },
+    // LeaveGame() {
+    //   if (store.state.ingame) {
+    //     const looser = store.state.playerNum == 1 ? 2 : 1;
+    //     const winner = store.state.playerNum == 1 ? 1 : 2;
+    //     socket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
+    //   }
+    //   store.commit("setInQueue", false);
+    //   store.commit("setGameConnect", false);
+    //   store.commit("setGameRoom", "");
+    // },
     async Spectate() {
       socket.connect();
 
@@ -111,7 +128,7 @@ export default defineComponent({
       await axios.post('/api/game/spectate', {
           userId: store.state.user.id as number,
           userName: store.state.user.username as string,
-          userPlaying: 11 as number,
+          userPlaying: 15 as number,
         }, 
           { headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
