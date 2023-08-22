@@ -80,3 +80,41 @@ export interface Room {
   mute: User[],
   messages: Message[],
 }
+
+export interface GameMove {
+  player: number,
+
+  notPressed: boolean,
+  key: number,
+  gameRoom: string,
+}
+
+
+export interface BlockState
+{
+  effect: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  num: number,
+  id: number,
+}
+
+export interface BallState
+  {
+    ballId: number,
+    ballX: number,
+    ballY: number,
+    ballVeloX: number,
+    ballVeloY: number,
+    player: number,
+  }
+
+export interface PaddleState
+{
+  player: number,
+  posY: number,
+  height: number,
+}
+

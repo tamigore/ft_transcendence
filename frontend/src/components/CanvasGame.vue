@@ -39,13 +39,33 @@ export default {
     };
   },
   mounted() {
-    if ("vue-drawing-canvas" in window.localStorage) {
-      this.initialImage = JSON.parse(
-        window.localStorage.getItem("vue-drawing-canvas")
-      );
-    }
+    const gameTick = 1000 / 60;
+      setInterval(this.gameLoop, gameTick);
   },
   methods: {
+    drawRectangle(x_start, y_start, x_end, y_end) {
+      const rectangle = {
+        type: "rectangle",
+        from: {
+          x: x_start, // Random X coordinate within canvas width
+          y: y_start, // Random Y coordinate within canvas height
+        },
+        to: {
+          x: x_end, // Random X coordinate within canvas width
+          y: y_end, // Random Y coordinate within canvas height
+        },
+        color: "#FF0000", // Red color (change as needed)
+        width: 2, // Rectangle width (change as needed)
+        fill: true, // Fill the rectangle
+      };
+      this.additionalImages.push(rectangle);
+      this.$refs.VueCanvasDrawing.redraw();
+    },
+    gameLoop() {
+    
+    this.drawRectangle(0, 100, 200, 350);
+    this.$refs.VueCanvasDrawing.redraw();
+  },
     async setImage(event) {
       const URL = window.URL;
       this.backgroundImage = URL.createObjectURL(event.target.files[0]);
@@ -85,6 +105,9 @@ export default {
     },
   },
 };
+
+
+
 </script>
 
 <template>

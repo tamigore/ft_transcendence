@@ -1,5 +1,5 @@
 import { createStore } from 'vuex';
-import { User, Room, Message } from '../utils/interfaces';
+import { User, Room, Message, Game } from '../utils/interfaces';
 
 const store = createStore({
     state: {
@@ -10,8 +10,31 @@ const store = createStore({
         lastRoom: {} as Room,
         lastPrivate: {} as Room,
         lastMessage: {} as Message,
+        ingame: false as boolean,
+        inQueue: false as boolean,
+        playerNum: 0 as number,
+        gameRoom: "" as string,
+        game: {} as Game,
     },
     mutations: {
+        setGameConnect : function(state, gameConnect: boolean) {
+            state.ingame = gameConnect;
+        },
+        setUserGameSocket : function (state, gameSocket: string) {
+            state.user.gameSocket = gameSocket;
+        },
+        setGameRoom : function (state, gameRoom: string) {
+            state.gameRoom = gameRoom;
+        },
+        setInQueue : function (state, inQueue: boolean) {
+            state.inQueue = inQueue;
+        },
+        setPlayerNum : function (state, num: number) {
+        state.playerNum = num;
+        },
+        setGame : function (state, game: Game) {
+            state.game = game;
+        },
         addMessage : function (state, chatMessage: Message) {
             state.messages.push(chatMessage);
         },

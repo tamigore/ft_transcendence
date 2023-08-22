@@ -3,6 +3,10 @@ import {
     ballMaxSpeedX,
     ballMaxSpeedY,
 } from './PongSettings';
+import store  from '../store';
+import socket from "@/utils/gameSocket";
+import {  BallState } from "@/utils/interfaces";
+
 
 /******************* BallClass *******************/
 export class BallClass {
@@ -30,6 +34,20 @@ export class BallClass {
       this.hp = hp;
   }
 
+
+  ballState(): BallState {
+    return ({
+      ballX: this.x,
+      ballY: this.y,
+      ballVeloX: this.veloX,
+      ballVeloY: this.veloY,
+      ballId: this.id,
+      player: store.state.playerNum,
+      ballHp: this.hp,
+    } as BallState);
+
+  }
+
   ballWallColision() {
     if (this.y <= 0) {
       this.veloY = Math.abs(this.veloY);
@@ -38,39 +56,67 @@ export class BallClass {
       this.veloY = -Math.abs(this.veloY);
     }
     if (this.x <= 1) {
-      this.hp--;
-      this.pong.scoreB += 1;
-      this.x = this.pong.width / 2;
-      this.y = this.pong.height / 2;
-      this.veloX = this.pong.randStartSpeedX();
-      this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+      if (!store.state.ingame) {
+        this.hp--;
+        this.pong.scoreB += 1;
+        this.x = this.pong.width / 2;
+        this.y = this.pong.height / 2;
+        this.veloX = this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+      }
+      else if (store.state.playerNum == 1) {
+        this.hp--;
+        this.x = this.pong.width / 2;
+        this.y = this.pong.height / 2;
+        this.veloX = this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+        this.onlinePoint(1);
+      }
     }
     else if (this.x >= this.pong.width - 1) {
-      if (this.pong.wallIsUp) {
-        this.veloX = -this.veloX;
-        return;
+      if (!store.state.ingame) {
+        if (this.pong.wallIsUp) {
+          this.veloX = -this.veloX;
+          return;
+        }
+        this.hp--;
+        this.pong.scoreA += 1;
+        this.x = this.pong.width / 2;
+        this.y = this.pong.height / 2;
+        this.veloX = -this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
       }
-      this.hp--;
-      this.pong.scoreA += 1;
-      this.x = this.pong.width / 2;
-      this.y = this.pong.height / 2;
-      this.veloX = -this.pong.randStartSpeedX();
-      this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+      else if (store.state.playerNum == 2) {
+        this.x = this.pong.width / 2;
+        this.y = this.pong.height / 2;
+        this.veloX = -this.pong.randStartSpeedX();
+        this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+        this.onlinePoint(2);
+      }
     }
+  }
+
+  onlinePoint = (_player: number) => {
+    console.log("onlinePoint-----------");
+    socket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
+    socket.emit("goalMessage", { room: store.state.gameRoom, player: _player });
   }
 
   ballPaddleColision = (paddleX: number, paddleY: number, paddleHeight: number, paddleWidth: number, sign: number): boolean => {
     const dist_center = Math.abs(this.x - (this.pong.width / 2));
+
     if (dist_center + this.radius >= paddleX && dist_center - this.radius <= paddleX + paddleWidth) {
       if (this.y - this.radius <= paddleY + paddleHeight && this.y + this.radius >= paddleY) {
-        this.veloX = sign * (Math.abs(this.veloX) + Math.random() / 3);
+        this.veloX = sign * (Math.abs(this.veloX) + Math.random() / 2);
         if (this.veloX >= ballMaxSpeedX || this.veloX <= - ballMaxSpeedX)
           this.veloX = ballMaxSpeedX * sign;
-        if (this.pong.gameIsBlocks && Math.random() < 0.6)
+        if (!store.state.ingame &&/* this.pong.gameIsBlocks && */ Math.random() < 0.5)
+          this.pong.generateBlocks();
+        if (store.state.ingame && /* store.state.game.isBlocked && */ store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
           this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
-        if (this.veloY > 0)
-          console.log("ballPaddleColision \n veloy: " + this.veloY + " ratio: " + ((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2) + "\n");
+
+        this.pong.hitSound.play();
         return true;
       }
     }
@@ -82,7 +128,10 @@ export class BallClass {
       if (this.x + this.radius >= block.x && this.x - this.radius <= block.x + block.width) {
         if (this.y + this.radius >= block.y && this.y - this.radius <= block.y + block.height) {
           block.triggerEffect(this);
+          // console.log("ballBlockColision = ", block.id);
+          socket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
           this.pong.removeBlock(block.id);
+
           return;
         }
       }
@@ -93,6 +142,7 @@ export class BallClass {
   preColision = (): boolean => {
     const oldVeloX = this.veloX;
     const oldVeloY = this.veloY;
+
     if (this.ballPaddleColision(Math.abs(this.pong.paddleOffset + this.pong.leftPaddleWidth - this.pong.width / 2),
       this.pong.leftPaddleY, this.pong.leftPaddleHeight,
       this.pong.leftPaddleWidth, 1)
@@ -116,30 +166,52 @@ export class BallClass {
   }
 
   ballColision = (): BallClass => {
+
     if (this.pong.alreadyComputed) {
       this.pong.alreadyComputed = false;
       this.x += this.veloX;
       this.y += this.veloY;
+
       return this;
     }
+
     this.ballBlockColision();
+    // const nbr = this.pong.num_ping + this.pong.num_pong;
     this.ballWallColision();
     if (this.x < this.pong.width / 3 &&
       this.ballPaddleColision(Math.abs(this.pong.paddleOffset + this.pong.leftPaddleWidth - this.pong.width / 2),
         this.pong.leftPaddleY, this.pong.leftPaddleHeight,
         this.pong.leftPaddleWidth, 1)) {
       this.pong.num_ping += 1;
+      if (store.state.playerNum == 1)
+        socket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
     }
     else if (this.x > this.pong.width / 2 / 3 &&
       this.ballPaddleColision(this.pong.rightPaddleX - this.pong.width / 2,
         this.pong.rightPaddleY, this.pong.rightPaddleHeight,
         this.pong.rightPaddleWidth, -1)) {
       this.pong.num_pong += 1;
+      if (store.state.playerNum == 2)
+        socket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
     }
-    if (this.hp == 0)
-      this.pong.myBalls.splice(this.pong.myBalls.indexOf(this), 1);
+    if (this.hp == 0) {
+      socket.emit("destroyBall", { room: store.state.gameRoom, ballId: this.id });
+      this.pong.removeBall(this.id);
+    }
     this.x += this.veloX;
     this.y += this.veloY;
+
+    // if (nbr == this.pong.num_ping + this.pong.num_pong)
+    //  this.pong.alreadyComputed = this.preColision();
+
     return this;
   }
+
+  setBallState = (state: BallState) => {
+    this.x = state.ballX;
+    this.y = state.ballY;
+    this.veloX = state.ballVeloX;
+    this.veloY = state.ballVeloY;
+  }
+
 }
