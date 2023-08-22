@@ -102,11 +102,11 @@ export class EffectBlock {
       let paddleStateData: PaddleState;
       if (ball.veloX > 0) {
         ball.pong.rightPaddleHeight *= 1.2;
-        paddleStateData = ball.pong.getpaddleState(2);
+        paddleStateData = ball.pong.getPaddleState(2);
       }
       else {
         ball.pong.leftPaddleHeight *= 1.2;
-        paddleStateData = ball.pong.getpaddleState(1);
+        paddleStateData = ball.pong.getPaddleState(1);
       }
       socket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
 
@@ -116,11 +116,11 @@ export class EffectBlock {
       let paddleStateData: PaddleState;
       if (ball.veloX > 0) {
         ball.pong.rightPaddleHeight /= 1.1;
-        paddleStateData = ball.pong.getpaddleState(2);
+        paddleStateData = ball.pong.getPaddleState(2);
       }
       else {
         ball.pong.leftPaddleHeight /= 1.1;
-        paddleStateData = ball.pong.getpaddleState(1);
+        paddleStateData = ball.pong.getPaddleState(1);
         socket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
       }
     }

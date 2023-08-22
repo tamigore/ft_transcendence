@@ -444,7 +444,7 @@ export class PongGameClass {
   }
 
 
-  getpaddleState = (player: number): PaddleState => {
+  getPaddleState = (player: number): PaddleState => {
     if (player == 1)
       return ({
         player: player,

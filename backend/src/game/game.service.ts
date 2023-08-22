@@ -71,11 +71,12 @@ export class GameService {
     const game = await this.prisma.$transaction(async () => {
       const game = await this.prisma.game.findFirst({
         where: {
-          OR: [
+            OR: [
             { player1Id: dto.userPlaying },
             { player2Id: dto.userPlaying }
-          ]
-        },
+          ],
+          historic: { is: null},
+        }
       });
 
       if (game) {

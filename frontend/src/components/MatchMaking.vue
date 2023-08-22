@@ -111,7 +111,7 @@ export default defineComponent({
       await axios.post('/api/game/spectate', {
           userId: store.state.user.id as number,
           userName: store.state.user.username as string,
-          userPlaying: 1 as number,
+          userPlaying: 11 as number,
         }, 
           { headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
@@ -120,8 +120,14 @@ export default defineComponent({
             user: store.state.user,
             room: response.data.player1.username as string,
           });
+          store.commit("setGameRoom", response.data.player1.username);
+          console.log("spectator join room: ", response.data.player1.username);
+          console.log("game id: ", response.data.id);
           //reucperer les infos de la game (tous les blocks)
-
+          socket.emit("newSpectator", {
+            room: response.data.player1.username as string,
+            user: store.state.user,
+          });
           store.commit("setPlayerNum", 0);
           store.commit("setGameConnect", true);
           

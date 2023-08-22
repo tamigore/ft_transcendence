@@ -166,4 +166,40 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       body.score,
     );
   }
+
+  @SubscribeMessage("newSpectator")
+  async newSpectator(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { room: string; user: User },
+  ) {
+    console.log("new spectator : ", body.user.username);
+    this.server.to(body.room).emit("servNewSpectator", body.user);
+  }
+
+  @SubscribeMessage("onSpecBlock")
+  async onSpecBlock(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { room: string; block: BlockState, userId : number },
+  ) {
+    console.log("spectator block id : ", body.block.id);
+    this.server.to(body.room).emit("servOnSpecBlock", {block: body.block, userId: body.userId});
+  }
+
+  @SubscribeMessage("onSpecBall")
+  async onSpecBall(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { room: string; ball: BallState, userId : number },
+  ) {
+    console.log("spectator ball id", body.ball.ballId);
+    this.server.to(body.room).emit("servOnSpecBall", {ball: body.ball, userId: body.userId});
+  }
+
+  @SubscribeMessage("onSpecPaddle")
+  async onSpecPaddle(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { room: string; paddle: PaddleState, userId : number },
+  ) {
+    console.log("spectator paddle : ", body.paddle);
+    this.server.to(body.room).emit("servOnSpecPaddle", {paddle: body.paddle, userId: body.userId});
+  }
 }

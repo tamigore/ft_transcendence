@@ -252,10 +252,9 @@ export default defineComponent({
         }
 
         socket.on("gameRoomJoiner", (data) => {
-          console.log("====================gameRoomJoiner", data);
+          store.commit("setGameRoom", data.room);
           if (store.state.playerNum == 1 && store.state.gameRoom != "")
             store.commit("setPlayer2Game", data.user);
-          store.commit("setGameRoom", data.room);
           if (store.state.playerNum == 2) {
             store.commit("setGameConnect", true);
             store.commit("setInQueue", false);
@@ -265,7 +264,6 @@ export default defineComponent({
         })
 
         socket.on("LaunchGame", (e: BallState) => {
-          console.log("LaunchGame", e);
           store.commit("setGameConnect", true);
           store.commit("setInQueue", false);
           Pong.value.startMultiOnline();
@@ -306,20 +304,17 @@ export default defineComponent({
 
         socket.on("blockCreation", (block: BlockState) => {
           if (store.state.playerNum != 1) {
-            console.log("blockCreation", block.num);
             Pong.value.myBlocks.push(new EffectBlock(Pong.value, block.x, block.y,
               block.width, block.height, block.effect, block.num, block.id));
           }
         });
 
         socket.on("blockDestruction", (id: number) => {
-          console.log("blockDestruction", id);
           Pong.value.removeBlock(id);
         });
 
 
         socket.on("ballCreation", (ball: BallState) => {
-          console.log("ballCreation", ball);
           if (store.state.playerNum != 1) {
             Pong.value.myBalls.push(new BallClass(Pong.value, ball.ballX, ball.ballY, ball.ballVeloX, ball.ballVeloY,
               Pong.value.ballRadius, 'blue', 1));
@@ -327,7 +322,6 @@ export default defineComponent({
         });
 
         socket.on("ballDestruction", (id: number) => {
-          console.log("ballDestruction", id);
           Pong.value.removeBall(id);
         });
 
@@ -339,6 +333,53 @@ export default defineComponent({
           store.commit("setPlayerNum", 0);
           Pong.value.restartMatch();
           console.log("gameEnder is ended");
+        });
+
+        socket.on("servNewSpectator", (user) => {
+          console.log("servNewSpectator", user);
+          if (store.state.playerNum != 1)
+            return ;
+
+            socket.emit("onSpecBall",{ room: store.state.gameRoom, ball:Pong.value.theBall.ballState() });
+          for (const ball of Pong.value.myBalls) {
+            socket.emit("onSpecBall",{ room: store.state.gameRoom, ball:ball.ballState() });
+          }
+          socket.emit("onSpecPaddle",{ room: store.state.gameRoom, paddle: Pong.value.getPaddleState(1) });
+          socket.emit("onSpecPaddle",{ room: store.state.gameRoom, paddle: Pong.value.getPaddleState(2) });
+          for (const block of Pong.value.myBlocks) {
+            socket.emit("onSpecBlock",{ room: store.state.gameRoom, block: block.blockState() });
+          }
+        });
+
+        socket.on("servOnSpecBall", (data) => {
+          console.log("servOnSpecBall", data);
+          if (store.state.user.id != data.userId)
+            return ;
+          if (data.ball.ballId == 0)
+            Pong.value.theBall.setBallState(data.ball);
+          else {
+            Pong.value.myBalls.push(new BallClass(Pong.value, data.ball.ballX, data.ball.ballY,
+                                                         data.ball.ballVeloX, data.ball.ballVeloY,
+                                                          Pong.value.ballRadius, 'blue', 1));            
+            }
+        });
+
+        socket.on("servOnSpecPaddle", (data) => {
+          console.log("servOnSpecPaddle", data);
+          if (store.state.user.id != data.userId)
+            return ;
+          if (data.paddle.player == 1)
+            Pong.value.setLeftPaddleState(data.paddle);
+          else
+            Pong.value.setRightPaddleState(data.paddle);
+        });
+
+        socket.on("servOnSpecBlock", (data) => {
+          console.log("servOnSpecBlock", data);
+          if (store.state.user.id != data.userId)
+            return ;
+          Pong.value.myBlocks.push(new EffectBlock(Pong.value, data.block.x, data.block.y,
+            data.block.width, data.block.height, data.block.effect, data.block.num, data.block.id));
         });
       });
 

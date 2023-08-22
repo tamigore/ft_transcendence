@@ -18,6 +18,11 @@ export interface ServerToClientEvents {
   ballDestruction(e: number): void;
   ballCreation(e: BallState): void;
   gameEnder(): void;
+
+  servNewSpectator(e: { user: User }): void;
+  servOnSpecBlock(e: {block: BlockState, userId : number }): void;
+  servOnSpecBall(e: { ball: BallState, userId : number }): void;
+  servOnSpecPaddle(e: { paddle: PaddleState, userId : number }): void;
 }
 
 export interface ClientToServerEvents {
@@ -35,6 +40,11 @@ export interface ClientToServerEvents {
   joinGameRoom(e: { user: User; room: string }): void;
   ballSetter(e: { ballInfo: BallState, room: string }): void;
   gameLeave(e: { room: string, player: number }): void;
+
+  newSpectator(e: { room: string, user: User }): void;
+  onSpecBlock(e: { room: string, block: BlockState, userId : number }): void;
+  onSpecBall(e: { room: string, ball: BallState, userId : number }): void;
+  onSpecPaddle(e: { room: string, paddle: PaddleState, userId : number }): void;
 }
 
 class SocketioGame {
