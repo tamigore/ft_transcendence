@@ -143,7 +143,6 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { defineComponent } from "vue";
 import { Room, Message, User } from "@/utils/interfaces";
 import store from "@/store";
-import { useToast } from "primevue/usetoast";
 import ChatBubble from "@/components/ChatBubble.vue"
 
 export default defineComponent({
@@ -155,7 +154,6 @@ export default defineComponent({
 
   data() {
     return {
-      toast: useToast(),
       roomName: "" as string,
       roomPassword: "" as string,
       text: "" as string,
@@ -168,14 +166,6 @@ export default defineComponent({
   computed: {
     connected () {
       const connect = socket.connected;
-      // if (connect)
-      //   this.toast.add({severity: 'success', summary: 'Connected',
-      //     detail: `The chat socket is lissening`,
-      //     life: 3000 });
-      // else
-      //   this.toast.add({severity: 'error', summary: 'Disconected',
-      //     detail: `The chat socket isn't connected`,
-      //     life: 3000 });
       return connect as boolean;
     },
 
@@ -189,15 +179,26 @@ export default defineComponent({
 
     lastMessage () { // TODO
       const message = store.state.lastMessage;
-      if (message.roomId !== store.state.lastRoom.id
-        && message.roomId !== store.state.lastPrivate.id) 
+      console.log(`lastMessage: ${message}`);
+      if (store.state.lastRoom.id === message.room.id)
       {
+        console.log("last Room == message.room");
+        if (!store.state.lastRoom.mute.find(user => user.id === message.user.id))
+          store.commit("addMessage", message);
+      }
+      else if (store.state.lastPrivate.id === message.room.id)
+      {
+        console.log("last private == message.room");
+        store.commit("addMessage", message);
+      }
+      else {
+        console.log("message.room joined but not selected");
         if (message.room.private)
-          this.toast.add({severity: 'info', summary: 'New message',
+          this.$toast.add({severity: 'info', summary: 'New message',
             detail: `From user ${message.user.username}`,
             life: 3000 });
         else
-          this.toast.add({severity: 'info', summary: 'New message',
+          this.$toast.add({severity: 'info', summary: 'New message',
             detail: `In room ${message.room.name}`,
             life: 3000 });
       }
@@ -211,7 +212,7 @@ export default defineComponent({
           user => user.id === store.state.user.id) ? true : false, room : store.state.rooms[i]
         };
       }
-      console.log(obj); 
+      console.log(`Rooms computed: ${obj}`); 
       return obj as { isIn: boolean; room: Room; }[];
     },
 
@@ -229,13 +230,11 @@ export default defineComponent({
   },
 
   created() {
-    console.log("ChatDisplay created");
     this.getRooms();
     this.getPrivate();
   },
 
   updated() {
-    console.log("Caht Display updated");
     const objDiv = document.getElementById("messageContainer");
     if (objDiv)
       objDiv.scrollTop = objDiv.scrollHeight;
@@ -243,7 +242,7 @@ export default defineComponent({
 
   methods: {
     InRoom (room: Room) {
-      console.log(room);
+      console.log(`InRoom methods: ${room}`);
       if (!room || !room.users)
         return false;
       return room.users.find(user => user.id === store.state.user.id) ? true : false;
@@ -286,7 +285,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log(response);
+          console.log(`getPrivate response: ${response.data}`);
           store.commit("setPrivate", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
@@ -297,7 +296,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log(response);
+          console.log(`getRooms response: ${response.data}`);
           store.commit("setRooms", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
@@ -308,7 +307,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log(response);
+          console.log(`getMessages response: ${response.data}`);
           store.commit("setMessages", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
@@ -316,7 +315,7 @@ export default defineComponent({
 
     async createRoom() {
       if (this.roomName == "") {
-        this.toast.add({severity: "error", summary: "Invalide Name", detail: "Room must have a valide name", life: 2000});
+        this.$toast.add({severity: "error", summary: "Invalide Name", detail: "Room must have a valide name", life: 2000});
         return;
       }
       const room = { ownerId: store.state.user.id, name: this.roomName, hash: this.roomPassword } as Room;
@@ -325,10 +324,10 @@ export default defineComponent({
       })
         .then((response: AxiosResponse) => {
           if (!this.InRoom(response.data)) {
-            this.toast.add({severity: "warn", summary: "Room name invalid", detail: "Room must have a unique name", life: 2000});
+            this.$toast.add({severity: "warn", summary: "Room name invalid", detail: "Room must have a unique name", life: 2000});
             return ;
           }
-          console.log(`createRoom success: ${response.data}`);
+          console.log(`createRoom response.data: ${response.data}`);
           store.commit("setLastRoom", response.data);
           socket.emit("join_room", { user: store.state.user, room:  response.data });
           store.commit("setMessages", []);
@@ -344,7 +343,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log("deleteRoom success: " + response);
+          console.log(`deleteRoom response.data: ${response.data}`);
           socket.emit("leave_room", { user: store.state.user, room:  response.data });
           store.commit("setLastRoom", {});
           store.commit("delRoom", room);
@@ -364,9 +363,8 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
       .then((res) => {
-        console.log(`joinRoom success ${res.data}`);
-        if (!res.data)
-          return;
+        if (!res.data) return;
+        console.log(`joinRoom response.data: ${res.data}`);
         const payload = {
           user: store.state.user,
           room: room,
@@ -388,7 +386,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
       .then((res) => {
-        console.log(`leaveRoom success ${res.data}`);
+        console.log(`leaveRoom response.data: ${res.data}`);
         const payload = {
           user: store.state.user,
           room: room,

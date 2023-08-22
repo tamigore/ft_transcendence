@@ -38,51 +38,61 @@ const store = createStore({
         addMessage : function (state, chatMessage: Message) {
             state.messages.push(chatMessage);
         },
-        setMessages : function (state, chatMessages: Message[]) {
+        setMessages(state, chatMessages: Message[]) {
             state.messages = chatMessages;
         },
-        setLastMessage : function (state, chatMessages: Message) {
+        setLastMessage(state, chatMessages: Message) {
             state.lastMessage = chatMessages;
         },
-        setLastPrivate: function (state, room: Room) {
+        setLastPrivate(state, room: Room) {
             console.log('setLastPrivate: ', room);
             state.lastPrivate.id = room.id;
             state.lastPrivate.name = room.name;
             state.lastPrivate.ownerId = room.ownerId;
         },
-        setLastRoom: function (state, room: Room) {
+        setLastRoom(state, room: Room) {
             console.log('setLastRoom: ', room);
             state.lastRoom.id = room.id;
             state.lastRoom.name = room.name;
             state.lastRoom.ownerId = room.ownerId;
         },
-        setRooms: function (state, rooms: Room[]) {
+        setRooms(state, rooms: Room[]) {
             console.log('setRooms: ', rooms);
             state.rooms = rooms;
         },
-        addRoom: function (state, room: Room) {
+        addRoom(state, room: Room) {
             console.log('addRoom: ', room);
             state.rooms.push(room);
         },
-        delRoom: function (state, room: Room) {
+        delRoom(state, room: Room) {
             console.log('delRoom: ', room);
             const index = state.rooms.indexOf(room);
             if (index >= 0) {
                 state.rooms.splice(index, index);
             }
         },
-        setPrivate: function (state, rooms: Room[]) {
+        setPrivate(state, rooms: Room[]) {
             console.log('setRooms: ', rooms);
             state.private = rooms;
         },
-        addPrivate: function (state, room: Room) {
-            console.log('addRoom: ', room);
+        addPrivate(state, room: Room) {
+            console.log('addPrivate: ', room);
             state.private.push(room);
         },
-        setUser: function (state, user: User) {
+        setFriend(state, users: User[]) {
+            console.log('setFriend: ', users);
+            state.user.friend = users;
+            state.user.friendBy = users;
+        },
+        setBlocked(state, users: User[]) {
+            console.log('setBlocked: ', users);
+            state.user.friend = users;
+            state.user.friendBy = users;
+        },
+        setUser(state, user: User) {
             console.log('setUser: ', user);
-            state.user.id = user.id;
-            state.user.created_at = user.created_at;
+            // state.user.id = user.id;
+            // state.user.created_at = user.created_at;
             state.user.updated_at = user.updated_at;
             state.user.email = user.email;
             state.user.username = user.username;
@@ -92,36 +102,39 @@ const store = createStore({
             state.user.bio = user.bio;
             state.user.img = user.img;
             state.user.twoFA = user.twoFA;
+            if (user.blocked)
+                state.user.blocked = user.blocked;
+            if (user.friend)
+                state.user.friend = user.friend;
         },
-        delUser: function (state) {
-            console.log('delUser');
+        delUser(state) {
             state.user = {} as User;
         },
-        setUserID: function (state, id: number) {
+        setUserID(state, id: number) {
             state.user.id = id;
         },
-        setLogged: function (state, islog: boolean) {
+        setLogged(state, islog: boolean) {
             state.user.loggedIn = islog;
         },
-        setUsername: function (state, username: string) {
+        setUsername(state, username: string) {
             state.user.username = username;
         },
-        setEmail: function (state, email: string) {
+        setEmail(state, email: string) {
             state.user.email = email;
         },
-        setHash: function (state, hash: string) {
+        setHash(state, hash: string) {
             state.user.hash = hash;
         },
-        setHashRt: function (state, hashRt: string) {
+        setHashRt(state, hashRt: string) {
             state.user.hashRt = hashRt;
         },
-        setChatSocket : function (state, chatSocket: string) {
+        setChatSocket (state, chatSocket: string) {
             state.user.chatSocket = chatSocket;
         },
-        setAvatarId : function (state, avatarId: string) {
+        setAvatarId (state, avatarId: string) {
             state.user.img = avatarId;
         },
-        setBio : function (state, description: string) {
+        setBio (state, description: string) {
             state.user.bio = description;
         },
     },

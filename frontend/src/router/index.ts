@@ -67,7 +67,7 @@ router.beforeEach(async (to, from) => {
       cookies.remove("access_token");
       cookies.remove("refresh_token");
       cookies.remove("userId");
-      await axios.get(`api/user/${store.state.user.id}`, {
+      await axios.get(`api/user/all/${store.state.user.id}`, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then((response: AxiosResponse) => {
@@ -82,7 +82,7 @@ router.beforeEach(async (to, from) => {
     }
   }
   if (from.name === 'home') {
-    await axios.get(`api/user/${store.state.user.id}`, {
+    await axios.get(`api/user/all/${store.state.user.id}`, {
       headers: {"Authorization": `Bearer ${store.state.user.hash}`}
     })
     .then(async (response: AxiosResponse) => {

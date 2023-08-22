@@ -711,9 +711,7 @@ export default defineComponent({
     },
 
     async addBlock() {
-      if (this.selectedBlock.trim() === '') {
-        return;
-      }
+      if (this.selectedBlock.trim() === '') return;
       const id = parseInt(this.selectedBlock);
       let friend = null as User | null;
       if (!isNaN(id)) {
@@ -1090,7 +1088,6 @@ export default defineComponent({
 
     async blockFriend(index: number, user: User) {
       this.removeFriend(index, user);
-
       return await axios
         .post(`/api/user/block/add`, user,
           {

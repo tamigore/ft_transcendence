@@ -69,6 +69,21 @@ export class UserService {
       });
   }
 
+  async findWithAllById(id: number) {
+    this.logger.log(`findById user: ${id}`);
+    return await this.prisma.user
+      .findUnique({
+        where: { id: id },
+        include: {
+          friend: true,
+          blocked: true,
+        },
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
   async findByUsername(name: string): Promise<User> {
     this.logger.log(`findByUsername user: ${name}`);
     return await this.prisma.user
@@ -111,11 +126,7 @@ export class UserService {
     this.logger.log(
       `user id : ${userId} wants to update user: ${updateUserDto}`,
     );
-    const find = await this.prisma.user.findUnique({
-      where: { username: updateUserDto.username },
-    });
-    if (typeof find !== "undefined" && find && find.username) return find; // not updated cause user is already in use
-    await this.prisma.user
+    return await this.prisma.user
       .update({
         where: { id: userId },
         data: {
@@ -156,7 +167,7 @@ export class UserService {
 
   async addFriends(userId: number, friendId: number) {
     this.logger.log(`user id: ${userId} wants to addFriends: ${friendId}`);
-    await this.prisma
+    return await this.prisma
       .$transaction([
         this.prisma.user.update({
           where: { id: userId },
@@ -169,6 +180,10 @@ export class UserService {
       ])
       .then((user) => {
         this.logger.log("addFriends success: ", user);
+        return this.prisma.user.findUnique({
+          where: { id: userId },
+          include: { friend: true },
+        });
       })
       .catch((error) => {
         throw new Error(error);
@@ -190,30 +205,14 @@ export class UserService {
       ])
       .then((user) => {
         this.logger.log("removeFriends success: ", user);
+        return this.prisma.user.findUnique({
+          where: { id: userId },
+          include: { friend: true },
+        });
       })
       .catch((error) => {
         throw new Error(error);
       });
-  }
-
-  async findFriendsById(userId: number, id: number) {
-    this.logger.log(`findFriendById user: ${userId}, friend: ${id}`);
-    const users = await this.prisma.user.findMany({
-      where: {
-        OR: [
-          {
-            id: userId,
-          },
-          {
-            id: id,
-          },
-        ],
-      },
-      include: {
-        friend: true,
-      },
-    });
-    return users;
   }
 
   async findFriends(userId: number) {
@@ -257,6 +256,10 @@ export class UserService {
       ])
       .then((user) => {
         this.logger.log("addBlocked success: ", user);
+        return this.prisma.user.findUnique({
+          where: { id: userId },
+          include: { blocked: true },
+        });
       })
       .catch((error) => {
         throw new Error(error);
@@ -278,6 +281,10 @@ export class UserService {
       ])
       .then((user) => {
         this.logger.log("removeBlocked success: ", user);
+        return this.prisma.user.findUnique({
+          where: { id: userId },
+          include: { blocked: true },
+        });
       })
       .catch((error) => {
         throw new Error(error);
