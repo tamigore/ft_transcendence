@@ -165,6 +165,25 @@ export class UserService {
       });
   }
 
+  async updateGameSocket(userId: number, gameSocket: string) {
+    this.logger.log(
+      `user id : ${userId} wants to update gameSocket: ${gameSocket}`,
+    );
+    await this.prisma.user
+      .update({
+        where: { id: userId },
+        data: {
+          gameSocket: gameSocket,
+        },
+      })
+      .then((user) => {
+        this.logger.log("gameSocket update success: ", user);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
   async addFriends(userId: number, friendId: number) {
     this.logger.log(`user id: ${userId} wants to addFriends: ${friendId}`);
     return await this.prisma

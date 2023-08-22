@@ -111,6 +111,18 @@ export class UserController {
     return this.userService.updateChatSocket(userId, chatSocket.socket);
   }
 
+  @Post("gamesocket")
+  @Header("Access-Control-Allow-Origin", "*")
+  @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.OK)
+  updateGameSocket(
+    @GetCurrentUserId() userId: number,
+    @Body() gameSocket: any,
+  ) {
+    console.log(gameSocket.socket);
+    this.userService.updateGameSocket(userId, gameSocket.socket);
+  }
+
   @Post("block/add")
   @Header("Access-Control-Allow-Origin", "*")
   @UseGuards(AtGuard)

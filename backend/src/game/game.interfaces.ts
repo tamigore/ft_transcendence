@@ -1,11 +1,11 @@
 export class Matchmaker {
-  userId: string;
+  userId: number;
   userName: string;
   isBlocked: boolean;
 }
 
 export class Spectate {
-  userId: string;
+  userId: number;
   userName: string;
   userPlaying: number;
 }

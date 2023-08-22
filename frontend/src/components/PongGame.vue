@@ -139,7 +139,7 @@ import { BallClass } from "../class/BallClass";
 import { EffectBlock } from "../class/EffectBlock";
 
 
-/* eslint-disable */
+
 
 export default defineComponent({
   name: 'FpsComponent',
@@ -149,7 +149,7 @@ export default defineComponent({
     let ctx: CanvasRenderingContext2D | null = null;
     const { fps } = useFPS();
     // const hitSound = ref(null);
-    let lastDate = Date.now();
+    // let lastDate = Date.now();
     const hitSound = new Audio();
     const Pong = ref(new PongGameClass(hitSound));
     const paddleSprite = new Image();
@@ -201,179 +201,170 @@ export default defineComponent({
 
     const gameLoop = () => {
 
-      // if (store.state.ingame && !Pong.value.gameIsRunning)
-      // {
-      //   console.log(Pong.value.gameIsRunning);
-      //   Pong.value.startMultiOnline();
+    
+      // if (store.state.ingame && store.state.playerNum == 1) {
+        if (Pong.value.inMultiplayer && !store.state.ingame)
+          Pong.value.restartMatch();
+        if (!ctx)
+        {
+          return;
+        }
+        ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
+        Pong.value.bot();
+        Pong.value.moovePaddles();
+        Pong.value.theBall.ballColision();
+        for (const ball of Pong.value.myBalls) {
+          ball.ballColision();
+        }
+        drawBlocks();
+        drawBall();
+        drawPaddle(Pong.value.paddleOffset, Pong.value.leftPaddleY, Pong.value.leftPaddleWidth, Pong.value.leftPaddleHeight,
+          paddleSprite);
+        drawPaddle(Pong.value.width - Pong.value.paddleOffset - Pong.value.rightPaddleWidth, Pong.value.rightPaddleY,
+          Pong.value.rightPaddleWidth, Pong.value.rightPaddleHeight, paddleSprite);
+        for (const ball of Pong.value.myBalls) {
+          ball.ballColision();
+        }
+        //parfois la balle sort du jeu et n'est pas reset
       // }
-     if (store.state.ingame && store.state.playerNum == 1)
-     {
-      const nowDate = Date.now();
-      if (lastDate + 250 < nowDate)
-      {
-        console.log("ballSetter d utemps");
-        lastDate  = nowDate;
-        socket.emit("ballSetter", {ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom});
-      }
-      if (Pong.value.inMultiplayer && !store.state.ingame)
-        Pong.value.restartMatch();
-      if (!ctx)
-        return;
-      ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
-      Pong.value.bot();
-      Pong.value.moovePaddles();
-      Pong.value.theBall.ballColision();
-      for (const ball of Pong.value.myBalls) {
-        ball.ballColision();
-      }
-      drawBlocks();
-      drawBall();
-      drawPaddle(Pong.value.paddleOffset, Pong.value.leftPaddleY, Pong.value.leftPaddleWidth, Pong.value.leftPaddleHeight,
-        paddleSprite);
-      drawPaddle(Pong.value.width - Pong.value.paddleOffset - Pong.value.rightPaddleWidth, Pong.value.rightPaddleY,
-        Pong.value.rightPaddleWidth, Pong.value.rightPaddleHeight, paddleSprite);
-      for (const ball of Pong.value.myBalls) {
-        ball.ballColision();
-      }
-      //parfois la balle sort du jeu et n'est pas reset
     }
 
-    /*******************Draw Functions*******************/
+      /*******************Draw Functions*******************/
 
-    
 
-    
 
-    // ... (other methods)
-    /*******************Mounted and unMounted*******************/
 
-    onMounted(() => {
 
-      paddleSprite.src = require('@/assets/sprites/blanc.png'); // Adjust the path as needed
-      hitSound.src = require('@/assets/sounds/hitSound.wav');
+      // ... (other methods)
+      /*******************Mounted and unMounted*******************/
 
-      socket.on("gameRoomJoiner", (data) => {
-        // console.log("GameRoomJoiner", data.room);
-        store.commit("setGameRoom", data.room);
-        if (store.state.playerNum == 2) {
+      onMounted(() => {
+        paddleSprite.src = require('@/assets/sprites/blanc.png'); // Adjust the path as needed
+        hitSound.src = require('@/assets/sounds/hitSound.wav');
+
+        if (myCanvas.value) {
+          ctx = myCanvas.value.getContext('2d');
+          if (ctx) {
+            window.addEventListener('keydown', Pong.value.handleKeyDown);
+            window.addEventListener('keyup', Pong.value.handleKeyUp);
+            setInterval(gameLoop, gameTick);
+          }
+        }
+
+        socket.on("gameRoomJoiner", (data) => {
+          console.log("====================gameRoomJoiner", data);
+          store.commit("setGameRoom", data.room);
+          if (store.state.playerNum == 2) {
+            store.commit("setGameConnect", true);
+            store.commit("setInQueue", false);
+            Pong.value.startMultiOnline();
+            socket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
+          }
+        })
+
+        socket.on("LaunchGame", (e: BallState) => {
+
           store.commit("setGameConnect", true);
           store.commit("setInQueue", false);
           Pong.value.startMultiOnline();
-          socket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
-        }
-      })
+          Pong.value.theBall.setBallState(e);
+        });
 
-      socket.on("LaunchGame", (e: BallState) => {
+        socket.on("servMessage", (e: GameMove) => {
+          Pong.value.handleKeyOnline(e.player, e.notPressed, e.key);
+        });
 
-        store.commit("setGameConnect", true);
-        store.commit("setInQueue", false);
-        Pong.value.startMultiOnline();
-        Pong.value.theBall.setBallState(e);
-      });
+        socket.on("paddleStateMessage", (e: PaddleState) => {
+          Pong.value.setPaddleState(e);
 
-      socket.on("servMessage", (e: GameMove) => {
-        Pong.value.handleKeyOnline(e.player, e.notPressed, e.key);
-      });
+        });
 
-      socket.on("paddleStateMessage", (e: PaddleState) => {
-        Pong.value.setPaddleState(e);
-
-      });
-
-      socket.on("setBall", (e: BallState) => {
-        if (store.state.playerNum != e.player)
-          if (e.ballId == 0)
-            Pong.value.theBall.setBallState(e);
-          else {
-            for (const ball of Pong.value.myBalls) {
-              if (ball.id == e.ballId)
-                ball.setBallState(e);
+        socket.on("setBall", (e: BallState) => {
+          if (store.state.playerNum != e.player)
+            if (e.ballId == 0)
+              Pong.value.theBall.setBallState(e);
+            else {
+              for (const ball of Pong.value.myBalls) {
+                if (ball.id == e.ballId)
+                  ball.setBallState(e);
+              }
             }
+        });
+
+        socket.on("scoreMessage", (e: number) => {
+          if (e == 2)
+            Pong.value.scoreA++;
+          else if (e == 1)
+            Pong.value.scoreB++;
+          if (Pong.value.scoreA >= 100 || Pong.value.scoreB >= 100) {
+            Pong.value.endGameOnline();
+            store.commit("setGameConnect", false);
           }
-      });
+        });
 
-      socket.on("scoreMessage", (e: number) => {
-        if (e == 2)
-          Pong.value.scoreA++;
-        else if (e == 1)
-          Pong.value.scoreB++;
-        if (Pong.value.scoreA >= 100 || Pong.value.scoreB >= 100) {
-          Pong.value.endGameOnline();
+        socket.on("blockCreation", (block: BlockState) => {
+          if (store.state.playerNum != 1) {
+            console.log("blockCreation", block.num);
+            Pong.value.myBlocks.push(new EffectBlock(Pong.value, block.x, block.y,
+              block.width, block.height, block.effect, block.num, block.id));
+          }
+        });
+
+        socket.on("ballCreation", (ball: BallState) => {
+          console.log("ballCreation", ball);
+          if (store.state.playerNum != 1) {
+            Pong.value.myBalls.push(new BallClass(Pong.value, ball.ballX, ball.ballY, ball.ballVeloX, ball.ballVeloY,
+              Pong.value.ballRadius, 'blue', 1));
+          }
+        });
+
+        socket.on("ballDestruction", (id: number) => {
+          console.log("ballDestruction", id);
+          Pong.value.removeBall(id);
+        });
+
+        socket.on("gameEnder", () => {
+          Pong.value.inMultiplayer = false;
+          Pong.value.gameIsRunning = false;
+          store.commit("setGameRoom", "");
           store.commit("setGameConnect", false);
-        }
+          store.commit("setPlayerNum", 0);
+          Pong.value.restartMatch();
+          console.log("gameEnder is ended");
+        });
       });
 
-      socket.on("blockCreation", (block: BlockState) => {
-        if (store.state.playerNum != 1) {
-          console.log("blockCreation", block.num);
-          Pong.value.myBlocks.push(new EffectBlock(Pong.value, block.x, block.y,
-            block.width, block.height, block.effect, block.num, block.id));
-        }
-      });
 
-      socket.on("ballCreation", (ball: BallState) => {
-        console.log("ballCreation", ball);
-        if (store.state.playerNum != 1) {
-          Pong.value.myBalls.push(new BallClass(Pong.value, ball.ballX, ball.ballY, ball.ballVeloX, ball.ballVeloY,
-            Pong.value.ballRadius, 'blue', 1));
-        }
-      });
 
-      socket.on("ballDestruction", (id: number) => {
-        console.log("ballDestruction", id);
-        Pong.value.removeBall(id);
-      });
-
-      socket.on("gameEnder", () => {
-        Pong.value.inMultiplayer = false;
-        Pong.value.gameIsRunning = false;
-        store.commit("setGameRoom", "");
+      onUnmounted(() => {
+        window.removeEventListener('keydown', Pong.value.handleKeyDown);
+        window.removeEventListener('keyup', Pong.value.handleKeyUp);
         store.commit("setGameConnect", false);
+        store.commit("setInQueue", false);
+        store.commit("setGameRoom", "");
         store.commit("setPlayerNum", 0);
-        Pong.value.restartMatch();
-        console.log("gameEnder is ended");
       });
 
-      if (myCanvas.value) {
-        ctx = myCanvas.value.getContext('2d');
-        if (ctx) {
-          window.addEventListener('keydown', Pong.value.handleKeyDown);
-          window.addEventListener('keyup', Pong.value.handleKeyUp);
-          setInterval(gameLoop, gameTick);
-        }
-      }
-    });
+      /*******************Computed values*******************/
 
-    onUnmounted(() => {
-      window.removeEventListener('keydown', Pong.value.handleKeyDown);
-      window.removeEventListener('keyup', Pong.value.handleKeyUp);
-      store.commit("setGameConnect", false);
-      store.commit("setInQueue", false);
-      store.commit("setGameRoom", "");
-      store.commit("setPlayerNum", 0);
-    });
+      const pongStyle = computed(() => ({
+        '--width': `${Pong.value.width * 3}px`,
+        '--height': `${Pong.value.height * 3}px`,
+      }));
 
-    /*******************Computed values*******************/
+      const computedCanvasStyle = computed(() => ({
+        '--canvasWidth': `${Pong.value.width}px`,
+        '--canvasHeight': `${Pong.value.height}px`,
+      }));
 
-    const pongStyle = computed(() => ({
-      '--width': `${Pong.value.width * 3}px`,
-      '--height': `${Pong.value.height * 3}px`,
-    }));
-
-    const computedCanvasStyle = computed(() => ({
-      '--canvasWidth': `${Pong.value.width}px`,
-      '--canvasHeight': `${Pong.value.height}px`,
-    }));
-
-    return {
-      Pong,
-      pongStyle,
-      myCanvas,
-      computedCanvasStyle,
-      fps,
-    };
-  }
-},
-}
+      return {
+        Pong,
+        pongStyle,
+        myCanvas,
+        computedCanvasStyle,
+        fps,
+      };
+    }
+  },
 );
 </script>

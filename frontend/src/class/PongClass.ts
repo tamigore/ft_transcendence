@@ -188,6 +188,7 @@ export class PongGameClass {
     this.inMultiplayer = false;
 
     this.hitSound = _hitSound;
+    console.log("hitSound");
     this.blockSprites = [
       require('@/assets/sprites/jaune.png'),
       require('@/assets/sprites/bleu.png'),
@@ -223,11 +224,11 @@ export class PongGameClass {
   }
 
   randStartSpeedX(): number {
-    return (1.5 + Math.random() * 0.75);
+    return (4 + Math.random() * 2)/this.veloDiv;
   }
 
   randStartSpeedY(): number {
-    return (1 - Math.random() * 2);
+    return (4 - Math.random() * 8)/this.veloDiv;
   }
 
   newBall(color?: string, x?: number, y?: number, hp?: number, direction?: number) {

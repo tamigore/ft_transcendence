@@ -74,9 +74,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() e: { user: User; room: string },
   ): Promise<boolean> {
-    this.logger.log("---joinGameRoom------", client.id, e.room);
+    this.logger.log("---joinGameRoom------",e.user.username, e.room);
     this.server.in(client.id).socketsJoin(e.room);
-    this.server.to(e.room).emit("", e);
+    this.server.to(e.room).emit("gameRoomJoiner", e);
     return true;
   }
 

@@ -1,18 +1,47 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Get,
-} from "@nestjs/common";
-import { HistoricService } from "./game.service";
-import { Public } from "../common/decorators";
-import { Historic } from "@prisma/client";
+import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import { GameService } from "./game.service";
+import { GetCurrentUserId, Public } from "../common/decorators";
+import { Game } from "@prisma/client";
+import { Matchmaker, Spectate } from "./game.interfaces";
+import { UseGuards } from "@nestjs/common";
+import { AtGuard } from "src/common/guards";
 
-@Controller("historic")
+@Controller("game")
 export class GameController {
-  constructor(private historicService: HistoricService) {}
+  constructor(private gameService: GameService) {}
+
+  @UseGuards(AtGuard)
+  @Post("matchmaker")
+  @HttpCode(HttpStatus.OK)
+  setGameFromId(@GetCurrentUserId() userId, @Body() dto: Matchmaker): Promise<Game> {
+    dto.userId = userId;
+    return this.gameService.matchMaker(dto);
+  }
+
+  @UseGuards(AtGuard)
+  @Post("spectate")
+  setGameSpectator(@Body() dto: Spectate): Promise<Game> {
+    return this.gameService.SpectateGame(dto);
+  }
+}
+
+
+// import {
+//   Body,
+//   Controller,
+//   HttpCode,
+//   HttpStatus,
+//   Post,
+//   Get,
+// } from "@nestjs/common";
+// import { GameService } from "./game.service";
+// import { Public } from "../common/decorators";
+// import { Historic } from "@prisma/client";
+
+// @Controller("historic")
+// export class GameController {
+//   constructor(private historicService: HistoricService) {}
+
 
 //   @Public()
 //   @Get("ID")
