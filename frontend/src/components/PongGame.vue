@@ -310,6 +310,12 @@ export default defineComponent({
           }
         });
 
+        socket.on("blockDestruction", (id: number) => {
+          console.log("blockDestruction", id);
+          Pong.value.removeBlock(id);
+        });
+
+
         socket.on("ballCreation", (ball: BallState) => {
           console.log("ballCreation", ball);
           if (store.state.playerNum != 1) {

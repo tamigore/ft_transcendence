@@ -127,10 +127,13 @@ export class BallClass {
     for (const block of this.pong.myBlocks) {
       if (this.x + this.radius >= block.x && this.x - this.radius <= block.x + block.width) {
         if (this.y + this.radius >= block.y && this.y - this.radius <= block.y + block.height) {
-          block.triggerEffect(this);
+          if (!store.state.ingame || store.state.playerNum == 1)
+          {
+            block.triggerEffect(this);
           // console.log("ballBlockColision = ", block.id);
-          socket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
-          this.pong.removeBlock(block.id);
+            socket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
+            this.pong.removeBlock(block.id);
+          }
 
           return;
         }

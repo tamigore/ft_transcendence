@@ -456,11 +456,11 @@ export class PongGameClass {
   }
 
   setPaddleState = (paddleState: PaddleState) => {
-    if (paddleState.player == 1 && store.state.playerNum != 2) {
+    if (paddleState.player == 1) {
       this.leftPaddleY = paddleState.posY;
       this.leftPaddleHeight = paddleState.height;
     }
-    else if (paddleState.player == 2 && store.state.playerNum != 1) {
+    else if (paddleState.player == 2) {
       this.rightPaddleY = paddleState.posY;
       this.rightPaddleHeight = paddleState.height;
     }

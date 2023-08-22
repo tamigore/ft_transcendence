@@ -122,7 +122,6 @@ export class EffectBlock {
         ball.pong.leftPaddleHeight /= 1.1;
         paddleStateData = ball.pong.getpaddleState(1);
         socket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
-
       }
     }
   }
