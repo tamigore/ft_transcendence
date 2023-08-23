@@ -43,7 +43,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: { moove: GameMove; room: string },
   ) {
     this.logger.log("gameMessage");
-    // this.logger.debug("MEaasfe body: ", body, "ConnectedSocket: ", client.id);
     this.server.to(body.room).emit("servMessage", body.moove);
   }
 
@@ -53,9 +52,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: { state: PaddleState; room: string },
   ) {
     this.logger.log("paddlePosMessage");
-    // this.logger.debug("ICI PADDLE: ", body, "ConnectedSocket: ", client.id);
-    // const str = body.room;
-    // this.logger.debug("teast ROOM ", str);
     this.server.to(body.room).emit("paddleStateMessage", body.state);
   }
 
@@ -65,7 +61,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: { ballInfo: BallState; room: string },
   ) {
     this.logger.log("pingMessage");
-    // this.logger.debug("HitMEssage bodyy: ", body, "ConnectedSocket: ", client.id);
     this.server.to(body.room).emit("pongMessage", body.ballInfo);
   }
 
@@ -74,7 +69,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() e: { user: User; room: string },
   ): Promise<boolean> {
-    this.logger.log("---joinGameRoom------",e.user.username, e.room);
+    this.logger.log("---joinGameRoom------", e.user.username, e.room);
     this.server.in(client.id).socketsJoin(e.room);
     this.server.to(e.room).emit("gameRoomJoiner", e);
     return true;
@@ -105,7 +100,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { ballInfo: BallState; room: string },
   ) {
-    // console.log("ballSetter  : ", body.ballInfo);
     this.logger.log("setBall");
     this.server.to(body.room).emit("setBall", body.ballInfo);
   }
@@ -115,7 +109,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { room: string; player: number },
   ) {
-    // console.log("goalMessage from player  : ", body.player);
     this.logger.log("goalMessage");
     this.server.to(body.room).emit("scoreMessage", body.player);
   }
@@ -125,7 +118,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { room: string; block: BlockState },
   ) {
-    // console.log("block creation ^^  : ", body.block.id);
     this.server.to(body.room).emit("blockCreation", body.block);
   }
 
@@ -134,7 +126,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { room: string; blockId: number },
   ) {
-    // console.log("block DESTRUCTION ^^  : ", body.blockId);
     this.server.to(body.room).emit("blockDestruction", body.blockId);
   }
 
@@ -190,27 +181,33 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage("onSpecBlock")
   async onSpecBlock(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { room: string; block: BlockState, userId : number },
+    @MessageBody() body: { room: string; block: BlockState; userId: number },
   ) {
     console.log("spectator block id : ", body.block.id);
-    this.server.to(body.room).emit("servOnSpecBlock", {block: body.block, userId: body.userId});
+    this.server
+      .to(body.room)
+      .emit("servOnSpecBlock", { block: body.block, userId: body.userId });
   }
 
   @SubscribeMessage("onSpecBall")
   async onSpecBall(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { room: string; ball: BallState, userId : number },
+    @MessageBody() body: { room: string; ball: BallState; userId: number },
   ) {
     console.log("spectator ball id", body.ball.ballId);
-    this.server.to(body.room).emit("servOnSpecBall", {ball: body.ball, userId: body.userId});
+    this.server
+      .to(body.room)
+      .emit("servOnSpecBall", { ball: body.ball, userId: body.userId });
   }
 
   @SubscribeMessage("onSpecPaddle")
   async onSpecPaddle(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { room: string; paddle: PaddleState, userId : number },
+    @MessageBody() body: { room: string; paddle: PaddleState; userId: number },
   ) {
     console.log("spectator paddle : ", body.paddle);
-    this.server.to(body.room).emit("servOnSpecPaddle", {paddle: body.paddle, userId: body.userId});
+    this.server
+      .to(body.room)
+      .emit("servOnSpecPaddle", { paddle: body.paddle, userId: body.userId });
   }
 }

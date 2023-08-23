@@ -93,14 +93,8 @@ export class PongGameClass {
   inMultiplayer: boolean;
   hitSound: HTMLAudioElement;
   blockSprites: [string, string, string, string, string, string, string];
-  // audioContext: AudioContext;
-  // audioBuffer: null;
 
   constructor(_hitSound: HTMLAudioElement) {
-    //AUDIO
-
-    // this.audioContext = new window.AudioContext();
-    // this.audioBuffer = null;
     //GAME PARAMETERS
     this.width = SetPongWidth;
     this.height = SetPongHeight;
@@ -114,81 +108,57 @@ export class PongGameClass {
 
     //LEFT PADDLE PARAMETERS
     this.bounce = SetBounce;
-
     this.leftPaddleWidth = SetLeftPaddleWidth;
     this.leftPaddleHeight = SetLeftPaddleHeight;
-
     this.leftPaddleY = SetLeftPaddleY;
     this.leftPaddleX = SetLeftPaddleX;
     this.leftPaddleSpeed = SetLeftPaddleSpeed;
-
     this.leftPaddleColor = setLeftPaddleColor;
-
     this.leftPaddleJustHit = false;
 
     //RIGHT PADDLE PARAMETERS
     this.rightPaddleWidth = SetRightPaddleWidth;
     this.rightPaddleHeight = SetRightPaddleHeight;
-
     this.rightPaddleY = SetRightPaddleY;
     this.rightPaddleX = SetRightPaddleX;
     this.rightPaddleSpeed = SetRightPaddleSpeed;
-
     this.rightPaddleColor = setRightPaddleColor;
     this.rightPaddleJustHit = false;
 
     //BALL PARAMETERS
-
     this.myBalls = [];
-
     this.ballRadius = setBallRadius;
     this.paddleOffset = SetPaddleOffset;
-
     this.ballStartSpeedX = setBallStartSpeedX;
     this.ballStartSpeedY = setBallStartSpeedY;
-
     this.num_ping = 0;
     this.num_pong = 0;
-
     this.scoreA = 0;
     this.scoreB = 0;
 
     //BLOCKS PARAMETERS
-
     this.myBlocks = [];
     this.blockWidth = SetBlockWidth;
     this.blockHeight = SetBlockHeight;
 
     //VARIOUS PARAMETERS
-
     this.blockSpace = setBlockSpace;
     this.blockId = 1;
     this.ballId = 0;
-
     this.gameIsRunning = false;
     this.gameIsBlocks = false;
     this.blockStatus = 'DISABLED';
-
     this.alreadyComputed = false;
-
     this.leftArrowUp = 0;
     this.leftArrowDown = 0;
-
     this.rightArrowUp = 0;
     this.rightArrowDown = 0;
-
     this.inertie = [0, 0];
-
     this.wallIsUp = false;
-
     this.veloDiv = setVeloDiv;
-
     this.theBall = new BallClass(this, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
-
     this.inMultiplayer = false;
-
     this.hitSound = _hitSound;
-    console.log("hitSound");
     this.blockSprites = [
       require('@/assets/sprites/jaune.png'),
       require('@/assets/sprites/bleu.png'),
@@ -215,20 +185,18 @@ export class PongGameClass {
 
   startNoPlayer() {
     this.restartMatch(true, false, false, true);
-
   }
 
   startMatchMultiLocal() {
     this.restartMatch(true);
-
   }
 
   randStartSpeedX(): number {
-    return (4 + Math.random() * 2)/this.veloDiv;
+    return (4 + Math.random() * 2) / this.veloDiv;
   }
 
   randStartSpeedY(): number {
-    return (4 - Math.random() * 8)/this.veloDiv;
+    return (4 - Math.random() * 8) / this.veloDiv;
   }
 
   newBall(color?: string, x?: number, y?: number, hp?: number, direction?: number) {
@@ -261,39 +229,26 @@ export class PongGameClass {
   restartMatch(gameIsRunnig?: boolean, rightBot?: boolean, wallIsUp?: boolean, bothBot?: boolean) {
     this.scoreA = 0;
     this.scoreB = 0;
-
     this.num_ping = 0;
     this.num_pong = 0;
-
-
     this.ballId = 1;
     this.myBalls = [];
-
     this.theBall.x = this.width / 2;
     this.theBall.y = this.height / 2;
-
     this.theBall.veloX = 0;
     this.theBall.veloY = 0;
-
     this.blockId = 1;
     this.myBlocks = [];
-
     this.inertie = [0, 0];
-
     this.rightPaddleHeight = 80;
     this.rightPaddleY = this.height / 2 - this.rightPaddleHeight / 2;
-
     this.rightPlayerKeyDown = 'ArrowDown';
     this.rightPlayerKeyUp = 'ArrowUp';
-
     this.leftPaddleHeight = 80;
     this.leftPaddleY = this.height / 2 - this.leftPaddleHeight / 2;
-
     this.leftPlayerKeyDown = 's';
     this.leftPlayerKeyUp = 'w';
-
     this.gameIsRunning = false;
-
     this.wallIsUp = false;
     if (gameIsRunnig != undefined && gameIsRunnig) {
       this.gameIsRunning = true;
@@ -372,16 +327,10 @@ export class PongGameClass {
     this.restartMatch();
   }
 
-
-
   /*******************Bots*******************/
-
   boting = (paddleY: number, paddleX: number, paddleHeight: number, player: number): number => {
-
     let ballY = this.theBall.y;
     let ballX = this.theBall.x;
-
-
     for (const ball of this.myBalls) {
       if (Math.abs(ball.x + ball.veloX - paddleX) < Math.abs(ball.x - paddleX) && Math.abs(ball.x - paddleX) < Math.abs(ballX - paddleX)) {
         ballY = ball.y;
@@ -411,29 +360,22 @@ export class PongGameClass {
         || (this.inertie[player] < 0 && paddleY > this.height - paddleHeight - 1))
         this.inertie[player] = 0;
     }
-
     return paddleY;
   }
 
   bot() {
     if (this.leftPlayerKeyDown == '' && !this.inMultiplayer)
       this.leftPaddleY = this.boting(this.leftPaddleY, this.leftPaddleX + this.leftPaddleWidth, this.leftPaddleHeight, 0);
-
     if (this.rightPlayerKeyDown == '' && !this.inMultiplayer)
       this.rightPaddleY = this.boting(this.rightPaddleY, this.rightPaddleX, this.rightPaddleHeight, 1);
   }
 
-
-
   /*******************Paddles Movements*******************/
-
   moovePaddles() {
     if (this.leftArrowUp && this.leftPaddleY > 1 - this.leftPaddleHeight) {
-      // socket.socket.emit(up);
       this.leftPaddleY -= this.leftPaddleSpeed * this.leftArrowUp;
     }
     else if (this.leftArrowDown && this.leftPaddleY < this.height - 1) {
-      // socket.socket.emit(down);
       this.leftPaddleY += this.leftPaddleSpeed * this.leftArrowDown;
     }
 
@@ -442,7 +384,6 @@ export class PongGameClass {
     else if (this.rightArrowDown && this.rightPaddleY < this.height - 1)
       this.rightPaddleY += this.rightPaddleSpeed * this.rightArrowDown;
   }
-
 
   getPaddleState = (player: number): PaddleState => {
     if (player == 1)
@@ -471,8 +412,6 @@ export class PongGameClass {
   }
 
   /*******************Keys handelers*******************/
-
-
   handleKeyOnline = (player: number, notPressed: boolean, key: number) => {
     if (notPressed)
       this.onlineKeyUp(player, key);
@@ -511,18 +450,13 @@ export class PongGameClass {
   }
 
   sendKey = (_player: number, _up: boolean, _key: number) => {
-    // console.log("game socket in game", store.state.gameSocket);
-
-    // console.log("sendKey", store.state.ingame, this.inMultiplayer);
     if (store.state.ingame && this.inMultiplayer) {
       const gameMoveData = {
         player: _player,
         notPressed: _up,
         key: _key,
       } as GameMove;
-
       socket.emit("gameMessage", { moove: gameMoveData, room: store.state.gameRoom });
-
       if (_up == true) {
         let _posY = 0;
         let _height = this.leftPaddleHeight;
@@ -532,21 +466,17 @@ export class PongGameClass {
           _posY = this.rightPaddleY;
           _height = this.rightPaddleHeight;
         }
-
         const paddleStateData = {
           player: _player,
           posY: _posY,
           height: _height
         } as PaddleState;
-
-
         socket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
       }
     }
   }
 
   handleKeyDown = (event: KeyboardEvent) => {
-
     if (event.key === this.leftPlayerKeyUp && this.leftArrowUp != 1) {
       this.leftArrowUp = 1;
       this.sendKey(1, false, 1);
@@ -564,8 +494,6 @@ export class PongGameClass {
       this.sendKey(2, false, 0);
     }
   }
-
-
 
   handleKeyUp = (event: KeyboardEvent) => {
     if (event.key === this.leftPlayerKeyUp && this.leftArrowUp != 0) {
@@ -586,12 +514,7 @@ export class PongGameClass {
     }
   }
 
-
-
-
-
   /*******************Blocks Functions*******************/
-
   checkBlockColi = (genX: number, genY: number, block: EffectBlock): boolean => {
     if (Math.abs(genX - block.x) < (this.blockWidth) && Math.abs(genY - block.y) < (this.blockHeight))
       return true;
@@ -618,7 +541,6 @@ export class PongGameClass {
   }
 
   /*******************Blocks Generation*******************/
-  /* eslint-disable */
   generateBlocks() {
     let genX = 0;
     let genY = 0;
@@ -626,7 +548,6 @@ export class PongGameClass {
     while (j < 25) {
       genX = this.width * 2 / 3 - this.width / 3 * Math.random();
       genY = (this.height - 1 * this.blockHeight) - ((this.height - 2 * this.blockHeight) * Math.random()) + 5;
-
       if (genX > this.width / 2)
         genX -= genX % (this.blockWidth * this.blockSpace);
       else
@@ -635,7 +556,6 @@ export class PongGameClass {
         genY -= genY % (this.blockHeight * this.blockSpace);
       else
         genY += (this.blockWidth * this.blockSpace) - genY % (this.blockHeight * this.blockSpace);
-
       if (this.isValidGen(genX, genY))
         break;
       j++;
@@ -647,7 +567,6 @@ export class PongGameClass {
     switch (numb) {
       case 0:
         {
-          //img.src = require('@/assets/pong.png');
           this.myBlocks.push(new EffectBlock(this, genX,
             genY,
             this.blockWidth, this.blockHeight, "R_SLOW", numb));
@@ -692,8 +611,6 @@ export class PongGameClass {
         break;
       }
     }
-    // console.log("block created", this.myBlocks[this.myBlocks.length - 1].getBlockState());
-
   }
 
   removeBlock = (blockId: number) => {
@@ -703,5 +620,4 @@ export class PongGameClass {
   removeBall = (ballId: number) => {
     this.myBalls = this.myBalls.filter(ball => ball.id !== ballId);
   }
-
 }

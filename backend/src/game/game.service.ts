@@ -6,59 +6,76 @@ import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 @Injectable()
 export class GameService {
   private logger: Logger = new Logger("GameService");
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
+
+  async findSpectate() {
+    return await this.prisma.game.findMany({
+      where: {
+        player2: { isNot: null },
+        historic: { is: null },
+      },
+      include: {
+        player1: true,
+        player2: true,
+      },
+    });
+  }
 
   async matchMaker(dto: Matchmaker): Promise<Game> {
-    console.log(`typeof ${typeof (dto.userId)}`);
-    const game = await this.prisma.$transaction(async () => {
-      const game = await this.prisma.game.findFirst({
-        where: {
-          player2: { is: null },
-          //isBlocked: dto.isBlocked as boolean,
-        },
-      })
-      console.log("INMATCHMAKER : ", dto.userName);
-
-      if (!game) {
-        this.logger.log(`no game found creating game: ${dto.userId} ... type ${typeof (dto.userId)}`);
-        return await this.prisma.game.create({
-          data: {
-            // isBlocked: dto.isBlocked,
-            name: dto.userName,
-            player1: {
-              connect: {
-                id: dto.userId,
-              }
-            }
-          },
-          include: {
-            player1: true,
-            player2: true,
-          }
-        })
-      }
-      else {
-        return await this.prisma.game.update({
+    console.log(`typeof ${typeof dto.userId}`);
+    const game = await this.prisma
+      .$transaction(async () => {
+        const game = await this.prisma.game.findFirst({
           where: {
-            id: game.id,
-            // isBlocked: dto.isBlocked,
+            player2: { is: null },
+            //isBlocked: dto.isBlocked as boolean,
           },
-          data: {
-            player2: {
-              connect: {
-                id: dto.userId,
-              }
-            }
-          },
-          include: {
-            player1: true,
-            player2: true,
-          }
-        })
-      }
-    })
+        });
+        console.log("INMATCHMAKER : ", dto.userName);
+
+        if (!game) {
+          this.logger.log(
+            `no game found creating game: ${
+              dto.userId
+            } ... type ${typeof dto.userId}`,
+          );
+          return await this.prisma.game.create({
+            data: {
+              // isBlocked: dto.isBlocked,
+              name: dto.userName,
+              player1: {
+                connect: {
+                  id: dto.userId,
+                },
+              },
+            },
+            include: {
+              player1: true,
+              player2: true,
+            },
+          });
+        } else {
+          return await this.prisma.game.update({
+            where: {
+              id: game.id,
+              // isBlocked: dto.isBlocked,
+            },
+            data: {
+              player2: {
+                connect: {
+                  id: dto.userId,
+                },
+              },
+            },
+            include: {
+              player1: true,
+              player2: true,
+            },
+          });
+        }
+      })
       .then((game) => {
-        this.logger.log(game)
+        this.logger.log(game);
         return game;
       })
       .catch((error) => {
@@ -71,12 +88,9 @@ export class GameService {
     const game = await this.prisma.$transaction(async () => {
       const game = await this.prisma.game.findFirst({
         where: {
-            OR: [
-            { player1Id: dto.userPlaying },
-            { player2Id: dto.userPlaying }
-          ],
-          historic: { is: null},
-        }
+          OR: [{ player1Id: dto.userPlaying }, { player2Id: dto.userPlaying }],
+          historic: { is: null },
+        },
       });
 
       if (game) {
@@ -86,7 +100,7 @@ export class GameService {
           },
           data: {
             spectator: {
-              connect: { username: dto.userName }
+              connect: { username: dto.userName },
             },
           },
           include: {
@@ -96,47 +110,50 @@ export class GameService {
           },
         });
       }
-      return (game);
+      return game;
     });
     return game;
   }
 
-  async gameToHistoric(game: Game, _winner: number, _looser: number, _score: string): Promise<Historic> {
+  async gameToHistoric(
+    game: Game,
+    _winner: number,
+    _looser: number,
+    _score: string,
+  ): Promise<Historic> {
     if (!game) {
       console.log("gameToHistoric : game is null");
     }
 
-    const historic = await this.prisma.historic.create({
-      data: {
-        score: _score,
-        winner: {
-          connect: {
-            id: _winner,
-          }
+    const historic = await this.prisma.historic
+      .create({
+        data: {
+          score: _score,
+          winner: {
+            connect: {
+              id: _winner,
+            },
+          },
+          looser: {
+            connect: {
+              id: _looser,
+            },
+          },
+          game: {
+            connect: {
+              id: game.id,
+            },
+          },
         },
-        looser: {
-          connect: {
-            id: _looser,
-          }
+        include: {
+          winner: true,
+          looser: true,
+          game: true,
         },
-        game:
-        {
-          connect: {
-             id : game.id,
-
-        }
-        }
-      },
-      include: {
-        winner: true,
-        looser: true,
-        game: true,
-      }
-
-    })
+      })
 
       .then((historic) => {
-        this.logger.log("---------YOOO LE HISTORIC : ", historic)
+        this.logger.log("---------YOOO LE HISTORIC : ", historic);
         return historic;
       })
       .catch((error) => {
@@ -144,8 +161,6 @@ export class GameService {
       });
     return historic;
   }
-
-
 }
 
 // import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
@@ -172,53 +187,47 @@ export class GameService {
 //   }
 // }
 
-
-
-
-
-
-
 @Injectable()
 export class HistoricService {
   private logger: Logger = new Logger("HistoricService");
   constructor(private prisma: PrismaService) {}
-  
-  async getGamesByPlayerId(body: any) : Promise<Historic[]> {
+
+  async getGamesByPlayerId(body: any): Promise<Historic[]> {
     let userId = 0;
-    userId = + body.id;
+    userId = +body.id;
     const messages = await this.prisma.historic.findMany({
       where: {
         OR: [
-            {
-                winnerID: userId,
-            },
-            {
-                looserID: userId,
-            },
+          {
+            winnerID: userId,
+          },
+          {
+            looserID: userId,
+          },
         ],
-      }
+      },
     });
     if (!messages) throw new ForbiddenException("Access Denied");
     return messages;
   }
 
-  async getGameByGameId(body: any) : Promise<Historic> {
-      let id = 0;
-      id = + body.id;
+  async getGameByGameId(body: any): Promise<Historic> {
+    let id = 0;
+    id = +body.id;
     const message = await this.prisma.historic.findUnique({
       where: {
-        id: id ,
-      }
+        id: id,
+      },
     });
     if (!message) throw new ForbiddenException("Access Denied");
     return message;
   }
 
-  async setGameByGameId(body: any) : Promise<void> {
+  async setGameByGameId(body: any): Promise<void> {
     let winnerID = 0;
-    winnerID = + body.winnerID;
+    winnerID = +body.winnerID;
     let looserID = 0;
-    looserID = + body.looserID;
+    looserID = +body.looserID;
 
     await this.prisma.historic
       .create({
@@ -233,17 +242,16 @@ export class HistoricService {
               id: looserID,
             },
           },
-          score : body.score,
-          game : {
-            connect : {
-              id : body.gameId
-            }
-          }
+          score: body.score,
+          game: {
+            connect: {
+              id: body.gameId,
+            },
+          },
         },
       })
       .catch((error: any) => {
-        this.logger.log("", error)
+        this.logger.log("", error);
       });
-    }
-    
+  }
 }

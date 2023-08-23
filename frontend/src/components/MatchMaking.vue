@@ -23,6 +23,11 @@
       </div>
     </div>
   </div>
+  <Accordion :activeIndex="0">
+    <AccordionTab v-for="game in specGames" :key="game?.id" :header="game?.name">
+        <p>{{ game?.player1?.username }} vs {{ game?.player2?.username }}</p>
+    </AccordionTab>
+</Accordion>
 </template>
   
 <script lang="ts">
@@ -31,7 +36,7 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import store from '@/store';
 import { server } from "@/utils/helper";
 import socket from '@/utils/gameSocket';
-
+import { Game } from '@/utils/interfaces';
 
 export default defineComponent({
   name: "MatchMaking",
@@ -40,45 +45,70 @@ export default defineComponent({
       boxes: false as boolean,
       solo: false as boolean,
       wall: false as boolean,
+      imageGrid: [
+        { id: "1", img: require('@/assets/profiles/profil_1.jpg') },
+        { id: "2", img: require('@/assets/profiles/profil_2.jpg') },
+        { id: "3", img: require('@/assets/profiles/profil_3.jpg') },
+        { id: "4", img: require('@/assets/profiles/profil_4.jpg') },
+        { id: "5", img: require('@/assets/profiles/profil_5.jpg') },
+        { id: "6", img: require('@/assets/profiles/profil_6.jpg') },
+        { id: "7", img: require('@/assets/profiles/profil_7.jpg') },
+        { id: "8", img: require('@/assets/profiles/profil_8.jpg') },
+        { id: "9", img: require('@/assets/profiles/profil_9.jpg') },
+      ],
     };
   },
+
+  computed: {
+    specGames() {
+      return store.state.specGames as Game[];
+    },
+  },
+
+  async mounted() {
+    await this.getGames();
+    console.log("mounted getGames: ", this.specGames);
+  },
+
   methods: {
+    async getGames() {
+      await axios.get('/api/game/spectate', {
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+      })
+        .then((response: AxiosResponse) => {
+          console.log("getGames response.data: ", response.data);
+          store.commit("setSpecGames", response.data);
+        })
+        .catch((error: AxiosError) => {
+          console.log(error);
+        });
+    },
+
     async SearchGame() {
       console.log("searching game");
-      await socket.connect();
+      socket.connect();
       console.log("socket id : ", socket.id);
-
-      // store.commit("setUserGameSocket", socket.id);
-      // console.log(`typeof ${typeof(store.state.user.id)}`);
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/matchmaker', {
         userName: store.state.user.username as string,
         isBlocked: false as boolean,
       }, {
-          headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
           console.log("response from Mathmaker : ", response.data.name);
           console.log("socket connecting room : ", response.data.player1.username);
-
-          //rendre la room unique ?
           console.log(" av join room socket id : ", socket.id);
           socket.emit("joinGameRoom", {
             user: store.state.user,
             room: response.data.player1.username as string,
           });
           console.log(" apres join room socket id : ", socket.id);
-
-
           console.log(response);
-
-          if (response.data.player2) 
-          {
-              store.commit("setPlayerNum", 2);
-          }
+          if (response.data.player2)
+            store.commit("setPlayerNum", 2);
           else
             store.commit("setPlayerNum", 1);
-
           store.commit("setGameConnect", false);
           store.commit("setInQueue", true);
           console.log("player num === ", store.state.playerNum);
@@ -89,17 +119,18 @@ export default defineComponent({
           console.log(error);
         });
     },
+
     LaunchSingle() {
       store.commit("setGameConnect", true);
     },
+
     LeaveGame() {
-        socket.emit("leaveGameRoom", { room: store.state.gameRoom });
+      socket.emit("leaveGameRoom", { room: store.state.gameRoom });
       if (store.state.ingame && store.state.playerNum != 0) {
         console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
         let looser = store.state.game.player1Id;
         let winner = store.state.game.player2Id;
-        if (store.state.game.player2Id === store.state.user.id)
-        {
+        if (store.state.game.player2Id === store.state.user.id) {
           looser = store.state.game.player2Id;
           winner = store.state.game.player1Id;
         }
@@ -109,26 +140,15 @@ export default defineComponent({
       store.commit("setGameConnect", false);
       store.commit("setGameRoom", "");
     },
-    // LeaveGame() {
-    //   if (store.state.ingame) {
-    //     const looser = store.state.playerNum == 1 ? 2 : 1;
-    //     const winner = store.state.playerNum == 1 ? 1 : 2;
-    //     socket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
-    //   }
-    //   store.commit("setInQueue", false);
-    //   store.commit("setGameConnect", false);
-    //   store.commit("setGameRoom", "");
-    // },
+
     async Spectate() {
       socket.connect();
-
       store.commit("setUserGameSocket", socket.id);
-      // console.log(`typeof ${typeof(store.state.user.id)}`);
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/spectate', {
           userId: store.state.user.id as number,
           userName: store.state.user.username as string,
-          userPlaying: 54 as number,
+          userPlaying: 57 as number,
         }, 
           { headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
@@ -140,19 +160,32 @@ export default defineComponent({
           store.commit("setGameRoom", response.data.player1.username);
           console.log("spectator join room: ", response.data.player1.username);
           console.log("game id: ", response.data.id);
-          //reucperer les infos de la game (tous les blocks)
           socket.emit("newSpectator", {
             room: response.data.player1.username as string,
             user: store.state.user,
           });
           store.commit("setPlayerNum", 0);
           store.commit("setGameConnect", true);
-          
+
         })
         .catch((error: AxiosError) => {
           console.log(error);
         });
-    }
+    },
+    
+    getImageById(id: string | null) {
+      if (!id) {
+        return { id: 1, img: require('@/assets/welc.jpeg') };
+      } else if (id && id.length < 2) {
+        return this.imageGrid.find(image => image.id === id);
+      } else {
+        if (id.length > 2) {
+          return { id: id, img: id };
+        } else {
+          return { id: 1, img: require('@/assets/welc.jpeg') };
+        }
+      }
+    },
   },
 });
 
