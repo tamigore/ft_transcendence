@@ -9,8 +9,7 @@
       <Button @click="SearchGame()"> Multiplayer </Button>
       <Button @click="LaunchSingle()"> Single Player </Button>
       <Button @click="LeaveGame()"> Leave game </Button>
-      <Button @click="Spectate()"> Spectate </Button>
-
+      
       <div class="flex align-items-center justify-content-between mb-6">
         <div class="flex align-items-center text-indigo-300">
           <Checkbox :binary="true" v-model="boxes" class="mr-2"></Checkbox>
@@ -25,7 +24,8 @@
   </div>
   <Accordion :activeIndex="0">
     <AccordionTab v-for="game in specGames" :key="game?.id" :header="game?.name">
-        <p>{{ game?.player1?.username }} vs {{ game?.player2?.username }}</p>
+      <p>{{ game?.player1?.username }} vs {{ game?.player2?.username }}</p>
+      <Button @click="Spectate(game)"> Spectate </Button>
     </AccordionTab>
 </Accordion>
 </template>
@@ -141,14 +141,14 @@ export default defineComponent({
       store.commit("setGameRoom", "");
     },
 
-    async Spectate() {
+    async Spectate(game: Game) {
       socket.connect();
       store.commit("setUserGameSocket", socket.id);
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/spectate', {
         userId: store.state.user.id as number,
         userName: store.state.user.username as string,
-        userPlaying: 15 as number,
+        gameId: game.id as number,
       }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -172,7 +172,7 @@ export default defineComponent({
           console.log(error);
         });
     },
-    
+
     getImageById(id: string | null) {
       if (!id) {
         return { id: 1, img: require('@/assets/welc.jpeg') };

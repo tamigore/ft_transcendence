@@ -34,7 +34,7 @@ const store = createStore({
             state.inQueue = inQueue;
         },
         setPlayerNum : function (state, num: number) {
-        state.playerNum = num;
+            state.playerNum = num;
         },
         setPlayer2Game : function (state, player2: User) {
             state.game.player2Id = player2.id;

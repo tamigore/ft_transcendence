@@ -7,7 +7,7 @@ export class Matchmaker {
 export class Spectate {
   userId: number;
   userName: string;
-  userPlaying: number;
+  gameId: number;
 }
 
 export interface GameMove {

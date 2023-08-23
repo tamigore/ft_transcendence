@@ -88,7 +88,7 @@ export class GameService {
     const game = await this.prisma.$transaction(async () => {
       const game = await this.prisma.game.findFirst({
         where: {
-          OR: [{ player1Id: dto.userPlaying }, { player2Id: dto.userPlaying }],
+          id: dto.gameId,
           historic: { is: null },
         },
       });
@@ -120,12 +120,11 @@ export class GameService {
     _winner: number,
     _looser: number,
     _score: string,
-  ): Promise<Historic> {
+  ) {
     if (!game) {
       console.log("gameToHistoric : game is null");
     }
-
-    const historic = await this.prisma.historic
+    return await this.prisma.historic
       .create({
         data: {
           score: _score,
@@ -151,7 +150,6 @@ export class GameService {
           game: true,
         },
       })
-
       .then((historic) => {
         this.logger.log("---------YOOO LE HISTORIC : ", historic);
         return historic;
@@ -159,7 +157,6 @@ export class GameService {
       .catch((error) => {
         throw error;
       });
-    return historic;
   }
 }
 
