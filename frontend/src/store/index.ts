@@ -15,8 +15,12 @@ const store = createStore({
         playerNum: 0 as number,
         gameRoom: "" as string,
         game: {} as Game,
+        specGames: [] as Game[],
     },
     mutations: {
+        setSpecGames : function(state, games: Game[]) {
+            state.specGames = games;
+        },
         setGameConnect : function(state, gameConnect: boolean) {
             state.ingame = gameConnect;
         },
