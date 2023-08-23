@@ -35,7 +35,7 @@ import { defineComponent } from 'vue';
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import store from '@/store';
 import { server } from "@/utils/helper";
-import socket from '@/utils/gameSocket';
+import gameSocket from '@/utils/gameSocket';
 import { Game } from '@/utils/interfaces';
 
 export default defineComponent({
@@ -86,8 +86,8 @@ export default defineComponent({
 
     async SearchGame() {
       console.log("searching game");
-      socket.connect();
-      console.log("socket id : ", socket.id);
+      gameSocket.connect();
+      console.log("gameSocket id : ", gameSocket.id);
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/matchmaker', {
         userName: store.state.user.username as string,
@@ -97,13 +97,13 @@ export default defineComponent({
       })
         .then((response: AxiosResponse) => {
           console.log("response from Mathmaker : ", response.data.name);
-          console.log("socket connecting room : ", response.data.player1.username);
-          console.log(" av join room socket id : ", socket.id);
-          socket.emit("joinGameRoom", {
+          console.log("gameSocket connecting room : ", response.data.player1.username);
+          console.log(" av join room gameSocket id : ", gameSocket.id);
+          gameSocket.emit("joinGameRoom", {
             user: store.state.user,
             room: response.data.player1.username as string,
           });
-          console.log(" apres join room socket id : ", socket.id);
+          console.log(" apres join room gameSocket id : ", gameSocket.id);
           console.log(response);
           if (response.data.player2)
             store.commit("setPlayerNum", 2);
@@ -112,7 +112,7 @@ export default defineComponent({
           store.commit("setGameConnect", false);
           store.commit("setInQueue", true);
           console.log("player num === ", store.state.playerNum);
-          console.log("socket id === ", socket.id);
+          console.log("gameSocket id === ", gameSocket.id);
           store.commit("setGame", response.data);
         })
         .catch((error: AxiosError) => {
@@ -125,7 +125,7 @@ export default defineComponent({
     },
 
     LeaveGame() {
-      socket.emit("leaveGameRoom", { room: store.state.gameRoom });
+      gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
       if (store.state.ingame && store.state.playerNum != 0) {
         console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
         let looser = store.state.game.player1Id;
@@ -134,7 +134,10 @@ export default defineComponent({
           looser = store.state.game.player2Id;
           winner = store.state.game.player1Id;
         }
-        socket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
+        gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
+      }
+      else if (store.state.ingame && store.state.playerNum === 0) {
+        console.log("spectator leave not done");
       }
       store.commit("setInQueue", false);
       store.commit("setGameConnect", false);
@@ -142,8 +145,8 @@ export default defineComponent({
     },
 
     async Spectate(game: Game) {
-      socket.connect();
-      store.commit("setUserGameSocket", socket.id);
+      gameSocket.connect();
+      store.commit("setUserGamegameSocket", gameSocket.id);
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/spectate', {
         userId: store.state.user.id as number,
@@ -153,19 +156,19 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          socket.emit("joinGameRoom", {
+          gameSocket.emit("joinGameRoom", {
             user: store.state.user,
             room: response.data.player1.username as string,
           });
           store.commit("setGameRoom", response.data.player1.username);
           console.log("spectator join room: ", response.data.player1.username);
           console.log("game id: ", response.data.id);
-          socket.emit("newSpectator", {
+          gameSocket.emit("newSpectator", {
             room: response.data.player1.username as string,
             user: store.state.user,
           });
           store.commit("setPlayerNum", 0);
-          store.commit("setGameConnect", true);
+          //store.commit("setGameConnect", true);
 
         })
         .catch((error: AxiosError) => {

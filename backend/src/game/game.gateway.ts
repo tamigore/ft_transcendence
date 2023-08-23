@@ -83,6 +83,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room: string;
     },
   ): Promise<void> {
+    console.log("==leaveGameRoom");
     this.server.in(client.id).socketsLeave(payload.room);
   }
 
@@ -209,5 +210,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .to(body.room)
       .emit("servOnSpecPaddle", { paddle: body.paddle, userId: body.userId });
+  }
+
+
+@SubscribeMessage("onSpecScore")
+  async onSpecScore(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { room: string; scoreA: number; scoreB:number; userId: number },
+  ) {
+    console.log("spectator score");
+    this.server
+      .to(body.room)
+      .emit("servOnSpecScore", { scoreA: body.scoreA,scoreb: body.scoreB, userId: body.userId });
   }
 }

@@ -1,7 +1,7 @@
 import { PongGameClass } from "./PongClass";
 import { BallClass } from "./BallClass";
 import store from "@/store";
-import socket from "@/utils/gameSocket";
+import gameSocket from "@/utils/gameSocket";
 import { PaddleState, BlockState } from "@/utils/interfaces";
 
 /*******************EffectBlock*******************/
@@ -22,7 +22,6 @@ export class EffectBlock {
     console.log("EffectBlock constructor");
 
     const theRequire = Pong.blockSprites[num];
-    console.log("theRequire inside = ", theRequire);
     this.x = x;
     this.y = y;
     this.width = width;
@@ -38,7 +37,7 @@ export class EffectBlock {
       this.id = this.pong.blockId;
     }
     if (store.state.ingame && store.state.playerNum == 1) {
-      socket.emit("createBlock", { room: store.state.gameRoom, block: this.getBlockState() });
+      gameSocket.emit("createBlock", { room: store.state.gameRoom, block: this.getBlockState() });
     }
   }
 
@@ -60,19 +59,19 @@ export class EffectBlock {
     if (this.effect === "R_SLOW") {
       ball.veloX /= -1.2;
       if (store.state.ingame)
-        socket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
+        gameSocket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
     }
     else if (this.effect === "SLOWn") {
       ball.veloX /= 1.2;
       ball.veloY /= 1.2;
       if (store.state.ingame)
-        socket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
+        gameSocket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
     }
     else if (this.effect === "WALL") {
       ball.veloX *= -1;
       ball.veloY *= -1;
       if (store.state.ingame)
-        socket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
+        gameSocket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
     }
     else if (this.effect === "TP") {
       if (store.state.ingame && store.state.playerNum != 1)
@@ -82,8 +81,8 @@ export class EffectBlock {
           ball.x = block.x + block.width / 2
           ball.y = block.y + block.height / 2;
           if (store.state.ingame) {
-            socket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
-            socket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
+            gameSocket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
+            gameSocket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
           }
           ball.pong.removeBlock(block.id);
           return;
@@ -108,7 +107,7 @@ export class EffectBlock {
         ball.pong.leftPaddleHeight *= 1.2;
         paddleStateData = ball.pong.getPaddleState(1);
       }
-      socket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
+      gameSocket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
 
     }
     else if (this.effect === "smallerPaddle") {
@@ -121,7 +120,7 @@ export class EffectBlock {
       else {
         ball.pong.leftPaddleHeight /= 1.1;
         paddleStateData = ball.pong.getPaddleState(1);
-        socket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
+        gameSocket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
       }
     }
   }
