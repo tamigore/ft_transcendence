@@ -19,7 +19,7 @@ export interface ServerToClientEvents {
   ballCreation(e: BallState): void;
   gameEnder(): void;
 
-  servNewSpectator(e: { user: User }): void;
+  servNewSpectator(user: User ): void;
   servOnSpecBlock(e: {block: BlockState, userId : number }): void;
   servOnSpecBall(e: { ball: BallState, userId : number }): void;
   servOnSpecPaddle(e: { paddle: PaddleState, userId : number }): void;

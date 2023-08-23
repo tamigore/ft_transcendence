@@ -128,7 +128,7 @@ export default defineComponent({
       await axios.post('/api/game/spectate', {
           userId: store.state.user.id as number,
           userName: store.state.user.username as string,
-          userPlaying: 15 as number,
+          userPlaying: 54 as number,
         }, 
           { headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
@@ -155,5 +155,6 @@ export default defineComponent({
     }
   },
 });
+
 </script>
   
