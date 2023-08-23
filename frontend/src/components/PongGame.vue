@@ -148,6 +148,7 @@ export default defineComponent({
     const hitSound = new Audio();
     const Pong = ref(new PongGameClass(hitSound));
     const paddleSprite = new Image();
+    let lastDate = new Date();
 
     const drawPaddle = (x: number, y: number, width: number, height: number, sprite: HTMLImageElement) => {
       if (!ctx)
@@ -181,10 +182,16 @@ export default defineComponent({
     }
 
     const gameLoop = () => {
+      if (!ctx)
+        return;
       if (Pong.value.inMultiplayer && !store.state.ingame)
         Pong.value.restartMatch();
-      if (!ctx) {
-        return;
+
+      const newDate = new Date();
+      if (store.state.ingame, newDate.getTime() - lastDate.getTime() > 200)
+      {
+        socket.emit("ballSetter", {  ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
+        lastDate = newDate;
       }
       ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
       Pong.value.bot();

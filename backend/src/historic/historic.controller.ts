@@ -29,7 +29,7 @@ export class HistoricController {
   @Post("ID")
   @HttpCode(HttpStatus.OK)
   setGameFromId(@Body() dto: Historic) {
-    // return this.historicService.setGameByGameId(dto);
+    return this.historicService.setGameByGameId(dto);
   }
 
   @Public()
