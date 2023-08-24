@@ -124,6 +124,7 @@ export class GameService {
   ) {
     if (!game) {
       console.log("gameToHistoric : game is null");
+      return null;
     }
     return await this.prisma.historic
       .create({

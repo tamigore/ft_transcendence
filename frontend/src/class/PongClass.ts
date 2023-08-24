@@ -92,7 +92,9 @@ export class PongGameClass {
 
   inMultiplayer: boolean;
   hitSound: HTMLAudioElement;
-  blockSprites: [string, string, string, string, string, string, string];
+  blockSprites: [string, string, string, string, string];
+  lastHit: Date;
+  blockSounds: [string, string, string, string, string];
 
   constructor(_hitSound: HTMLAudioElement) {
     //GAME PARAMETERS
@@ -159,14 +161,20 @@ export class PongGameClass {
     this.theBall = new BallClass(this, this.width / 2, this.height / 2, 0, 0, setBallRadius, 'white');
     this.inMultiplayer = false;
     this.hitSound = _hitSound;
+    this.lastHit = new Date();
     this.blockSprites = [
-      require('@/assets/sprites/jaune.png'),
-      require('@/assets/sprites/bleu.png'),
-      require('@/assets/sprites/marron.png'),
-      require('@/assets/sprites/violet.png'),
-      require('@/assets/sprites/rose.png'),
-      require('@/assets/sprites/vert.png'),
-      require('@/assets/sprites/rouge.png')
+      require('@/assets/sprites/block.png'),
+      require('@/assets/sprites/tp.png'),
+      require('@/assets/sprites/newBall.png'),
+      require('@/assets/sprites/larger.png'),
+      require('@/assets/sprites/smaller.png'),
+    ];
+    this.blockSounds = [
+      require('@/assets/sounds/breakLego.mp3'),
+      require('@/assets/sounds/tpEnderman.mp3'),
+      require('@/assets/sounds/newBall.mp3'),
+      require('@/assets/sounds/larger.mp3'),
+      require('@/assets/sounds/smaller.mp3'),
     ];
   }
 
@@ -337,7 +345,7 @@ export class PongGameClass {
         ballX = ball.x;
       }
     }
-    const diff = paddleY + paddleHeight / 2 - ballY - this.ballRadius / 2;
+    const diff = paddleY + paddleHeight / 2 - ballY + this.ballRadius / 2;
 
     if (this.inertie[player] < -1) {
       paddleY = paddleY + this.leftPaddleSpeed;
@@ -348,8 +356,8 @@ export class PongGameClass {
       this.inertie[player]--;
     }
     else {
-      let inertie = (diff / this.leftPaddleSpeed) + (Math.random() * diff / this.leftPaddleSpeed) * 0.6 - (Math.random() * diff / this.leftPaddleSpeed) * 0.6
-      this.inertie[player] += 2;
+      let inertie = (diff / this.leftPaddleSpeed) + Math.sign(diff) * (Math.abs(diff) / 10 * (Math.random() * 0.3));
+      // this.inertie[player] += 2;
       if (inertie % 1 > 0.5)
         inertie += 1 - inertie % 1;
       else
@@ -569,42 +577,29 @@ export class PongGameClass {
         {
           this.myBlocks.push(new EffectBlock(this, genX,
             genY,
-            this.blockWidth, this.blockHeight, "R_SLOW", numb));
+            this.blockWidth, this.blockHeight, "WALL", numb));
           break;
         }
       case 1:
         {
           this.myBlocks.push(new EffectBlock(this, genX,
             genY,
-            this.blockWidth, this.blockHeight, "SLOW", numb));
+            this.blockWidth, this.blockHeight, "TP", numb));
           break;
         }
-      case 2:
-        {
-          this.myBlocks.push(new EffectBlock(this, genX,
-            genY,
-            this.blockWidth, this.blockHeight, "WALL", numb));
-          break;
-        }
-      case 3: {
-        this.myBlocks.push(new EffectBlock(this, genX,
-          genY,
-          this.blockWidth, this.blockHeight, "TP", numb));
-        break;
-      }
-      case 4: {
+      case 2: {
         this.myBlocks.push(new EffectBlock(this, genX,
           genY,
           this.blockWidth, this.blockHeight, "newBall", numb));
         break;
       }
-      case 5: {
+      case 3: {
         this.myBlocks.push(new EffectBlock(this, genX,
           genY,
           this.blockWidth, this.blockHeight, "biggerPaddle", numb));
         break;
       }
-      case 6: {
+      case 4: {
         this.myBlocks.push(new EffectBlock(this, genX,
           genY,
           this.blockWidth, this.blockHeight, "smallerPaddle", numb));

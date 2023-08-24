@@ -16,12 +16,12 @@ export class EffectBlock {
   num: number;
   pong: PongGameClass;
   sprite: HTMLImageElement = new Image();
+  sound: HTMLAudioElement = new Audio();
 
   constructor(Pong: PongGameClass, x: number, y: number, width: number, height: number,
     effect: string, num: number, _id?: number) {
     console.log("EffectBlock constructor");
 
-    const theRequire = Pong.blockSprites[num];
     this.x = x;
     this.y = y;
     this.width = width;
@@ -29,8 +29,9 @@ export class EffectBlock {
     this.effect = effect;
     this.pong = Pong;
     this.num = num;
-    this.sprite.src = theRequire;
-    if (_id !== undefined) {
+    this.sprite.src = Pong.blockSprites[num];
+    this.sound.src = Pong.blockSounds[num];
+    if (_id !== undefined ) {
       this.id = _id;
     }
     else {
@@ -56,18 +57,9 @@ export class EffectBlock {
   }
 
   triggerEffect(ball: BallClass): void {
-    if (this.effect === "R_SLOW") {
-      ball.veloX /= -1.2;
-      if (store.state.ingame)
-        gameSocket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
-    }
-    else if (this.effect === "SLOWn") {
-      ball.veloX /= 1.2;
-      ball.veloY /= 1.2;
-      if (store.state.ingame)
-        gameSocket.emit("ballSetter", { ballInfo: ball.ballState(), room: store.state.gameRoom });
-    }
-    else if (this.effect === "WALL") {
+      
+    if (this.effect === "WALL") {
+      this.sound.play();
       ball.veloX *= -1;
       ball.veloY *= -1;
       if (store.state.ingame)
@@ -78,6 +70,7 @@ export class EffectBlock {
         return;
       for (const block of ball.pong.myBlocks) {
         if (block.effect === "TP" && block.id != this.id) {
+          this.sound.play();
           ball.x = block.x + block.width / 2
           ball.y = block.y + block.height / 2;
           if (store.state.ingame) {
@@ -93,32 +86,36 @@ export class EffectBlock {
       && !((store.state.ingame) && store.state.playerNum != 1)) {
       if (store.state.ingame && store.state.playerNum != 1)
         return;
+      this.sound.volume = 0.4;
+      this.sound.play();
       console.log("newBall-----------------");
       ball.pong.newBall('blue', this.x + this.width / 2, this.y + this.height / 2, 1, ball.veloX / Math.abs(ball.veloX));
     }
     else if (this.effect === "biggerPaddle") {
+      this.sound.play();
       console.log("biggerPaddle");
       let paddleStateData: PaddleState;
       if (ball.veloX > 0) {
-        ball.pong.rightPaddleHeight *= 1.2;
+        ball.pong.leftPaddleHeight *= 1.2;
         paddleStateData = ball.pong.getPaddleState(2);
       }
       else {
-        ball.pong.leftPaddleHeight *= 1.2;
+        ball.pong.rightPaddleHeight *= 1.2;
         paddleStateData = ball.pong.getPaddleState(1);
       }
       gameSocket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
 
     }
     else if (this.effect === "smallerPaddle") {
+      this.sound.play();
       console.log("smallerPaddle");
       let paddleStateData: PaddleState;
       if (ball.veloX > 0) {
-        ball.pong.rightPaddleHeight /= 1.1;
+        ball.pong.leftPaddleHeight /= 1.1;
         paddleStateData = ball.pong.getPaddleState(2);
       }
       else {
-        ball.pong.leftPaddleHeight /= 1.1;
+        ball.pong.rightPaddleHeight /= 1.1;
         paddleStateData = ball.pong.getPaddleState(1);
         gameSocket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
       }

@@ -44,7 +44,6 @@
   width: var(--canvasWidth, 10px);
   height: var(--canvasHeight, 10px);
   border: 1px solid #000000;
-  background-color: #55415a;
   margin: auto;
 
 }
@@ -215,6 +214,7 @@ export default defineComponent({
     onMounted(() => {
       paddleSprite.src = require('@/assets/sprites/blanc.png'); // Adjust the path as needed
       hitSound.src = require('@/assets/sounds/hitSound.wav');
+      hitSound.volume = 0.5;
 
       if (myCanvas.value) {
         ctx = myCanvas.value.getContext('2d');
@@ -224,26 +224,7 @@ export default defineComponent({
           setInterval(gameLoop, gameTick);
         }
       }
-      
-      // gameSocket.on('disconnecting', () => {
-      //   if (store.state.ingame && store.state.playerNum != 0) {
-      //   console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
-      //   let looser = store.state.game.player1Id;
-      //   let winner = store.state.game.player2Id;
-      //   if (store.state.game.player2Id === store.state.user.id) {
-      //     looser = store.state.game.player2Id;
-      //     winner = store.state.game.player1Id;
-      //   }
-      //   gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
-      // }
-      // else if (store.state.ingame && store.state.playerNum === 0) {
-      //   console.log("spectator leave not done");
-      // }
-      // gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
-      // store.commit("setInQueue", false);
-      // store.commit("setGameConnect", false);
-      // store.commit("setGameRoom", "");
-      // });
+
 
       gameSocket.on("gameRoomJoiner", (data) => {
         if (store.state.ingame == true)

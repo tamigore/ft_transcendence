@@ -109,19 +109,21 @@ export class BallClass {
 
     if (dist_center + this.radius >= paddleX && dist_center - this.radius <= paddleX + paddleWidth) {
       if (this.y - this.radius <= paddleY + paddleHeight && this.y + this.radius >= paddleY) {
+        if (this.pong.lastHit.getMilliseconds() - Date.now() > -200)
+          return false;
         this.veloX = sign * (Math.abs(this.veloX) + Math.random() / 2);
         if (this.veloX >= ballMaxSpeedX || this.veloX <= - ballMaxSpeedX)
           this.veloX = ballMaxSpeedX * sign;
-        if (!store.state.ingame &&/* this.pong.gameIsBlocks && */ Math.random() < 0.5)
+        if (!store.state.ingame &&this.pong.gameIsBlocks &&  Math.random() < 0.5)
         {
           this.pong.generateBlocks();
-          console.log("===generateBlocks");
         }
         if (store.state.ingame &&  store.state.game.isBlocked &&  store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
           this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
 
         this.pong.hitSound.play();
+        this.pong.lastHit = new Date();
         return true;
       }
     }

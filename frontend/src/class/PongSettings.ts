@@ -41,7 +41,7 @@ export const setBallRadius = 8;
 export const setBallStartSpeedX = 6/setVeloDiv;
 export const setBallStartSpeedY = 6/setVeloDiv;
 
-export const ballMaxSpeedX = 1000/setVeloDiv;
+export const ballMaxSpeedX = 22;
 export const ballMaxSpeedY = 33/setVeloDiv;
 export const SetBounce = 5;
 

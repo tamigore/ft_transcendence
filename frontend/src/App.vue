@@ -195,6 +195,7 @@ export default defineComponent({
           looser = store.state.game.player2Id;
           winner = store.state.game.player1Id;
         }
+        console.log("winner = ", winner);
         gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
       }
       else if (store.state.ingame && store.state.playerNum === 0) {
@@ -206,6 +207,10 @@ export default defineComponent({
       // end LeaveGame
       gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
       gameSocket.disconnect();
+      let ok = 1;
+      while (ok < 2000) {
+        ok++;
+        }
       
     });
     if (!socket.connected && store.state.user.loggedIn) {
