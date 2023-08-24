@@ -8,7 +8,7 @@
       <p>{{ "scoreB " + Pong.scoreB }}</p>
     </div>
 
-    <div class="button-container">
+    <div v-if="!Pong.inMultiplayer" class="button-container">
       <button @click="Pong.startMatchSolo" :disabled="Pong.gameIsRunning">Solo</button>
       <button @click="Pong.startMatchMultiLocal" :disabled="Pong.gameIsRunning">MultiplayerLocal</button>
       <button @click="Pong.startNoPlayer" :disabled="Pong.gameIsRunning">NoPlayer</button>
@@ -300,6 +300,7 @@ export default defineComponent({
       });
 
       gameSocket.on("gameEnder", () => {
+        console.log("gameEnder is started");
         Pong.value.inMultiplayer = false;
         Pong.value.gameIsRunning = false;
         store.commit("setGameRoom", "");

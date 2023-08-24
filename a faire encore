@@ -5,11 +5,11 @@
 le consulter.
 
 - spectate depuis le chat ou depuis friend interface
-- lancer game avec block ou sans online
+- lancer game avec block ou sans online -> conencter a la box
 
 - refresh les para sur refresh de page + leave game
 
-- actualiser les games a spectate
+- actualiser les games a spectate -> problemes vient  leave game on reload = pas d'histo donc pas supr de spectate
 
 
  

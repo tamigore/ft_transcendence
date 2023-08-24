@@ -19,7 +19,7 @@ const store = createStore({
     },
     mutations: {
         setSpecGames : function(state, games: Game[]) {
-            state.specGames = games;
+            state.specGames = games.filter(game =>game.historic == null || game.historic == undefined);
         },
         setGameConnect : function(state, gameConnect: boolean) {
             state.ingame = gameConnect;

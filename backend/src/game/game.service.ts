@@ -28,7 +28,7 @@ export class GameService {
         const game = await this.prisma.game.findFirst({
           where: {
             player2: { is: null },
-            //isBlocked: dto.isBlocked as boolean,
+            isBlocked: dto.isBlocked as boolean,
           },
         });
         console.log("INMATCHMAKER : ", dto.userName);
@@ -58,7 +58,7 @@ export class GameService {
           return await this.prisma.game.update({
             where: {
               id: game.id,
-              // isBlocked: dto.isBlocked,
+              isBlocked: dto.isBlocked,
             },
             data: {
               player2: {
