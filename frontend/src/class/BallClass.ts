@@ -4,7 +4,7 @@ import {
     ballMaxSpeedY,
 } from './PongSettings';
 import store  from '../store';
-import socket from "@/utils/gameSocket";
+import gameSocket from "@/utils/gameSocket";
 import {  BallState } from "@/utils/interfaces";
 
 
@@ -97,9 +97,11 @@ export class BallClass {
   }
 
   onlinePoint = (_player: number) => {
+    if (!store.state.ingame || store.state.playerNum != _player)
+      return ;
     console.log("onlinePoint-----------");
-    socket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
-    socket.emit("goalMessage", { room: store.state.gameRoom, player: _player });
+    gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
+    gameSocket.emit("goalMessage", { room: store.state.gameRoom, player: _player });
   }
 
   ballPaddleColision = (paddleX: number, paddleY: number, paddleHeight: number, paddleWidth: number, sign: number): boolean => {
@@ -111,7 +113,10 @@ export class BallClass {
         if (this.veloX >= ballMaxSpeedX || this.veloX <= - ballMaxSpeedX)
           this.veloX = ballMaxSpeedX * sign;
         if (!store.state.ingame &&/* this.pong.gameIsBlocks && */ Math.random() < 0.5)
+        {
           this.pong.generateBlocks();
+          console.log("===generateBlocks");
+        }
         if (store.state.ingame && /* store.state.game.isBlocked && */ store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
           this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
@@ -131,7 +136,7 @@ export class BallClass {
           {
             block.triggerEffect(this);
           // console.log("ballBlockColision = ", block.id);
-            socket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
+            gameSocket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
             this.pong.removeBlock(block.id);
           }
 
@@ -187,7 +192,7 @@ export class BallClass {
         this.pong.leftPaddleWidth, 1)) {
       this.pong.num_ping += 1;
       if (store.state.playerNum == 1)
-        socket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
+        gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
     }
     else if (this.x > this.pong.width / 2 / 3 &&
       this.ballPaddleColision(this.pong.rightPaddleX - this.pong.width / 2,
@@ -195,10 +200,10 @@ export class BallClass {
         this.pong.rightPaddleWidth, -1)) {
       this.pong.num_pong += 1;
       if (store.state.playerNum == 2)
-        socket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
+        gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
     }
     if (this.hp == 0) {
-      socket.emit("destroyBall", { room: store.state.gameRoom, ballId: this.id });
+      gameSocket.emit("destroyBall", { room: store.state.gameRoom, ballId: this.id });
       this.pong.removeBall(this.id);
     }
     this.x += this.veloX;

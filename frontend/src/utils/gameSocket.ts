@@ -23,6 +23,7 @@ export interface ServerToClientEvents {
   servOnSpecBlock(e: {block: BlockState, userId : number }): void;
   servOnSpecBall(e: { ball: BallState, userId : number }): void;
   servOnSpecPaddle(e: { paddle: PaddleState, userId : number }): void;
+  servOnSpecScore(e: { scoreA: number, scoreB: number, userId : number }): void;
 }
 
 export interface ClientToServerEvents {
@@ -46,6 +47,7 @@ export interface ClientToServerEvents {
   onSpecBlock(e: { room: string, block: BlockState, userId : number }): void;
   onSpecBall(e: { room: string, ball: BallState, userId : number }): void;
   onSpecPaddle(e: { room: string, paddle: PaddleState, userId : number }): void;
+  onSpecScore(e: { room: string, scoreA: number, scoreB: number, userId : number }): void;
 }
 
 class SocketioGame {
@@ -58,7 +60,7 @@ class SocketioGame {
       }
     );
     this.socket.on("connect", () => {
-      axios.post("/api/user/gamesocket", { socket: socket.id }, {
+      axios.post("/api/user/gamesocket", { socket: gameSocket.id }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       });
     });
@@ -68,6 +70,6 @@ class SocketioGame {
   }
 }
 
-const socket = new SocketioGame().socket;
+const gameSocket = new SocketioGame().socket;
 
-export default socket;
+export default gameSocket;

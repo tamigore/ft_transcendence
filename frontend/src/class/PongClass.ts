@@ -30,7 +30,7 @@ import {
 import store from "@/store";
 import { BallClass } from './BallClass';
 import { EffectBlock } from './EffectBlock';
-import socket from "@/utils/gameSocket";
+import gameSocket from "@/utils/gameSocket";
 import { GameMove, PaddleState } from "@/utils/interfaces";
 
 export class PongGameClass {
@@ -223,7 +223,7 @@ export class PongGameClass {
       this.myBalls.push(newBall);
     }
     if (store.state.ingame && store.state.playerNum == 1)
-      socket.emit("createBall", { room: store.state.gameRoom, ball: newBall.ballState() });
+      gameSocket.emit("createBall", { room: store.state.gameRoom, ball: newBall.ballState() });
   }
 
   restartMatch(gameIsRunnig?: boolean, rightBot?: boolean, wallIsUp?: boolean, bothBot?: boolean) {
@@ -277,7 +277,6 @@ export class PongGameClass {
     this.restartMatch(true);
     this.inMultiplayer = true;
     this.gameIsRunning = true;
-    store.commit("setGameConnect", true);
     console.log("startMultiOnline-----------");
     console.log("game", store.state.game);
     this.leftPlayerKeyDown = '';
@@ -285,11 +284,13 @@ export class PongGameClass {
     this.rightPlayerKeyDown = '';
     this.rightPlayerKeyUp = '';
     if (store.state.playerNum == 1) {
+      console.log("player 1 KEYS");
       this.leftPlayerKeyDown = 's';
       this.leftPlayerKeyUp = 'w';
       this.blockId = 1;
     }
-    if (store.state.playerNum == 2) {
+    else if (store.state.playerNum == 2) {
+      console.log("player 2 KEYS");
       this.rightPlayerKeyDown = 's';
       this.rightPlayerKeyUp = 'w';
       this.blockId = 2;
@@ -317,7 +318,7 @@ export class PongGameClass {
     const theScore = this.scoreA + " - " + this.scoreB as string;
     console.log("endGameOnline----------- score  = ", theScore);
     if (store.state.playerNum == 1)
-      socket.emit("endGame", {
+      gameSocket.emit("endGame", {
         room: store.state.gameRoom,
         game: store.state.game,
         winner: winnerId,
@@ -456,7 +457,7 @@ export class PongGameClass {
         notPressed: _up,
         key: _key,
       } as GameMove;
-      socket.emit("gameMessage", { moove: gameMoveData, room: store.state.gameRoom });
+      gameSocket.emit("gameMessage", { moove: gameMoveData, room: store.state.gameRoom });
       if (_up == true) {
         let _posY = 0;
         let _height = this.leftPaddleHeight;
@@ -471,7 +472,7 @@ export class PongGameClass {
           posY: _posY,
           height: _height
         } as PaddleState;
-        socket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
+        gameSocket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
       }
     }
   }
