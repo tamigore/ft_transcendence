@@ -7,18 +7,18 @@
 
     <div>
       <Button @click="SearchGame()"> Multiplayer </Button>
-      <Button @click="LaunchSingle()"> Single Player </Button>
+      <!-- <Button @click="LaunchSingle()"> Single Player </Button> -->
       <Button @click="LeaveGame()"> Leave game </Button>
-      
+
       <div class="flex align-items-center justify-content-between mb-6">
         <div class="flex align-items-center text-indigo-300">
           <Checkbox :binary="true" v-model="boxes" class="mr-2"></Checkbox>
           <label>Play with Boxes</label>
         </div>
-        <div class="flex align-items-center text-indigo-300">
+        <!-- <div class="flex align-items-center text-indigo-300">
           <Checkbox :binary="true" v-model="wall" class="mr-2"></Checkbox>
           <label>Play with Wall</label>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -27,7 +27,7 @@
       <p>{{ game?.player1?.username }} vs {{ game?.player2?.username }}</p>
       <Button @click="Spectate(game)"> Spectate </Button>
     </AccordionTab>
-</Accordion>
+  </Accordion>
 </template>
   
 <script lang="ts">
@@ -91,7 +91,7 @@ export default defineComponent({
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/matchmaker', {
         userName: store.state.user.username as string,
-        isBlocked: false as boolean,
+        isBlocked: this.boxes,
       }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -125,7 +125,7 @@ export default defineComponent({
     },
 
     LeaveGame() {
-      gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+
       if (store.state.ingame && store.state.playerNum != 0) {
         console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
         let looser = store.state.game.player1Id;
@@ -139,6 +139,7 @@ export default defineComponent({
       else if (store.state.ingame && store.state.playerNum === 0) {
         console.log("spectator leave not done");
       }
+      gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
       store.commit("setInQueue", false);
       store.commit("setGameConnect", false);
       store.commit("setGameRoom", "");
