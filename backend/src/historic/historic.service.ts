@@ -1,5 +1,4 @@
-/* eslint-disable prettier/prettier */
-import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { Historic } from "@prisma/client";
 
@@ -7,68 +6,88 @@ import { Historic } from "@prisma/client";
 export class HistoricService {
   private logger: Logger = new Logger("HistoricService");
   constructor(private prisma: PrismaService) {}
-  
-  async getGamesByPlayerId(body: any) : Promise<Historic[]> {
-    let userId = 0;
-    userId = + body.id;
-    const messages = await this.prisma.historic.findMany({
-      where: {
-        OR: [
+
+  async getGamesByPlayerId(userId: number): Promise<Historic[]> {
+    return await this.prisma.historic
+      .findMany({
+        where: {
+          OR: [
             {
-                winnerID: userId,
+              winnerID: userId,
             },
             {
-                looserID: userId,
+              looserID: userId,
             },
-        ],
-      }
-    });
-    if (!messages) throw new ForbiddenException("Access Denied");
-    return messages;
+          ],
+        },
+        orderBy: {
+          created_at: "desc",
+        },
+        include: {
+          winner: true,
+          looser: true,
+        },
+      })
+      .then((res) => {
+        console.error(res);
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
-  async getGameByGameId(body: any) : Promise<Historic> {
-      let id = 0;
-      id = + body.id;
-    const message = await this.prisma.historic.findUnique({
-      where: {
-        id: id ,
-      }
-    });
-    if (!message) throw new ForbiddenException("Access Denied");
-    return message;
+  async getLeaderBoard() {
+    return await this.prisma.user
+      .findMany({
+        take: 10,
+        orderBy: {
+          win: {
+            _count: "desc",
+          },
+        },
+        include: {
+          win: true,
+          loose: true,
+        },
+      })
+      .then((res) => {
+        console.error(res);
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
-  async setGameByGameId(body: any) : Promise<void> {
-    let winnerID = 0;
-    winnerID = + body.winnerID;
-    let looserID = 0;
-    looserID = + body.looserID;
+  async getAllHistoric(): Promise<Historic[]> {
+    return await this.prisma.historic.findMany({});
+  }
 
+  async setGameByGameId(body: any): Promise<void> {
     await this.prisma.historic
       .create({
         data: {
           winner: {
             connect: {
-              id: winnerID,
+              id: body.winnerID,
             },
           },
           looser: {
             connect: {
-              id: looserID,
+              id: body.looserID,
             },
           },
-          score : body.score,
-          game : {
-            connect : {
-              id : body.gameId
-            }
-          }
+          score: body.score,
+          game: {
+            connect: {
+              id: body.gameId,
+            },
+          },
         },
       })
       .catch((error: any) => {
-        this.logger.log("", error)
+        this.logger.log("", error);
       });
-    }
-    
+  }
 }

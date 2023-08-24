@@ -7,4 +7,4 @@ import { UserService } from "src/user/user.service";
   controllers: [HistoricController],
   providers: [HistoricService, UserService],
 })
-export class GameModule {}
+export class HistoricModule {}
