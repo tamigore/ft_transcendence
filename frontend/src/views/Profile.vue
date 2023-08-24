@@ -559,6 +559,8 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { User } from '@/utils/interfaces';
 import router from '@/router';
 import socket from '@/utils/socket';
+import { useToast } from "primevue/usetoast";
+
 
 export default defineComponent({
   name: 'ProfileView',
@@ -601,6 +603,7 @@ export default defineComponent({
 
   data() {
     return {
+      toast: useToast(),
       ShowTwoFA: false as boolean,
       TwoFASecret: "" as string,
       QRcode: "" as string,
@@ -671,10 +674,16 @@ export default defineComponent({
         .then((response: AxiosResponse) => {
           console.log(response);
           if (response.data === true) {
-            alert("Connexion with 2FA activated");
+            this.toast.add({severity: 'success', summary: 'Connected',
+            detail: `Connexion with 2FA activated.`,
+            life: 3000 });
             this.close2FA();
           }
-          else alert("Connexion with 2FA failed");
+          else {
+            this.toast.add({severity: 'warn', summary: 'Not connected',
+            detail: `Connexion with 2FA failed.`,
+            life: 3000 });
+          }
         })
         .catch((error: AxiosError) => {
           throw error;
@@ -803,8 +812,11 @@ export default defineComponent({
           this.imageGrid.push({ id: this.url, img: this.url });
           this.ModifyUserAvatarId(this.imageGrid[this.imageGrid.length - 1]);
           this.showPopup = false;
-        } else {
-          alert('Invalid URL');
+        } 
+        else {
+          this.toast.add({severity: 'warn', summary: '',
+            detail: `Invalid URL`,
+            life: 3000 });
           this.url = '';
         }
       }
@@ -874,7 +886,9 @@ export default defineComponent({
       if (this.isEditingBio) {
         if (this.editedBio !== null) {
           if (this.editedBio.length > 1000) {
-            alert("Bio cannot exceed 1000 characters.");
+            this.toast.add({severity: 'warn', summary: '',
+            detail: `Bio cannot exceed 1000 characters.`,
+            life: 3000 });
             return;
           }
         }
@@ -899,11 +913,15 @@ export default defineComponent({
       if (this.isEditingEmail) {
         if (this.editedEmail !== null) {
           if (this.editedEmail.trim() === '') {
-            alert("Email cannot be empty.");
+            this.toast.add({severity: 'warn', summary: '',
+            detail: `Email cannot be empty.`,
+            life: 3000 });
             return;
           }
           if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.editedEmail)) {
-            alert("Invalid email format.");
+            this.toast.add({severity: 'warn', summary: '',
+            detail: `Invalid email format.`,
+            life: 3000 });
             return;
           }
         }
@@ -936,15 +954,21 @@ export default defineComponent({
       if (this.isEditingUsername) {
         if (this.editedUsername !== null) {
           if (this.editedUsername.trim() === '') {
-            alert("Username cannot be empty.");
+            this.toast.add({severity: 'warn', summary: '',
+            detail: `Username cannot be empty.`,
+            life: 3000 });
             return;
           }
-          if (this.editedUsername.length > 50) {
-            alert("Username cannot exceed 50 characters.");
+          if (this.editedUsername.length > 25) {
+            this.toast.add({severity: 'warn', summary: '',
+            detail: `Username cannot exceed 25 characters.`,
+            life: 3000 });
             return;
           }
           if (/\s/.test(this.editedUsername)) {
-            alert("Username cannot contain whitespace.");
+            this.toast.add({severity: 'warn', summary: '',
+            detail: `Username cannot contain whitespace.`,
+            life: 3000 });
             return;
           }
         }
@@ -1080,13 +1104,21 @@ export default defineComponent({
           this.selectedFriend = '';
           return (user);
         }
-        else
-          alert('This friend is already registered in your friends list.');
+        else {
+          this.toast.add({severity: 'warn', summary: '',
+            detail: `This friend is already registered in your friends list.`,
+            life: 3000 });
+        }
       }
-      else if (user && user.username && (user.username === this.username))
-        alert("You can't add yourself in your friends list.");
+      else if (user && user.username && (user.username === this.username)) {
+        this.toast.add({severity: 'warn', summary: '',
+            detail: `You can't add yourself in your friends list.`,
+            life: 3000 });
+      }
       else {
-        alert('User with provided id not found.');
+        this.toast.add({severity: 'warn', summary: '',
+            detail: `User with provided id not found.`,
+            life: 3000 });
       }
       return null;
     },
@@ -1100,13 +1132,21 @@ export default defineComponent({
           this.selectedFriend = '';
           return (user);
         }
-        else
-          alert('This friend is already registered in your friends list.');
+        else {
+          this.toast.add({severity: 'warn', summary: '',
+            detail: `This friend is already registered in your friends list.`,
+            life: 3000 });
+        }
       }
-      else if (user && user.username && (user.username === this.username))
-        alert("You can't add yourself in your friends list.");
+      else if (user && user.username && (user.username === this.username)) {
+        this.toast.add({severity: 'warn', summary: '',
+            detail: `You can't add yourself in your friends list.`,
+            life: 3000 });
+      }
       else {
-        alert('User with provided username not found.');
+        this.toast.add({severity: 'warn', summary: '',
+            detail: `User with provided username not found.`,
+            life: 3000 });
       }
       return null;
     },
