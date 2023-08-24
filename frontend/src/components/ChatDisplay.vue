@@ -132,11 +132,6 @@
 </div>
 </template>
             
-            
-            
-
-
-
 <script lang="ts">
 import socket from "@/utils/socket";
 import axios, { AxiosResponse, AxiosError } from 'axios';
@@ -177,30 +172,22 @@ export default defineComponent({
       return store.state.lastPrivate as Room;
     },
 
-    lastMessage () { // TODO
+    lastMessage () {
       const message = store.state.lastMessage;
       console.log(`lastMessage: ${message}`);
-      if (store.state.lastRoom.id === message.room.id)
-      {
-        console.log("last Room == message.room");
-        if (!store.state.lastRoom.mute.find(user => user.id === message.user.id))
-          store.commit("addMessage", message);
-      }
-      else if (store.state.lastPrivate.id === message.room.id)
-      {
-        console.log("last private == message.room");
-        store.commit("addMessage", message);
-      }
-      else {
-        console.log("message.room joined but not selected");
-        if (message.room.private)
-          this.$toast.add({severity: 'info', summary: 'New message',
-            detail: `From user ${message.user.username}`,
-            life: 3000 });
-        else
-          this.$toast.add({severity: 'info', summary: 'New message',
-            detail: `In room ${message.room.name}`,
-            life: 3000 });
+      if (store.state.lastRoom.id !== message.room.id && store.state.lastPrivate.id !== message.room.id) {
+        if ((store.state.lastRoom.mute && !store.state.lastRoom.mute.find(user => user.id === message.user.id))
+          || (store.state.user.blocked && !store.state.user.blocked.find(user => user.id === message.user.id))) {
+          console.log("message.room joined but not selected");
+          if (message.room.private)
+            this.$toast.add({severity: 'info', summary: 'New message',
+              detail: `From user ${message.user.username}`,
+              life: 3000 });
+          else
+            this.$toast.add({severity: 'info', summary: 'New message',
+              detail: `In room ${message.room.name}`,
+              life: 3000 });
+        }
       }
       return message as Message;
     },
@@ -208,9 +195,11 @@ export default defineComponent({
     Rooms () {
       const obj = [] as { isIn: boolean; room: Room; }[];
       for (let i = 0; i < store.state.rooms.length; i++) {
-        obj[i] = { isIn: store.state.rooms[i].users.find(
-          user => user.id === store.state.user.id) ? true : false, room : store.state.rooms[i]
-        };
+        if (store.state.rooms[i].users)
+          obj[i] = { isIn: store.state.rooms[i].users.find(
+            user => user.id === store.state.user.id) ? true : false, room : store.state.rooms[i]
+          };
+        else console.error("wrong get room");
       }
       console.log(`Rooms computed: ${obj}`); 
       return obj as { isIn: boolean; room: Room; }[];

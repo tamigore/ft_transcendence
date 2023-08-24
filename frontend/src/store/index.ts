@@ -114,6 +114,9 @@ const store = createStore({
                 state.user.blocked = user.blocked;
             if (user.friend)
                 state.user.friend = user.friend;
+            if (user.rooms) {
+                state.user.rooms = user.rooms;
+            }
         },
         delUser(state) {
             state.user = {} as User;
