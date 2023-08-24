@@ -235,7 +235,7 @@
                 <Tag class="pr-6" icon="pi pi-circle-fill"
                   style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)" value="Online"></Tag>
               </span>
-              <span v-if="blocked.loggedIn">
+              <span v-if="blocked.ingame">
                 <Tag icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)"
                   value="In game"></Tag>
               </span>
