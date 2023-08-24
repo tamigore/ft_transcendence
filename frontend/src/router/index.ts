@@ -130,12 +130,17 @@ router.beforeEach(async (to, from) => {
       })
     }
   }
-  if (
+  if ( store.state.user &&
     !store.state.user.loggedIn &&
     to.name !== 'home'
   ) {
     console.log("user.loggedIn is false");
     return { path: '/' };
+  }
+  if (store.state.user && store.state.user.loggedIn && store.state.user.rooms && store.state.user.rooms.length > 0) {
+    for (const room of store.state.user.rooms) {
+      socket.emit('join_room', {user: store.state.user, room: room});
+    }
   }
 })
 

@@ -77,6 +77,7 @@ export class UserService {
         include: {
           friend: true,
           blocked: true,
+          rooms: true,
         },
       })
       .catch((error) => {

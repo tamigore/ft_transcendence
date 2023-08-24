@@ -203,10 +203,7 @@ export default defineComponent({
       store.commit("setGameConnect", false);
       store.commit("setGameRoom", "");
       // end LeaveGame
-
       gameSocket.disconnect();
-      
-
     });
     if (!socket.connected && store.state.user.loggedIn) {
       socket.connect();

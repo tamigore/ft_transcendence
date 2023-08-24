@@ -266,8 +266,29 @@
               </div>
             </li>
 
+            <!-- <li v-for="" class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
+              <div class="text-500 w-6 md:w-2 font-medium">index</div>
+              <div class="align-items-center flex w-8">
+                <div
+                  style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
+                  <img :src="getImageById(imgId)?.img" :alt="'Avatar'"
+                    style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
+                  <span
+                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                    title="username">
+                    username
+                  </span>
+                </div>
+              </div>
+              <div class="w-6 md:w-2 flex justify-content-end">
+                <span>win nbr</span>
+              </div>
+            </li> -->
+
             <!-- leaderBoard tile -->
-            <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
+            <!-- <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
               <div class="text-500 w-6 md:w-2 font-medium">index</div>
               <div class="align-items-center flex w-8">
                 <div
@@ -307,7 +328,7 @@
               <div class="w-6 md:w-2 flex justify-content-end">
                 <span>win nbr</span>
               </div>
-            </li>
+            </li> -->
           </ul>
         </div>
       </div>
@@ -575,6 +596,7 @@ export default defineComponent({
     this.getAllFriends();
     this.getAllBlocked();
     this.getAllUsernames();
+    // this.getHistory();
   },
 
   data() {
@@ -618,6 +640,9 @@ export default defineComponent({
 
       selectedBlock: '' as string,
       userBlocked: [] as User[],
+
+      // gameHistoric: [] as History[],
+      // leaderBoard: [] as User[],
     }
   },
 
