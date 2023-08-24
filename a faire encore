@@ -6,10 +6,12 @@ le consulter.
 
 - spectate depuis le chat ou depuis friend interface
 
+
 - pong reactif
 
-- refresh les para sur refresh de page + leave game
-- actualiser les games a spectate -> probleme vient de leave game on reload = pas d'histo donc pas supr de spectate
+- mettre ingame dans le user
+
+
 
 
 

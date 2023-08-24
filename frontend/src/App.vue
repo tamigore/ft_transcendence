@@ -184,8 +184,9 @@ export default defineComponent({
       sessionStorage.setItem('store', JSON.stringify(store.state));
       socket.disconnect();
 
+      
       //MatchMaking.LeaveGame(); -- le before unload ne marche pas (pas de log de leaveGameroom dans le back)
-      gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+     
       if (store.state.ingame && store.state.playerNum != 0) {
         console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
         let looser = store.state.game.player1Id;
@@ -203,43 +204,17 @@ export default defineComponent({
       store.commit("setGameConnect", false);
       store.commit("setGameRoom", "");
       // end LeaveGame
+      gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
       gameSocket.disconnect();
+      
     });
     if (!socket.connected && store.state.user.loggedIn) {
       socket.connect();
       store.commit("setChatSocket", socket.id);
     }
+    
   },
-  beforUnmount){
-    // if (store_item) {
-    //   store.replaceState(Object.assign({}, store.state, JSON.parse(store_item)));
-    // }
-     
-      sessionStorage.setItem('store', JSON.stringify(store.state));
-      socket.disconnect();
-
-      //MatchMaking.LeaveGame(); -- le before unload ne marche pas (pas de log de leaveGameroom dans le back)
-      gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
-      if (store.state.ingame && store.state.playerNum != 0) {
-        console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
-        let looser = store.state.game.player1Id;
-        let winner = store.state.game.player2Id;
-        if (store.state.game.player2Id === store.state.user.id) {
-          looser = store.state.game.player2Id;
-          winner = store.state.game.player1Id;
-        }
-        gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
-      }
-      else if (store.state.ingame && store.state.playerNum === 0) {
-        console.log("spectator leave not done");
-      }
-      store.commit("setInQueue", false);
-      store.commit("setGameConnect", false);
-      store.commit("setGameRoom", "");
-      // end LeaveGame
-
-      gameSocket.disconnect();
-},
+  
 });
 
 

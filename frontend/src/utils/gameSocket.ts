@@ -18,6 +18,7 @@ export interface ServerToClientEvents {
   ballDestruction(e: number): void;
   ballCreation(e: BallState): void;
   gameEnder(): void;
+  disconnecting(): void;
 
   servNewSpectator(user: User ): void;
   servOnSpecBlock(e: {block: BlockState, userId : number }): void;

@@ -33,7 +33,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // @UseGuards(WsGuard)
   async handleDisconnect(client: Socket) {
+    console.log("in handle client.rooms : ", client.rooms);
     this.logger.log("GameGateway handleDisconnect clientid: ", client.id);
+
+
+  }
+
+  @SubscribeMessage("disconnecting")
+  handleDisconnecting(@ConnectedSocket() client: Socket) {
+    console.log("==================Game disconnecting client", client.id);
+    console.log("client.rooms : ", client.rooms);
+    client.rooms.forEach((room) => {
+      this.logger.log(`=========================Game disconnecting user ${client.id} from room ${room}`);
+    });
   }
 
   // @UseGuards(WsGuard)
@@ -70,7 +82,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() e: { user: User; room: string },
   ): Promise<boolean> {
     this.logger.log("---joinGameRoom------", e.user.username, e.room);
-    this.server.in(client.id).socketsJoin(e.room);
+    client.join(e.room);
+    //this.server.in(client.id).socketsJoin(e.room);
+    console.log("in join client.rooms : ", client.rooms);
     this.server.to(e.room).emit("gameRoomJoiner", e);
     return true;
   }
@@ -83,7 +97,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room: string;
     },
   ): Promise<void> {
-    console.log("==leaveGameRoom");
+    console.log("============leaveGameRoom");
     this.server.in(client.id).socketsLeave(payload.room);
   }
 

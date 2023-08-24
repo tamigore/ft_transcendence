@@ -38,6 +38,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("disconnecting")
   handleDisconnecting(@ConnectedSocket() client: Socket) {
+    console.log('chat room: ', client.rooms);
     client.rooms.forEach((room) => {
       this.logger.log(`disconnecting user ${client.id} from room ${room}`);
     });
