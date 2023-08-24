@@ -266,69 +266,26 @@
               </div>
             </li>
 
-            <!-- <li v-for="" class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
+            <li v-for="user in leaderBoard" :key="user.id" class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
               <div class="text-500 w-6 md:w-2 font-medium">index</div>
               <div class="align-items-center flex w-8">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
-                  <img :src="getImageById(imgId)?.img" :alt="'Avatar'"
+                  <img :src="getImageById(user.img)?.img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
                   <span
                     style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
                     title="username">
-                    username
+                    {{user.username}}
                   </span>
                 </div>
               </div>
               <div class="w-6 md:w-2 flex justify-content-end">
-                <span>win nbr</span>
-              </div>
-            </li> -->
-
-            <!-- leaderBoard tile -->
-            <!-- <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-              <div class="text-500 w-6 md:w-2 font-medium">index</div>
-              <div class="align-items-center flex w-8">
-                <div
-                  style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
-                  <img :src="getImageById(imgId)?.img" :alt="'Avatar'"
-                    style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
-                  <span
-                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
-                    title="username">
-                    username
-                  </span>
-                </div>
-              </div>
-              <div class="w-6 md:w-2 flex justify-content-end">
-                <span>win nbr</span>
+                <span>{{userWins(user.win)}}</span>
               </div>
             </li>
-
-            <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-              <div class="text-500 w-6 md:w-2 font-medium">index</div>
-              <div class="align-items-center flex w-8">
-                <div
-                  style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
-                  <img :src="getImageById(imgId)?.img" :alt="'Avatar'"
-                    style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
-                  <span
-                    style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
-                    title="username">
-                    username
-                  </span>
-                </div>
-              </div>
-              <div class="w-6 md:w-2 flex justify-content-end">
-                <span>win nbr</span>
-              </div>
-            </li> -->
           </ul>
         </div>
       </div>
@@ -354,25 +311,25 @@
                 style="width: 200px;">Score P2</div>
             </li>
 
-            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
-              style="background: linear-gradient(to top right, #e73434ae, #b90d6ba2);">
+            <li v-for="history in gameHistoric" :key="history.id" class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
+              v-bind:class="[history.winnerID == id ? 'win' : 'loose']">
 
               <div class="font-bold flex align-items-center justify-content-center"
                 style="width: 200px; min-height: 50px">
-                300
+                {{history.score.split('-')[0]}}
               </div>
 
               <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 20%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
+                  <img :src="getImageById(history?.winner?.img).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
                 <div class="text-500 font-medium text-left flex items-center" style="overflow: hidden;">
                   <span
                     style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
                     title="username">
-                    username
+                    {{userScore(history.score, true)}}
                   </span>
                 </div>
               </div>
@@ -387,22 +344,22 @@
                   <span
                     style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
                     title="username">
-                    username
+                    {{history?.looser?.username}}
                   </span>
                 </div>
                 <div
                   style="width: 75px; height: 75px; float: left; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #5f6767; cursor: default;">
-                  <img :src="getImageById(imgId).img" :alt="'Avatar'"
+                  <img :src="getImageById(history?.looser?.img).img" :alt="'Avatar'"
                     style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
               </div>
               <div class="font-bold flex align-items-center justify-content-center"
                 style="width: 200px; min-height: 50px">
-                200
+                {{userScore(history.score, false)}}
               </div>
             </li>
 
-            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
+            <!-- <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
               style="background: linear-gradient(to top right, #e73434ae, #b90d6ba2);">
 
               <div class="font-bold flex align-items-center justify-content-center"
@@ -544,7 +501,7 @@
                 style="width: 200px; min-height: 50px">
                 200
               </div>
-            </li>
+            </li> -->
           </ul>
         </div>
       </div>
@@ -556,7 +513,7 @@
 import store from '@/store';
 import { defineComponent } from 'vue';
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { User } from '@/utils/interfaces';
+import { User, Historic } from '@/utils/interfaces';
 import router from '@/router';
 import socket from '@/utils/socket';
 
@@ -596,7 +553,8 @@ export default defineComponent({
     this.getAllFriends();
     this.getAllBlocked();
     this.getAllUsernames();
-    // this.getHistory();
+    this.getHistory();
+    this.getLeaderBoard();
   },
 
   data() {
@@ -641,13 +599,71 @@ export default defineComponent({
       selectedBlock: '' as string,
       userBlocked: [] as User[],
 
-      // gameHistoric: [] as History[],
-      // leaderBoard: [] as User[],
+      gameHistoric: [] as Historic[],
+      leaderBoard: [] as User[],
     }
   },
 
   methods:
   {
+    async getHistory() {
+      await axios
+        .get(`/api/historic/${store.state.user.id}`, {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          this.gameHistoric = response.data;
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
+
+    async getLeaderBoard() {
+      await axios
+        .get(`/api/historic/leaderboard`, {
+            headers: { Authorization: `Bearer ${store.state.user.hash}` },
+          })
+        .then((response: AxiosResponse) => {
+          console.log(response);
+          this.leaderBoard = response.data;
+        })
+        .catch((error: AxiosError) => {
+          throw error;
+        });
+    },
+
+    userWins(wins: History[]): number {
+      if (!wins || !wins.length)
+        return (0);
+      let count = 0;
+      for (let i = 0; i < wins.length; i++) {
+        count++;
+      }
+      return count;
+    },
+
+    userScore(score: string, side: boolean): string {
+      if (score === "forfeit") {
+        if (side)
+          return "won by forfeit";
+        return "lost by forfeit";
+      }
+      else {
+        let less = score.split("-")[0];
+        let more = score.split("-")[1];
+        if (parseInt(less) > parseInt(more)) {
+          const tmp = less;
+          less = more;
+          more = tmp;
+        }
+        if (side)
+          return (more);
+        return (less);
+      }
+    },
+
     open2FA() {
       this.ShowTwoFA = true;
     },
@@ -720,7 +736,6 @@ export default defineComponent({
     },
 
     async getAllBlocked() {
-
       await axios
         .get(`/api/user/blocked`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -745,7 +760,6 @@ export default defineComponent({
         friend = await this.handleUsernameSearch(this.selectedBlock);
       }
       if (friend) {
-
         return axios
           .post(`/api/user/block/del`, friend, {
             headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -974,7 +988,6 @@ export default defineComponent({
     },
 
     async getAllUsernames() {
-
       await axios
         .get(`/api/user/`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -989,7 +1002,6 @@ export default defineComponent({
     },
 
     async getAllFriends() {
-
       await axios
         .get(`/api/user/friends`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -1016,7 +1028,6 @@ export default defineComponent({
     },
 
     async getUserById(id: number): Promise<User | null> {
-
       return await axios
         .get(`/api/user/${id}`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -1031,7 +1042,6 @@ export default defineComponent({
     },
 
     async getUserByUsername(username: string): Promise<User | null> {
-
       return await axios
         .get(`/api/user/username/${username}`, {
           headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -1057,7 +1067,6 @@ export default defineComponent({
         friend = await this.handleUsernameSearch(this.selectedFriend);
       }
       if (friend) {
-
         return axios
           .post(`/api/user/friends/add`, friend, {
             headers: { Authorization: `Bearer ${store.state.user.hash}` },
@@ -1264,5 +1273,13 @@ export default defineComponent({
     linear-gradient(to top right, #1e1546, transparent),
     linear-gradient(to left, #00000000, #19032583);
   background-blend-mode: screen;
+}
+
+.win {
+  background: linear-gradient(to top right, #34e764ae, #0db985a2);
+}
+
+.loose {
+  background: linear-gradient(to top right, #e73434ae, #b90d6ba2);
 }
 </style>

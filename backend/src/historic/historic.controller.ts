@@ -7,35 +7,34 @@ import {
   Get,
 } from "@nestjs/common";
 import { HistoricService } from "../historic/historic.service";
-import { Public } from "../common/decorators";
+import { GetCurrentUserId } from "../common/decorators";
 import { Historic } from "@prisma/client";
-import { PrismaService } from "../prisma/prisma.service";
 
 @Controller("historic")
 export class HistoricController {
-  constructor(
-    private historicService: HistoricService,
-    private prismaService: PrismaService,
-  ) {}
+  constructor(private historicService: HistoricService) {}
 
-  @Public()
-  @Get("ID")
+  @Get()
   @HttpCode(HttpStatus.OK)
-  getGameFromId(@Body() dto: Historic) {
-    return this.historicService.getGameByGameId(dto);
+  getAllHistoric() {
+    return this.historicService.getAllHistoric();
   }
 
-  @Public()
+  @Get("leaderboard")
+  @HttpCode(HttpStatus.OK)
+  getLeaderBoard() {
+    return this.historicService.getLeaderBoard();
+  }
+
+  @Get(":id")
+  @HttpCode(HttpStatus.OK)
+  getPlayerHistoric(@GetCurrentUserId() userId: number) {
+    return this.historicService.getGamesByPlayerId(userId);
+  }
+
   @Post("ID")
   @HttpCode(HttpStatus.OK)
-  setGameFromId(@Body() dto: Historic) {
+  setHistoric(@Body() dto: Historic) {
     return this.historicService.setGameByGameId(dto);
-  }
-
-  @Public()
-  @Get("Games")
-  @HttpCode(HttpStatus.OK)
-  getGamesHistoric(@Body() dto: Historic): Promise<Historic[]> {
-    return this.historicService.getGamesByPlayerId(dto);
   }
 }

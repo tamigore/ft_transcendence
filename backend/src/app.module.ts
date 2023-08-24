@@ -9,6 +9,7 @@ import { UserModule } from "./user/user.module";
 import { GameModule } from "./game/game.module";
 import { RoomModule } from "./room/room.module";
 import { TwoFAModule } from "src/tfa/twoFA.module";
+import { HistoricModule } from "src/historic/historic.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { TwoFAModule } from "src/tfa/twoFA.module";
     UserModule,
     GameModule,
     RoomModule,
+    HistoricModule,
   ],
   providers: [
     {
