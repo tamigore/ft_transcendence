@@ -29,7 +29,6 @@ export const parseTimestamp = (timestamp: Date, format = '') => {
 			date
 		)}, ${zeroPad(date.getHours(), 2)}:${zeroPad(date.getMinutes(), 2)}`
 	}
-
 	return date
 }
 
