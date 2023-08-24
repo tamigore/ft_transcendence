@@ -5,14 +5,16 @@
 le consulter.
 
 - spectate depuis le chat ou depuis friend interface
-- lancer game avec block ou sans online -> conencter a la box
+
+- pong reactif
 
 - refresh les para sur refresh de page + leave game
+- actualiser les games a spectate -> probleme vient de leave game on reload = pas d'histo donc pas supr de spectate
 
-- actualiser les games a spectate -> problemes vient  leave game on reload = pas d'histo donc pas supr de spectate
 
 
- 
+
+
 nestjs_container | [Nest] 109  - 08/24/2023, 2:06:32 PM     LOG [NestApplication] Nest application successfully started +4ms
 nestjs_container | [Nest] 109  - 08/24/2023, 2:06:32 PM     LOG [UserService] user id : 60464 wants to update chatSocket: DvIig-fqbIr-kH_dAAAC
 nestjs_container | [Nest] 109  - 08/24/2023, 2:06:32 PM   ERROR [ExceptionsHandler] PrismaClientKnownRequestError: 
