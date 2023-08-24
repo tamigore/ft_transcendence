@@ -64,6 +64,7 @@ model Game {
   created_at DateTime @default(now())
 
   name      String
+  isBlocked Boolean @default(false)
   player1Id Int
   player1   User      @relation(name: "player1", fields: [player1Id], references: [id])
   player2Id Int?

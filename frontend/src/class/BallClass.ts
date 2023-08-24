@@ -117,7 +117,7 @@ export class BallClass {
           this.pong.generateBlocks();
           console.log("===generateBlocks");
         }
-        if (store.state.ingame && /* store.state.game.isBlocked && */ store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
+        if (store.state.ingame &&  store.state.game.isBlocked &&  store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
           this.pong.generateBlocks();
         this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
 

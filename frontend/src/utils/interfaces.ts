@@ -34,6 +34,7 @@ export interface Game {
   id: number,
   created_at: Date,
 
+  isBlocked: boolean,
   name: string
   player1Id: number,
   player1: User,

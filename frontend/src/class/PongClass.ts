@@ -298,7 +298,6 @@ export class PongGameClass {
     this.rightPaddleHeight = 800;
     this.leftPaddleHeight = 800;
     // this.newBall();
-    this.gameIsBlocks = true;
   }
 
   endGameOnline() {

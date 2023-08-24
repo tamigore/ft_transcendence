@@ -41,7 +41,7 @@ export class GameService {
           );
           return await this.prisma.game.create({
             data: {
-              // isBlocked: dto.isBlocked,
+              isBlocked: dto.isBlocked,
               name: dto.userName,
               player1: {
                 connect: {
@@ -97,6 +97,7 @@ export class GameService {
         return await this.prisma.game.update({
           where: {
             id: game.id,
+            historic: { is: undefined },
           },
           data: {
             spectator: {

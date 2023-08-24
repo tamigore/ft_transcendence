@@ -91,7 +91,7 @@ export default defineComponent({
       axios.defaults.baseURL = server.nestUrl;
       await axios.post('/api/game/matchmaker', {
         userName: store.state.user.username as string,
-        isBlocked: false as boolean,
+        isBlocked: true as boolean, //link with boxes
       }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
