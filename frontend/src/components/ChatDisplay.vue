@@ -337,9 +337,9 @@ export default defineComponent({
       })
       .then((response: AxiosResponse) => {
         console.log(`deleteRoom response.data: ${response.data}`);
-        if (store.state.lastRoom.id == room.id) store.commit("setLastRoom", {});
-        store.commit("delRoom", room);
         socket.emit("leave_room", { user: store.state.user, room: room });
+        store.commit("delRoom", room);
+        if (store.state.lastRoom.id == room.id) store.commit("setLastRoom", {});
         })
         .catch((error: AxiosError) => { throw error; });
     },
