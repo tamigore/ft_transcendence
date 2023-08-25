@@ -40,7 +40,8 @@ model User {
   spectator  Game[]     @relation(name: "spectator")
   win        Historic[] @relation(name: "winner")
   loose      Historic[] @relation(name: "looser")
-
+  ingame     Boolean    @default(false)
+  inqueue    Boolean    @default(false)
   @@map("users")
 }
 

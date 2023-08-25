@@ -28,6 +28,7 @@ export interface User {
   spectator: Game[],
   win: Historic,
   loose: Historic,
+  ingame: boolean,
 }
 
 export interface Game {

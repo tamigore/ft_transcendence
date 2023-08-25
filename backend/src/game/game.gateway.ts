@@ -237,4 +237,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .to(body.room)
       .emit("servOnSpecScore", { scoreA: body.scoreA,scoreb: body.scoreB, userId: body.userId });
   }
+
+
+@SubscribeMessage("queueLeave")
+  async onQueueLeave(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { gameId: number },
+  ) {
+    console.log("queueLeave");
+    this.gameService.queueLeave(body.gameId);
+  }
 }

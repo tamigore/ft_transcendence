@@ -21,6 +21,62 @@ export class GameService {
     });
   }
 
+  async updateInGame(userId: number, value: boolean) {
+    return await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ingame: value,
+      },
+    });
+  }
+
+  async updateInQueue(userId: number, value: boolean) {
+    return await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        inqueue: value,
+      },
+    });
+  }
+
+  async queueLeave(gameId: number) {
+    return await this.prisma.game.delete({
+      where: {
+        id: gameId,
+      }
+      }).then(() => {
+        console.log("queueLeave : game deleted");
+      });
+  }
+
+  async setPrivateGame(dto: {user1Id: number, user2Id: number}): Promise<Game> {
+    const game = await this.prisma.game.create({
+      data: {
+        name: "onInvite",
+        isBlocked: false,
+        player1: {
+          connect: {
+            id: dto.user1Id,
+          },
+        },
+        player2: {
+          connect: {
+            id: dto.user2Id,
+          },
+        },
+      },
+      include: {
+        player1: true,
+        player2: true,
+      },
+    });
+    return game;
+    }
+
   async matchMaker(dto: Matchmaker): Promise<Game> {
     console.log(`typeof ${typeof dto.userId}`);
     const game = await this.prisma
@@ -29,6 +85,9 @@ export class GameService {
           where: {
             player2: { is: null },
             isBlocked: dto.isBlocked as boolean,
+            NOT: {
+              player1Id: dto.userId as number,
+            }
           },
         });
         console.log("INMATCHMAKER : ", dto.userName);
@@ -75,6 +134,16 @@ export class GameService {
         }
       })
       .then((game) => {
+        if (!game.player2)
+        {
+          this.updateInQueue(game.player1Id, true);
+        }
+        else if (game.player2)
+        {
+          this.updateInQueue(game.player1Id, false);
+          this.updateInGame(game.player1Id, true);
+          this.updateInGame(game.player2Id, true);
+        }
         this.logger.log(game);
         return game;
       })
@@ -153,6 +222,8 @@ export class GameService {
         },
       })
       .then((historic) => {
+        this.updateInGame(historic.winnerID, false);
+        this.updateInGame(historic.looserID, false);
         this.logger.log("---------YOOO LE HISTORIC : ", historic);
         return historic;
       })

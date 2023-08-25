@@ -1,21 +1,10 @@
-• Des stats (telles que : victoires et défaites, rang et niveaux, hauts faits, etc.) doivent
-être affichées sur le profil de l’utilisateur.
 
-• Chaque utilisateur doit avoir un Match History (historique comportant les parties 1 contre 1, les niveaux et ainsi de suite). Toute personne loguée doit pouvoir
-le consulter.
 
 - spectate depuis le chat ou depuis friend interface
 
-
 - pong reactif
 
-- mettre ingame dans le user
-
-- changer sprite block + mettre son cassage de blocks
-
-- si player one refresh pas de leave 
-
-
+- faire page accueile du pong ?
 
 
 
