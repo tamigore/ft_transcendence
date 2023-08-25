@@ -71,6 +71,24 @@ export default defineComponent({
   },
 
   methods: {
+    async privateGame(user1Id: number, user2Id: number)
+    {
+      await axios.post('/api/game/privateGame', {
+        user1Id: user1Id,
+        user2Id: user2Id,
+      }, {
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+      })
+        .then((response: AxiosResponse) => {
+          console.log("response from privateGame : ", response.data);
+          store.commit("setGame", response.data);
+          store.commit("setGameConnect", true);
+        })
+        .catch((error: AxiosError) => {
+          console.log(error);
+        });
+    },
+
     async getGames() {
       await axios.get('/api/game/spectate', {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
@@ -138,6 +156,9 @@ export default defineComponent({
       }
       else if (store.state.ingame && store.state.playerNum === 0) {
         console.log("spectator leave not done");
+      }
+      else if (store.state.inQueue) {
+        gameSocket.emit("queueLeave", { gameId: store.state.game.id });
       }
       gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
       store.commit("setInQueue", false);

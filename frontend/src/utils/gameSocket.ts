@@ -43,7 +43,8 @@ export interface ClientToServerEvents {
   leaveGameRoom(e: { room: string }): void;
   ballSetter(e: { ballInfo: BallState, room: string }): void;
   gameLeave(e: { room: string, player: number }): void;
-
+  queueLeave(e: { gameId: number }): void;
+  
   newSpectator(e: { room: string, user: User }): void;
   onSpecBlock(e: { room: string, block: BlockState, userId : number }): void;
   onSpecBall(e: { room: string, ball: BallState, userId : number }): void;
