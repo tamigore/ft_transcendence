@@ -53,6 +53,8 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   console.log(from);
   console.log(to);
+  if (typeof to.name === "undefined" && store.state.user && !store.state.user.loggedIn)
+    return { path: '/404NotFound' };
   if (typeof from.name === "undefined") {
     const { cookies } = useCookies();
     console.log(cookies.keys());

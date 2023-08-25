@@ -316,7 +316,7 @@
 
               <div class="font-bold flex align-items-center justify-content-center"
                 style="width: 200px; min-height: 50px">
-                {{history.score.split('-')[0]}}
+                {{userScore(history.score, true)}}
               </div>
 
               <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
@@ -329,7 +329,7 @@
                   <span
                     style="display: block; margin-top: 5px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
                     title="username">
-                    {{userScore(history.score, true)}}
+                    {{history?.winner?.username}}
                   </span>
                 </div>
               </div>

@@ -516,8 +516,8 @@ export class RoomService implements OnModuleInit {
             where: { id: roomId },
             include: { owner: true },
           })
-          .catch((error) => {
-            throw new Error(error);
+          .catch((/*error*/) => {
+            return null; //throw new Error(error);
           });
         if (userId !== room.owner.id)
           throw new Error(`User ${userId} doesn't own room ${roomId}`);
@@ -542,8 +542,8 @@ export class RoomService implements OnModuleInit {
               },
             },
           })
-          .catch((error) => {
-            throw new Error(error);
+          .catch((/*error*/) => {
+            return null; //throw new Error(error);
           });
         return prisma.room.delete({
           where: { id: roomId },
@@ -552,8 +552,8 @@ export class RoomService implements OnModuleInit {
       .then((res) => {
         this.logger.log("remove success: ", res);
       })
-      .catch((error) => {
-        throw new Error(error);
+      .catch((/*error*/) => {
+        return null; // throw new Error(error);
       });
   }
 
@@ -574,10 +574,10 @@ export class RoomService implements OnModuleInit {
         });
         if (!room) return false;
         if (userId !== removeId) {
-          if (!this.higherRights(room, userId, removeId))
-            throw new Error(
-              `User ${userId} donesn't have rights on room ${roomId}`,
-            );
+          if (!this.higherRights(room, userId, removeId)) return false;
+          // throw new Error(
+          //   `User ${userId} donesn't have rights on room ${roomId}`,
+          // );
         }
         return await prisma.room.update({
           where: { id: roomId },
@@ -605,8 +605,9 @@ export class RoomService implements OnModuleInit {
       .then((room) => {
         this.logger.log("removeUser success: ", room);
       })
-      .catch((error) => {
-        throw new Error(error);
+      .catch((/*error*/) => {
+        return false;
+        // throw new Error(error);
       });
   }
 

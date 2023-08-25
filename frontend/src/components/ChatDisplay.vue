@@ -73,8 +73,8 @@
             
         <!-- Colonne du chat (3/4 de la largeur) -->
         <div class="flex flex-col w-9">
-          <div v-if="!isPrivate" class="flex flex-column col">
-            <div class="flex flex-column col mt-6 myBackground2" style="height: 70vh" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
+          <div v-if="!isPrivate" class="flex flex-column col" style="height: 70vh">
+            <div class="flex flex-column col mt-6 myBackground2" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
               <div v-for="Room in Rooms" :key="Room.room.id">
                 <div v-if="Room.room.name == lastRoom.name">
                   <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
@@ -99,9 +99,9 @@
               </div>
             </div>
           </div>
-          <div v-else class="flex flex-column col">
-            <div v-for="Room in Private" :key="Room.id">
-              <div class="flex flex-column col mt-6 myBackground2" style="height: 70vh" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
+          <div v-else class="flex flex-column col" style="height: 70vh">
+            <div class="flex flex-column col mt-6 myBackground2" v-bind:class="[ lastPrivate && lastPrivate.id  ? 'box-shadow' : 'box-shadow-dark']">
+              <div v-for="Room in Private" :key="Room.id">
                 <div v-if="Room.name == lastPrivate.name">
                   <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
                     <div v-for="msg in Messages" :key="msg.id">
@@ -176,6 +176,7 @@ export default defineComponent({
       const message = store.state.lastMessage;
       console.log(`lastMessage: ${message}`);
       if (store.state.lastRoom.id !== message.room.id && store.state.lastPrivate.id !== message.room.id) {
+        console.log(`lastMessage is not in the room ?`);
         if ((store.state.lastRoom.mute && !store.state.lastRoom.mute.find(user => user.id === message.user.id))
           || (store.state.user.blocked && !store.state.user.blocked.find(user => user.id === message.user.id))) {
           console.log("message.room joined but not selected");
@@ -189,6 +190,9 @@ export default defineComponent({
               life: 3000 });
         }
       }
+      this.$toast.add({severity: 'info', summary: 'New message',
+              detail: `${message.room.name}`,
+              life: 3000 });
       return message as Message;
     },
 
@@ -331,11 +335,11 @@ export default defineComponent({
       await axios.delete(`api/room/${room.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
-        .then((response: AxiosResponse) => {
-          console.log(`deleteRoom response.data: ${response.data}`);
-          socket.emit("leave_room", { user: store.state.user, room:  response.data });
-          store.commit("setLastRoom", {});
-          store.commit("delRoom", room);
+      .then((response: AxiosResponse) => {
+        console.log(`deleteRoom response.data: ${response.data}`);
+        if (store.state.lastRoom.id == room.id) store.commit("setLastRoom", {});
+        store.commit("delRoom", room);
+        socket.emit("leave_room", { user: store.state.user, room: room });
         })
         .catch((error: AxiosError) => { throw error; });
     },

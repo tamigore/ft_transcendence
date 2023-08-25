@@ -38,7 +38,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("disconnecting")
   handleDisconnecting(@ConnectedSocket() client: Socket) {
-    console.log('chat room: ', client.rooms);
+    console.log("chat room: ", client.rooms);
     client.rooms.forEach((room) => {
       this.logger.log(`disconnecting user ${client.id} from room ${room}`);
     });
@@ -55,6 +55,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.userService.updateChatSocket(user.id, client.id);
     const room = await this.roomService.findById(body.room.id);
     if (!room) throw new Error("onMessage no room found");
+    if (room.private) this.server.in(user.chatSocket).socketsJoin(room.name);
     this.chatService.createMessage(body);
     this.server.to(body.room.name).emit("servMessage", body);
   }
@@ -70,9 +71,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ): Promise<void> {
     this.logger.log(`${payload.user.username} is joining ${payload.room.name}`);
     const user = await this.userService.findById(payload.user.id);
-    if (!user) throw new Error("onJoinRoom no user found");
+    if (!user) return null; // throw new Error("onJoinRoom no user found");
     const room = await this.roomService.findById(payload.room.id);
-    if (!room) throw new Error("onJoinRoom no room found");
+    if (!room) return null; // throw new Error("onJoinRoom no room found");
     this.server.in(user.chatSocket).socketsJoin(room.name);
     if (room.private) this.server.emit("updatePrivate");
     else this.server.emit("update");
@@ -89,10 +90,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ): Promise<void> {
     this.logger.log(`${payload.user.username} is leaving ${payload.room.name}`);
     const user = await this.userService.findById(payload.user.id);
-    if (!user) throw new Error("onLeaveRoom no user found");
+    if (!user) return null; // throw new Error("onLeaveRoom no user found");
     const room = await this.roomService.findById(payload.room.id);
-    if (!room) throw new Error("onLeaveRoom no room found");
+    if (!room) return null; // throw new Error("onLeaveRoom no room found");
     this.server.in(user.chatSocket).socketsLeave(room.name);
     this.server.emit("update");
+  }
+
+  @SubscribeMessage("update")
+  async update(
+    @MessageBody()
+    payload: {
+      room: Room;
+    },
+  ): Promise<void> {
+    this.server.to(payload.room.name).emit("update");
   }
 }

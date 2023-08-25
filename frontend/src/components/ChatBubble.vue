@@ -133,6 +133,7 @@ export default defineComponent({
         return true;
       return false;
     },
+
     parsDate(date: Date): string {
       const d = new Date(date);
       let month = '' + (d.getMonth() + 1);
@@ -146,14 +147,17 @@ export default defineComponent({
           day = '0' + day;
       return [year, month, day].join('-') + ` ${h.slice(-2)}:${m.slice(-2)}`;
     },
+
     display(): void {
       this.toggle = !this.toggle;
     },
+
     async searchUser(): Promise<void> {
       console.log("searchUser");
       if (this.message.user && this.message.user.username)
         router.push(`/profile/${this.message.user.username}`);
     },
+
     async blockUser(): Promise<void> {
       console.log("blockUser");
       await axios.post('/api/user/block/add', {
@@ -161,13 +165,16 @@ export default defineComponent({
       }, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
-        if (res && res.data && res.data.friend)
-          store.commit("setBlocked", res.data.friend);
+        if (res && res.data && res.data.blocked)
+          store.commit("setBlocked", res.data.blocked);
+        socket.emit("update", {room: this.message.room});
+        // await this.update();
       })
       .catch(err => { throw new Error(err) });
     },
+
     async addAdmin(): Promise<void> {
       console.log("addAdmin");
       await axios.post('/api/room/addAdmin', {
@@ -177,11 +184,14 @@ export default defineComponent({
       }, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
+        socket.emit("update", {room: this.message.room});
+        // await this.update();
       })
       .catch(err => { throw new Error(err) });
     },
+
     async kickUser(): Promise<void> {
       console.log("kickUser");
       
@@ -192,11 +202,14 @@ export default defineComponent({
       }, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
+        socket.emit("leave_room", {user: this.message.user, room: this.message.room});
+        // await this.update();
       })
       .catch(err => { throw new Error(err) });
     },
+
     async banUser(): Promise<void> {
       console.log("banUser");
       
@@ -207,11 +220,17 @@ export default defineComponent({
       }, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
+        if (res && res.data && res.data.ban) {
+          store.commit("setBan", res.data.ban);
+        }
+        socket.emit("update", {room: this.message.room});
+        // await this.update();
       })
       .catch(err => { throw new Error(err) });
     },
+
     async muteUser() {
       console.log("muteUser");
       await axios.post('/api/room/addMute', {
@@ -221,11 +240,13 @@ export default defineComponent({
       }, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
-      .then((res) => {
+      .then(async (res) => {
+        await this.update();
         console.log(res);
       })
       .catch(err => { throw new Error(err) });
     },
+
     async addFriend(): Promise<void> {
       console.log("addFriend");
       await axios.post('/api/user/friends/add', this.message.user, {
@@ -235,9 +256,11 @@ export default defineComponent({
         console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
+        this.update();
       })
       .catch(err => { throw new Error(err) });
     },
+
     async removeFriend(): Promise<void> {
       console.log("removeFriend");
       await axios.post('/api/user/friends/del', this.message.user, {
@@ -250,9 +273,12 @@ export default defineComponent({
       })
       .catch(err => { throw new Error(err) });
     },
+
     invitePong(): void {
       console.log("invitePong");
+      router.push({path: "/pong"});
     },
+
     async privateMessage(): Promise<void> {
       console.log("privateMessage");
       
@@ -264,19 +290,43 @@ export default defineComponent({
       })
       .then(async (res: AxiosResponse) => {
         console.log(res);
-        socket.emit("join_room", { user: store.state.user, room: res.data });
-        socket.emit("join_room", { user: this.message.user, room: res.data });
         await axios.get(`api/room/private/${store.state.user.id}`, {
           headers: { "Authorization": `Bearer ${store.state.user.hash}` }
         })
-          .then((response: AxiosResponse) => {
+          .then(async (response: AxiosResponse) => {
             console.log(`getPrivate response: ${response.data}`);
             store.commit("setPrivate", response.data);
           })
           .catch((error: AxiosError) => { throw error; });
+        socket.emit("join_room", { user: store.state.user, room: res.data });
+        socket.emit("join_room", { user: this.message.user, room: res.data });
       })
       .catch((err: AxiosError) => { throw err });
     },
+
+    async update() {
+      await axios.get("api/room/public", {
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+      })
+        .then(async (response: AxiosResponse) => {
+          const rooms = response.data;
+          store.commit("setRooms", response.data);
+          for (const room of rooms)
+          {
+            if (room.id === store.state.lastRoom.id)
+            {
+              await axios.get(`api/chat/room/${room.id}`, {
+                headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+              })
+                .then((response: AxiosResponse) => {
+                  store.commit("setMessages", response.data);
+                })
+                .catch((error: AxiosError) => { throw error; });
+            }
+          }
+        })
+        .catch((error: AxiosError) => { throw error; });
+    }
   }
 })
 </script>

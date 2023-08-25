@@ -14,6 +14,7 @@ export interface ClientToServerEvents {
   leave_room: (e: { user: User; room: Room }) => boolean;
   kick_user: (e: { user: User; user_to_kick: User; room: Room }) => boolean;
   cliMessage: (e: Message) => boolean;
+  update: (e: { room: Room }) => void;
 }
 
 class SocketioChat {
@@ -30,11 +31,12 @@ class SocketioChat {
 
     this.socket.on('servMessage', (msg: Message) => {
       console.log("new servMessage" + msg);
+      store.commit("setLastMessage", msg);
       if (store.state.lastRoom.id === msg.room.id) {
         console.log("last Room == message.room");
         if ((store.state.lastRoom.mute && store.state.lastRoom.mute.find(user => user.id === msg.user.id))
           || (store.state.user.blocked && store.state.user.blocked.find(user => user.id === msg.user.id)))
-          store.commit("setLastMessage", msg);
+          return ;
         else
           store.commit("addMessage", msg);
       }
@@ -42,7 +44,6 @@ class SocketioChat {
         console.log("last private == message.room");
         store.commit("addMessage", msg);
       }
-      store.commit("setLastMessage", msg);
     });
 
     this.socket.on('update', async () => {
@@ -51,6 +52,7 @@ class SocketioChat {
       })
         .then(async (response: AxiosResponse) => {
           const rooms = response.data as Room[];
+          store.commit("setRooms", response.data);
           for (const room of rooms)
           {
             if (room.id === store.state.lastRoom.id)
@@ -64,7 +66,6 @@ class SocketioChat {
                 .catch((error: AxiosError) => { throw error; });
             }
           }
-          store.commit("setRooms", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
     });
@@ -75,6 +76,7 @@ class SocketioChat {
       })
         .then(async (response: AxiosResponse) => {
           const rooms = response.data as Room[];
+          store.commit("setPrivate", rooms);
           for (const room of rooms)
           {
             if (room.id === store.state.lastPrivate.id)
@@ -88,7 +90,6 @@ class SocketioChat {
                 .catch((error: AxiosError) => { throw error; });
             }
           }
-          store.commit("setRooms", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
     });

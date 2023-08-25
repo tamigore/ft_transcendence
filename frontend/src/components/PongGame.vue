@@ -8,13 +8,13 @@
       <p>{{ "scoreB " + Pong.scoreB }}</p>
     </div>
 
-    <div v-if="!Pong.inMultiplayer" class="button-container">
-      <button @click="Pong.startMatchSolo" :disabled="Pong.gameIsRunning">Solo</button>
-      <button @click="Pong.startMatchMultiLocal" :disabled="Pong.gameIsRunning">MultiplayerLocal</button>
-      <button @click="Pong.startNoPlayer" :disabled="Pong.gameIsRunning">NoPlayer</button>
-      <button @click="Pong.startWall" :disabled="Pong.gameIsRunning">WALL</button>
-      <button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</button>
-      <button @click="Pong.setBlocks" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</button>
+    <div v-if="!Pong.inMultiplayer" class="Button-container">
+      <Button @click="Pong.startMatchSolo" :disabled="Pong.gameIsRunning">Solo</Button>
+      <Button @click="Pong.startMatchMultiLocal" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
+      <Button @click="Pong.startNoPlayer" :disabled="Pong.gameIsRunning">NoPlayer</Button>
+      <Button @click="Pong.startWall" :disabled="Pong.gameIsRunning">WALL</Button>
+      <Button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</Button>
+      <Button @click="Pong.setBlocks" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
     </div>
     <div class="pong-container">
       <div class="input-container">
@@ -43,9 +43,16 @@
   position: relative;
   width: var(--canvasWidth, 10px);
   height: var(--canvasHeight, 10px);
-  border: 1px solid #000000;
+  border: 0.2rem solid #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0 .2rem #fff,
+              0 0 .2rem #fff,
+              0 0 1.2rem #bc13fe,
+              0 0 0.8rem #bc13fe,
+              0 0 1.2rem #bc13fe,
+              inset 0 0 1.2rem #bc13fe;
   margin: auto;
-
+  background: rgba(0, 0, 0, 0.534);
 }
 
 .info-container {
@@ -58,10 +65,10 @@
   width: 10%;
 }
 
-.button-container {
+.Button-container {
   position: absolute;
   bottom: 100%;
-  /* Make the button container stick to the top of the game container */
+  /* Make the Button container stick to the top of the game container */
   left: 0;
   /* Align to the left of the game container */
   height: auto;
@@ -71,11 +78,11 @@
   display: flex;
   /* Make it a flex container */
   justify-content: center;
-  /* Center buttons horizontally */
+  /* Center Buttons horizontally */
   align-items: center;
-  /* Center buttons vertically */
+  /* Center Buttons vertically */
   gap: 10px;
-  /* Add some space between the buttons */
+  /* Add some space between the Buttons */
 }
 
 .game-container {
@@ -88,7 +95,7 @@
   margin-top: 5%;
   margin-right: 5%;
   padding-top: 120px;
-  /* Space for the buttons. This should be greater than the height of the buttons */
+  /* Space for the Buttons. This should be greater than the height of the Buttons */
 }
 
 .pong-container {
@@ -153,7 +160,10 @@ export default defineComponent({
     const drawPaddle = (x: number, y: number, width: number, height: number, sprite: HTMLImageElement) => {
       if (!ctx)
         return;
-      ctx.drawImage(sprite, x, y, width, height)
+      ctx.shadowColor = "rgb("+243+","+243+","+21+")";
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle= "rgba("+243+","+243+","+21+",0.2)";
+      ctx.drawImage(sprite, x, y, width, height);
     }
 
     const drawBlocks = () => {
@@ -169,13 +179,19 @@ export default defineComponent({
         return;
       ctx.beginPath();
       ctx.arc(Pong.value.theBall.x, Pong.value.theBall.y, Pong.value.theBall.radius, 0, Math.PI * 2);
-      ctx.fillStyle = Pong.value.theBall.color;
+      ctx.shadowColor = "rgb("+13+","+213+","+252+")";
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle= "rgba("+13+","+213+","+252+",0.2)";
+      // ctx.fillStyle = Pong.value.theBall.color;
       ctx.fill();
       ctx.closePath();
       for (const ball of Pong.value.myBalls) {
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        ctx.fillStyle = ball.color;
+        ctx.shadowColor = "rgb("+13+","+213+","+252+")";
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle= "rgba("+13+","+213+","+252+",0.2)";
+        // ctx.fillStyle = ball.color;
         ctx.fill();
         ctx.closePath();
       }
