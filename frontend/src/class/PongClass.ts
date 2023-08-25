@@ -95,6 +95,7 @@ export class PongGameClass {
   blockSprites: [string, string, string, string, string];
   lastHit: Date;
   blockSounds: [string, string, string, string, string];
+  pointSounds: [HTMLAudioElement, HTMLAudioElement];
 
   constructor(_hitSound: HTMLAudioElement) {
     //GAME PARAMETERS
@@ -176,6 +177,11 @@ export class PongGameClass {
       require('@/assets/sounds/larger.mp3'),
       require('@/assets/sounds/smaller.mp3'),
     ];
+    this.pointSounds = [new Audio(), new Audio()];
+    this.pointSounds[0].src = require('@/assets/sounds/GoodPoint.mp3');
+    this.pointSounds[1].src = require('@/assets/sounds/BadPoint.mp3');
+    this.pointSounds[0].volume = 0.5;
+
   }
 
   /***********************re-START GAME***********************/

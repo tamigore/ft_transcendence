@@ -1,48 +1,51 @@
 <template>
   <div v-if="Pong" class="game-container">
-    <div class="info-container">
-      <div>FPS: {{ fps.toFixed(2) }}</div>
-      <p>{{ "veloBall x-y " + Pong.theBall.veloX + " " + Pong.theBall.veloY }}</p>
-      <p>{{ "posBall x-y " + Pong.theBall.x + " " + Pong.theBall.y }}</p>
-      <p>{{ "scoreA " + Pong.scoreA }}</p>
-      <p>{{ "scoreB " + Pong.scoreB }}</p>
-    </div>
+    
 
     <div v-if="!Pong.inMultiplayer" class="Button-container">
-      <Button @click="Pong.startMatchSolo" :disabled="Pong.gameIsRunning">Solo</Button>
-      <Button @click="Pong.startMatchMultiLocal" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
-      <Button @click="Pong.startNoPlayer" :disabled="Pong.gameIsRunning">NoPlayer</Button>
-      <Button @click="Pong.startWall" :disabled="Pong.gameIsRunning">WALL</Button>
+      <Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
+      <Button @click="Pong.startMatchMultiLocal()" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
+      <Button @click="Pong.startNoPlayer()" :disabled="Pong.gameIsRunning">NoPlayer</Button>
+      <Button @click="Pong.startWall()" :disabled="Pong.gameIsRunning">WALL</Button>
       <Button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</Button>
-      <Button @click="Pong.setBlocks" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
+      <Button @click="Pong.setBlocks()" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
     </div>
-    <div class="pong-container">
+ 
+    <div class="flexContainer">
       <div class="input-container">
-        <div class="left-input">
-          <p>{{ Pong.leftPlayerKeyUp }}</p>
-          <p>{{ Pong.leftPlayerKeyDown }}</p>
-        </div>
+     
+        <p>{{ "scoreA " + Pong.scoreA }}</p>
       </div>
       <canvas ref="myCanvas" class="gameCanvasStyle" :style="computedCanvasStyle" :width="`${Pong.width}`"
         :height="`${Pong.height}`">
       </canvas>
       <div class="input-container">
-        <div class="right-input">
-          <p>{{ Pong.rightPlayerKeyUp }}</p>
-          <p>{{ Pong.rightPlayerKeyDown }}</p>
-        </div>
+       
+        <p>{{ "scoreB " + Pong.scoreB }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <style>
+
+.flexContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60vw; /* Set the container's width to the full viewport width */
+  height: 60vh; /* Set the container's height to the full viewport height */
+  border: 1px solid black; /* Just for visualization */
+}
+
+
+
 .gameCanvasStyle {
   z-index: 1;
-  display: block;
+  display: flex;
   position: relative;
-  width: var(--canvasWidth, 10px);
-  height: var(--canvasHeight, 10px);
+  /* width: var(--canvasWidth, 10px);
+  height: var(--canvasHeight, 10px); */
   border: 0.2rem solid #fff;
   border-radius: 1rem;
   box-shadow: 0 0 .2rem #fff,
@@ -53,6 +56,12 @@
               inset 0 0 1.2rem #bc13fe;
   margin: auto;
   background: rgba(0, 0, 0, 0.534);
+  justify-content: center;
+  /* Center Buttons horizontally */
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .info-container {
@@ -285,9 +294,17 @@ export default defineComponent({
 
       gameSocket.on("scoreMessage", (e: number) => {
         if (e == 2)
+        {
           Pong.value.scoreA++;
+          if (store.state.playerNum == 1)
+           Pong.value.pointSounds[0].play();
+        }
         else if (e == 1)
+        {
           Pong.value.scoreB++;
+          if (store.state.playerNum == 2)
+           Pong.value.pointSounds[0].play();
+        }
         if (Pong.value.scoreA >= 100 || Pong.value.scoreB >= 100) {
           Pong.value.endGameOnline();
           store.commit("setGameConnect", false);
