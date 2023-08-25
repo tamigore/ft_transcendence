@@ -309,8 +309,8 @@ export class PongGameClass {
       this.rightPlayerKeyUp = 'w';
       this.blockId = 2;
     }
-    this.rightPaddleHeight = 800;
-    this.leftPaddleHeight = 800;
+    this.rightPaddleHeight = 80;
+    this.leftPaddleHeight = 80;
     // this.newBall();
   }
 

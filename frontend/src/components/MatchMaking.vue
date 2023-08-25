@@ -15,10 +15,10 @@
           <Checkbox :binary="true" v-model="boxes" class="mr-2"></Checkbox>
           <label>Play with Boxes</label>
         </div>
-        <!-- <div class="flex align-items-center text-indigo-300">
+        <div class="flex align-items-center text-indigo-300">
           <Checkbox :binary="true" v-model="wall" class="mr-2"></Checkbox>
           <label>Play with Wall</label>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>

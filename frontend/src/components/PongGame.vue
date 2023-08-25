@@ -41,6 +41,7 @@
 
 
 .gameCanvasStyle {
+  flex: 1;
   z-index: 1;
   display: flex;
   position: relative;
