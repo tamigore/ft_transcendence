@@ -4,33 +4,10 @@
 
 - pong reactif
 
+- rajouter des son de victoire et de defaite 
+
 - faire page accueile du pong ?
 
 
 
 
-
-nestjs_container | [Nest] 109  - 08/24/2023, 2:06:32 PM     LOG [NestApplication] Nest application successfully started +4ms
-nestjs_container | [Nest] 109  - 08/24/2023, 2:06:32 PM     LOG [UserService] user id : 60464 wants to update chatSocket: DvIig-fqbIr-kH_dAAAC
-nestjs_container | [Nest] 109  - 08/24/2023, 2:06:32 PM   ERROR [ExceptionsHandler] PrismaClientKnownRequestError: 
-nestjs_container | Invalid `.update()` invocation in
-nestjs_container | /app/src/user/user.service.ts:154:8
-nestjs_container | 
-nestjs_container |   151   `user id : ${userId} wants to update chatSocket: ${chatSocket}`,
-nestjs_container |   152 );
-nestjs_container |   153 await this.prisma.user
-nestjs_container | → 154   .update(
-nestjs_container | An operation failed because it depends on one or more records that were required but not found. Record to update not found.
-nestjs_container | Error: PrismaClientKnownRequestError: 
-nestjs_container | Invalid `.update()` invocation in
-nestjs_container | /app/src/user/user.service.ts:154:8
-nestjs_container | 
-nestjs_container |   151   `user id : ${userId} wants to update chatSocket: ${chatSocket}`,
-nestjs_container |   152 );
-nestjs_container |   153 await this.prisma.user
-nestjs_container | → 154   .update(
-nestjs_container | An operation failed because it depends on one or more records that were required but not found. Record to update not found.
-nestjs_container |     at /app/src/user/user.service.ts:164:15
-nestjs_container |     at UserService.updateChatSocket (/app/src/user/user.service.ts:153:5)
-nestjs_container |     at /app/node_modules/@nestjs/core/router/router-execution-context.js:46:28
-nestjs_container |     at /app/node_modules/@nestjs/core/router/router-proxy.js:9:17
