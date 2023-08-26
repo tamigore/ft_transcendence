@@ -1,30 +1,53 @@
 <template>
-	<div v-if="Pong" class="game-container flex align-items-center justify-content-center">
+  <div v-if="Pong" class="flex flex-column align-items-center justify-content-center">
+    
+    <div class="flex p-4">
+      <div v-if="!Pong.inMultiplayer" class="flex px-2">
+        <div class="flex px-2">
+          <Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
+        </div>
+        <div class="flex px-2">
+          <Button @click="Pong.startWall()" :disabled="Pong.gameIsRunning">WALL</Button>
+        </div>
+        <div class="flex px-2">
+          <Button @click="Pong.startMatchMultiLocal()" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
+        </div>
+        <div class="flex px-2">
+          <Button @click="Pong.startNoPlayer()" :disabled="Pong.gameIsRunning">NoPlayer</Button>
+        </div>
+        <div class="flex px-2">
+          <Button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</Button>
+        </div>
+        <div class="flex px-2">
+          <Button @click="Pong.setBlocks()" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
+        </div>
+      </div>
+      <Button @click="LeaveGame()">LeaveGame</Button>
+    </div>
 
-		<Button v-if="inGame || inSolo" @click="LeaveGame()">LeaveGame</Button>
-		<div v-if="!Pong.inMultiplayer && inSolo" class="Button-container">
-			<Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
-			<Button @click="Pong.startMatchMultiLocal()" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
-			<Button @click="Pong.startNoPlayer()" :disabled="Pong.gameIsRunning">NoPlayer</Button>
-			<Button @click="Pong.startWall()" :disabled="Pong.gameIsRunning">WALL</Button>
-			<Button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</Button>
-			<Button @click="Pong.setBlocks()" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
-		</div>
-
-		<div class="flex align-items-center justify-content-center">
-			<div class="input-container">
-
-				<p>{{ "scoreA " + Pong.scoreA }}</p>
-			</div>
-			<canvas ref="myCanvas" class="gameCanvasStyle" :style="computedCanvasStyle" :width="`${Pong.width}`"
-				:height="`${Pong.height}`">
-			</canvas>
-			<div class="input-container">
-
-				<p>{{ "scoreB " + Pong.scoreB }}</p>
-			</div>
-		</div>
-	</div>
+    <!-- <div v-if="!Pong.inMultiplayer" class="Button-container">
+      <Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
+      <Button @click="Pong.startMatchMultiLocal()" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
+      <Button @click="Pong.startNoPlayer()" :disabled="Pong.gameIsRunning">NoPlayer</Button>
+      <Button @click="Pong.startWall()" :disabled="Pong.gameIsRunning">WALL</Button>
+      <Button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</Button>
+      <Button @click="Pong.setBlocks()" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
+    </div> -->
+ 
+    <div class="flex align-items-center justify-content-center">
+      <div class="input-container">
+     
+        <p>{{ "scoreA " + Pong.scoreA }}</p>
+      </div>
+      <canvas ref="myCanvas" class="gameCanvasStyle" :style="computedCanvasStyle" :width="`${Pong.width}`"
+        :height="`${Pong.height}`">
+      </canvas>
+      <div class="input-container">
+       
+        <p>{{ "scoreB " + Pong.scoreB }}</p>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style>

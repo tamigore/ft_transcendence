@@ -36,7 +36,7 @@
         <!-- Colonne des salles (1/4 de la largeur) -->
         <div class="flex flex-col w-4">
           <TabView class= "w-full">
-            <TabPanel header="Rooms" >
+            <TabPanel header="Rooms" @click="selectRoom(lastRoom)">
               <div id="roomContainer" class="scroll" style="height: 69vh;">
               <div v-for="Room in Rooms" :key="Room.room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
                 <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.room.id == lastRoom.id ? 'box-shadow' : '']" @click="selectRoom(Room.room)">
@@ -55,7 +55,7 @@
               </div>
             </TabPanel>
 
-            <TabPanel header="Private Message">
+            <TabPanel header="Private Message" @click="selectPrivate(lastPrivate)">
               <div id="roomContainer" class="scroll" style="height: 69vh;">
                 <div v-for="Room in Private" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4">
                   <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" v-bind:class="[Room.id == lastPrivate.id ? 'box-shadow' : 'box-shadow-dark']"  @click="selectPrivate(Room)">
