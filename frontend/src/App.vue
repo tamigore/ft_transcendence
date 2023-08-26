@@ -187,13 +187,14 @@ export default defineComponent({
       
       //MatchMaking.LeaveGame(); -- le before unload ne marche pas (pas de log de leaveGameroom dans le back)
 			if (store.state.ingame && store.state.playerNum != 0) {
-				console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
+				console.log(`App player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
 				let looser = store.state.game.player1Id;
 				let winner = store.state.game.player2Id;
 				if (store.state.game.player2Id === store.state.user.id) {
 					looser = store.state.game.player2Id;
 					winner = store.state.game.player1Id;
 				}
+				console.log("endGame emit");
 				gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
 			}
 			else if (store.state.ingame && store.state.playerNum === 0) {
@@ -202,23 +203,34 @@ export default defineComponent({
 			else if (store.state.inQueue) {
 				gameSocket.emit("queueLeave", { gameId: store.state.game.id });
 			}
-			gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+			if (store.state.ingame || store.state.inQueue)
+				gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+			console.log("endGame emit then : ",store.state.ingame, store.state.playerNum);
 			store.commit("setInQueue", false);
 			store.commit("setGameConnect", false);
 			store.commit("setGameRoom", "");
-			store.commit("setInsolo", false);
+			store.commit("setInSolo", false);
       // end LeaveGame
       gameSocket.disconnect();
       let ok = 1;
-      while (ok < 2000) {
+      while (ok < 200000) {
+				console.log("wait disconnect");
         ok++;
         }
       
     });
+		store.commit("setInQueue", false);
+		store.commit("setGameConnect", false);
+		store.commit("setGameRoom", "");
+		store.commit("setInSolo", false);
     if (!socket.connected && store.state.user.loggedIn) {
       socket.connect();
       store.commit("setChatSocket", socket.id);
     }
+		if (!gameSocket.connected && store.state.user.loggedIn)
+		{
+			gameSocket.connect();
+			store.commit("setUserGameSocket", gameSocket.id);}
     
   },
   

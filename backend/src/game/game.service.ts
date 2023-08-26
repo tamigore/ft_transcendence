@@ -226,7 +226,7 @@ export class GameService {
         include: {
           winner: true,
           looser: true,
-          game: true,
+          // game: true,
         },
       })
       .then((historic) => {

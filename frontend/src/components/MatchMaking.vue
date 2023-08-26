@@ -142,7 +142,7 @@ export default defineComponent({
 
 		LeaveGame() {
 			if (store.state.ingame && store.state.playerNum != 0) {
-				console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
+				console.log(`matchmaking player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
 				let looser = store.state.game.player1Id;
 				let winner = store.state.game.player2Id;
 				if (store.state.game.player2Id === store.state.user.id) {
