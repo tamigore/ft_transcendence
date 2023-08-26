@@ -153,6 +153,9 @@ const store = createStore({
         setBio (state, description: string) {
             state.user.bio = description;
         },
+        setTwoFAState(state, twoFAState: boolean ) {
+            state.user.twoFAState = twoFAState;
+        }
     },
 })
 

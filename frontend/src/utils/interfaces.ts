@@ -13,6 +13,7 @@ export interface User {
   bio: string | null,
   img: string | null, //Path to img src
   twoFA: string | null,
+  twoFAState: boolean,
   friend: User[],
   friendBy: User[],
   blocked: User[],

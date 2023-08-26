@@ -30,10 +30,14 @@
     <div class="popup">
       <div class="popup-header">
         <span class="p-font-weight-bold text-900">Two Authorization Factor</span>
+       
+        
         <div class="px-4">
           <Button v-if="!TwoFA || TwoFA?.length === 0" @click="Enable2FA">Enable</Button>
           <Button v-else @click="Disable2FA">Disable</Button>
         </div>
+
+
         <Button icon="pi pi-times" rounded class="p-button-secondary"
           style="background-color: rgb(211, 177, 224); color: rgb(30, 27, 31);" @click="close2FA">
         </Button>
@@ -596,6 +600,7 @@ export default defineComponent({
           })
         .then((response: AxiosResponse) => {
           console.log(response);
+          
           this.QRcode = "";
         })
         .catch((error: AxiosError) => {
@@ -1070,6 +1075,9 @@ export default defineComponent({
     ModifyStoreAvatarId(id) {
       store.commit('setAvatarId', id);
     },
+    ModifyStore2FA(twoFA) {
+      store.commit('setTwoFA', twoFA);
+    }
   },
 })
 

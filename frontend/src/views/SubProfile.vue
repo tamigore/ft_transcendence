@@ -17,7 +17,7 @@
 
           <ul v-if="userData" class="list-none p-0 m-0">
 
-            <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
+            <li class="flex align-items-center py-4 px-2 surface-border flex-wrap">
               <div class="font-medium text-3xl text-900 mr-7">{{ userData.username }}'s profile
               </div>
               <div v-if="userData.username !== username">
