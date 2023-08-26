@@ -78,6 +78,8 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { User } from '@/utils/interfaces';
 import { useRoute } from "vue-router";
 import router from '@/router';
+import { useToast } from "primevue/usetoast";
+
 
 
 export default defineComponent({
@@ -94,6 +96,7 @@ async mounted() {
 
 data() {
   return {
+    toast: useToast(),
     userData: null as User | null,
     storedUsername: '' as string | null,
     imageGrid: [
@@ -139,7 +142,10 @@ methods:
       headers: { Authorization: `Bearer ${store.state.user.hash}` },
     })
     .then((response: AxiosResponse) => {
-      console.log(response);
+     console.log(response);
+            this.toast.add({severity: 'success', summary: '',
+            detail: `The user is in your friends list.`,
+            life: 3000 });
     })
     .catch((error: AxiosError) => {
       console.error(error);
