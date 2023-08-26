@@ -1,8 +1,9 @@
 <template>
+	<div v-show="inSolo || inGame">
   <div v-if="Pong" class="flex flex-column align-items-center justify-content-center">
     
-    <div class="flex p-4">
-      <div v-if="!Pong.inMultiplayer" class="flex px-2">
+    <div  v-if="inSolo || inGame"  class="flex p-4">
+      <div v-if="inSolo" class="flex px-2">
         <div class="flex px-2">
           <Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
         </div>
@@ -48,6 +49,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <style>
