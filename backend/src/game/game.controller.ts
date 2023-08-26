@@ -41,9 +41,10 @@ export class GameController {
     return this.gameService.SpectateGame(dto);
   }
 
-  @UseGuards(AtGuard)
-  @Post("privateGame")
-  setPrivateGame(@Body() dto: {user1Id: number, user2Id: number}): Promise<Game> {
-    return this.gameService.setPrivateGame(dto);
-  }
+
+	// @UseGuards(AtGuard)
+  // @Post("inviteGame")
+  // setPrivateGame(@Body() dto: {user1Id: number, user2Id: number}) {
+  //   this.gameService.inviteGame(dto);
+  // }
 }

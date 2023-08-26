@@ -8,6 +8,7 @@
 		<div>
 			<Button @click="SearchGame()"> Multiplayer </Button>
 			<Button @click="LaunchSingle()"> Single Player </Button>
+			<Button @click="inviteGame()"> invite </Button>
 			<!-- <Button @click="LeaveGame()"> Leave game </Button> -->
 
 			<div class="flex align-items-center justify-content-between mb-6">
@@ -66,22 +67,16 @@ export default defineComponent({
 	},
 
 	methods: {
-		async privateGame(user1Id: number, user2Id: number) {
-			await axios.post('/api/game/privateGame', {
-				user1Id: user1Id,
-				user2Id: user2Id,
-			}, {
-				headers: { "Authorization": `Bearer ${store.state.user.hash}` }
-			})
-				.then((response: AxiosResponse) => {
-					console.log("response from privateGame : ", response.data);
-					store.commit("setGame", response.data);
-					store.commit("setGameConnect", true);
-				})
-				.catch((error: AxiosError) => {
-					console.log(error);
-				});
-		},
+		// async inviteGame(user2Id: number) {
+		// 	console.log("invite friend");
+		// 	gameSocket.emit("inviteJoinRoom", {room : store.state.user.username as string});
+		// 	await await axios.post('/api/game/inviteGame', {
+		// 		user1Id: store.state.user.id as number,
+		// 		user2Id: user2Id,
+		// 	}, {
+		// 		headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+		// 	})
+		// },
 
 		async getGames() {
 			await axios.get('/api/game/spectate', {
