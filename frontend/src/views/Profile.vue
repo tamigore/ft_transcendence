@@ -69,11 +69,12 @@
 
           <div class="profile-details">
             <ul class="list-none p-0 m-0">
-              <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
-                <div class="font-medium text-3xl text-900 w-6 md:w-2 mr-8">My profile
+
+              <li class="justify-content-between py-4 surface-border flex-wrap">
+                <div class="font-medium text-3xl text-900 w-6 mr-8">My profile
                 </div>
-                <Button label="View my public profile" icon="pi pi-eye" @click="goToPublicProfile(username)" text />
-                <Button @click="open2FA" class="mx-8">2FA</Button>
+                <Button class="mr-4" label="View my public profile" icon="pi pi-eye" @click="goToPublicProfile(username)" text />
+                <Button @click="open2FA" icon="pi pi-lock" label="activate two-factor auth" text/>
               </li>
 
               <li class="flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap">
