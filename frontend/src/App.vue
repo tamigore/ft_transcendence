@@ -212,12 +212,8 @@ export default defineComponent({
 			store.commit("setInSolo", false);
       // end LeaveGame
       gameSocket.disconnect();
-      let ok = 1;
-      while (ok < 200000) {
-				console.log("wait disconnect");
-        ok++;
-        }
-      
+      for(let num = 0; num < 20000; num++)
+				console.log("wait");
     });
 		store.commit("setInQueue", false);
 		store.commit("setGameConnect", false);

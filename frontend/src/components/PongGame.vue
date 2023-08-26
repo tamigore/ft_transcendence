@@ -468,6 +468,19 @@ export default defineComponent({
 				Pong.value.myBlocks.push(new EffectBlock(Pong.value, data.block.x, data.block.y,
 					data.block.width, data.block.height, data.block.effect, data.block.num, data.block.id));
 			});
+
+			// gameSocket.on("servInviteGame", (data) => {
+			// 	console.log("servInviteGame ");
+			// 	if (store.state.playerNum == 2) 
+			// 		return ;
+			// 	store.commit("setGame", data.game);
+			// 	store.commit("setGameConnect", true);
+			// 	store.commit("setPlayerNum", 1);
+			// 	console.log("inviteGame player 2");
+			// 	store.commit("setInQueue", false);
+			// 	Pong.value.startMultiOnline();
+			// 	gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
+			// })
 		});
 
 		onUnmounted(() => {
