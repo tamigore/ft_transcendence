@@ -1,11 +1,15 @@
 <template>
+
   <MatchMaking />
-  <PongGame />
+	
+	<PongGame />
+
 </template>
 
 <script type="ts">
 import PongGame from "@/components/PongGame";
 import MatchMaking from "@/components/MatchMaking.vue";
+import store from "@/store";
 
 export default {
   name: "PongVue",
@@ -13,5 +17,10 @@ export default {
     MatchMaking,
     PongGame,
   },
+  computed: {
+		inGame() {
+			return store.state.ingame;
+		}
+	},
 }
 </script>

@@ -127,7 +127,7 @@ export default defineComponent({
             store.commit("setPlayerNum", 2);
           else
             store.commit("setPlayerNum", 1);
-          store.commit("setGameConnect", false);
+        //   store.commit("setGameConnect", false);
           store.commit("setInQueue", true);
           console.log("player num === ", store.state.playerNum);
           console.log("gameSocket id === ", gameSocket.id);
