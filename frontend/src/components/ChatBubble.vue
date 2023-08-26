@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { Message } from "@/utils/interfaces";
+import { Message, Room } from "@/utils/interfaces";
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import store from "@/store";
 import socket from '@/utils/socket';
@@ -52,9 +52,9 @@ export default defineComponent({
               this.addAdmin();
             },
             visible: () => {
-              if (!this.message || !this.message.room || !this.message.room.ownerId)
+              if (!this.message || !this.room || !this.room.ownerId)
                 return (false);
-              return this.message.room.ownerId === store.state.user.id;
+              return this.room.ownerId === store.state.user.id;
             },
           },
           { label: 'Kick', icon: 'pi pi-fw pi-sign-out',
@@ -91,7 +91,6 @@ export default defineComponent({
             command: () => {
               this.invitePong();
             },
-            // visible: () => this.message.user.,
           },
           { label: 'Private Message', icon: 'pi pi-fw pi-comments',
             command: () => {
@@ -104,6 +103,10 @@ export default defineComponent({
   props: {
     message: {
       type: Object as () => Message,
+      required: true,
+    },
+    room: {
+      type: Object as () => Room,
       required: true,
     },
     owner: { type: Boolean, required: true},
@@ -122,14 +125,14 @@ export default defineComponent({
   },
   methods: {
     hasHigherRights(): boolean {
-      if (!this.message || !this.message.room || (!this.message.room.ownerId && !this.message.room.admin)
-        || (!this.message.room.ownerId && this.message.room.admin?.find((user) => {user.id === store.state.user.id})))
+      if (!this.message || !this.room || (!this.room.ownerId && !this.room.admin)
+        || (!this.room.ownerId && this.room.admin?.find((user) => {user.id === store.state.user.id})))
         return false;
-      if (this.message.room.ownerId === store.state.user.id
-        || (this.message.room.admin
-          && this.message.room.admin?.find((user) => {user.id === store.state.user.id})
-          && !this.message.room.admin?.find((user) => {user.id === this.message.userId})
-          && this.message.room.ownerId !== this.message.userId))
+      if (this.room.ownerId === store.state.user.id
+        || (this.room.admin
+          && this.room.admin?.find((user) => {user.id === store.state.user.id})
+          && !this.room.admin?.find((user) => {user.id === this.message.userId})
+          && this.room.ownerId !== this.message.userId))
         return true;
       return false;
     },
@@ -169,8 +172,7 @@ export default defineComponent({
         console.log(res);
         if (res && res.data && res.data.blocked)
           store.commit("setBlocked", res.data.blocked);
-        socket.emit("update", {room: this.message.room});
-        // await this.update();
+        socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
@@ -178,7 +180,7 @@ export default defineComponent({
     async addAdmin(): Promise<void> {
       console.log("addAdmin");
       await axios.post('/api/room/addAdmin', {
-        roomId: this.message.roomId,
+        roomId: this.room.id,
         userId: store.state.user.id,
         otherId: this.message.userId,
       }, {
@@ -186,8 +188,7 @@ export default defineComponent({
       })
       .then(async (res) => {
         console.log(res);
-        socket.emit("update", {room: this.message.room});
-        // await this.update();
+        socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
@@ -196,7 +197,7 @@ export default defineComponent({
       console.log("kickUser");
       
       await axios.post('/api/room/delUser', {
-        roomId: this.message.roomId,
+        roomId: this.room.id,
         userId: store.state.user.id,
         otherId: this.message.userId,
       }, {
@@ -204,8 +205,7 @@ export default defineComponent({
       })
       .then(async (res) => {
         console.log(res);
-        socket.emit("leave_room", {user: this.message.user, room: this.message.room});
-        // await this.update();
+        socket.emit("leave_room", {user: this.message.user, room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
@@ -214,7 +214,7 @@ export default defineComponent({
       console.log("banUser");
       
       await axios.post('/api/room/addBan', {
-        roomId: this.message.roomId,
+        roomId: this.room.id,
         userId: store.state.user.id,
         otherId: this.message.userId,
       }, {
@@ -225,8 +225,7 @@ export default defineComponent({
         if (res && res.data && res.data.ban) {
           store.commit("setBan", res.data.ban);
         }
-        socket.emit("update", {room: this.message.room});
-        // await this.update();
+        socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
@@ -234,7 +233,7 @@ export default defineComponent({
     async muteUser() {
       console.log("muteUser");
       await axios.post('/api/room/addMute', {
-        roomId: this.message.roomId,
+        roomId: this.room.id,
         userId: store.state.user.id,
         otherId: this.message.userId,
       }, {
@@ -252,11 +251,11 @@ export default defineComponent({
       await axios.post('/api/user/friends/add', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
-        this.update();
+        await this.update();
       })
       .catch(err => { throw new Error(err) });
     },
@@ -266,10 +265,11 @@ export default defineComponent({
       await axios.post('/api/user/friends/del', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
+        await this.update();
       })
       .catch(err => { throw new Error(err) });
     },

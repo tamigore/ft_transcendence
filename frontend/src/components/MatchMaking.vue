@@ -7,8 +7,8 @@
 
     <div>
       <Button @click="SearchGame()"> Multiplayer </Button>
-      <!-- <Button @click="LaunchSingle()"> Single Player </Button> -->
-      <Button @click="LeaveGame()"> Leave game </Button>
+      <Button @click="LaunchSingle()"> Single Player </Button>
+      <!-- <Button @click="LeaveGame()"> Leave game </Button> -->
 
       <div class="flex align-items-center justify-content-between mb-6">
         <div class="flex align-items-center text-indigo-300">
@@ -127,7 +127,7 @@ export default defineComponent({
             store.commit("setPlayerNum", 2);
           else
             store.commit("setPlayerNum", 1);
-          store.commit("setGameConnect", false);
+          // store.commit("setGameConnect", false);
           store.commit("setInQueue", true);
           console.log("player num === ", store.state.playerNum);
           console.log("gameSocket id === ", gameSocket.id);
@@ -143,7 +143,6 @@ export default defineComponent({
     },
 
     LeaveGame() {
-
       if (store.state.ingame && store.state.playerNum != 0) {
         console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
         let looser = store.state.game.player1Id;

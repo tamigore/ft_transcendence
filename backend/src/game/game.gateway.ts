@@ -35,8 +35,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleDisconnect(client: Socket) {
     console.log("in handle client.rooms : ", client.rooms);
     this.logger.log("GameGateway handleDisconnect clientid: ", client.id);
-
-
   }
 
   @SubscribeMessage("disconnecting")
@@ -44,7 +42,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log("==================Game disconnecting client", client.id);
     console.log("client.rooms : ", client.rooms);
     client.rooms.forEach((room) => {
-      this.logger.log(`=========================Game disconnecting user ${client.id} from room ${room}`);
+      this.logger.log(
+        `=========================Game disconnecting user ${client.id} from room ${room}`,
+      );
     });
   }
 
@@ -106,6 +106,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { room: string; ball: BallState },
   ) {
+    client.rooms.forEach((room) => {
+      if (room === body.room) {
+        return false;
+      }
+    });
     this.logger.log("LauchGame");
     this.server.to(body.room).emit("LaunchGame", body.ball);
   }
@@ -226,20 +231,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .emit("servOnSpecPaddle", { paddle: body.paddle, userId: body.userId });
   }
 
-
-@SubscribeMessage("onSpecScore")
+  @SubscribeMessage("onSpecScore")
   async onSpecScore(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { room: string; scoreA: number; scoreB:number; userId: number },
+    @MessageBody()
+    body: { room: string; scoreA: number; scoreB: number; userId: number },
   ) {
     console.log("spectator score");
-    this.server
-      .to(body.room)
-      .emit("servOnSpecScore", { scoreA: body.scoreA,scoreb: body.scoreB, userId: body.userId });
+    this.server.to(body.room).emit("servOnSpecScore", {
+      scoreA: body.scoreA,
+      scoreb: body.scoreB,
+      userId: body.userId,
+    });
   }
 
-
-@SubscribeMessage("queueLeave")
+  @SubscribeMessage("queueLeave")
   async onQueueLeave(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { gameId: number },
