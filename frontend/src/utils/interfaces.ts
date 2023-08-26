@@ -105,12 +105,12 @@ export interface BlockState
 
 export interface BallState
   {
-    ballId: number,
-    ballX: number,
-    ballY: number,
-    ballVeloX: number,
-    ballVeloY: number,
-    player: number,
+		ballId: number;
+		ballX: number;
+		ballY: number;
+		ballVeloX: number;
+		ballVeloY: number;
+		player: number;
   }
 
 export interface PaddleState

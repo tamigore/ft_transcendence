@@ -223,7 +223,7 @@ export default defineComponent({
 		const hitSound = new Audio();
 		const Pong = ref(new PongGameClass(hitSound));
 		const paddleSprite = new Image();
-		// let lastDate = new Date();
+		let lastDate = new Date();
 
 		const drawPaddle = (x: number, y: number, width: number, height: number, sprite: HTMLImageElement) => {
 			if (!ctx)
@@ -271,11 +271,11 @@ export default defineComponent({
 			if (Pong.value.inMultiplayer && !store.state.ingame)
 				Pong.value.restartMatch();
 
-			// const newDate = new Date();
-			// if (store.state.ingame && store.state.playerNum == 1 && newDate.getTime() - lastDate.getTime() > 200) {
-			// 	gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
-			// 	lastDate = newDate;
-			// }
+			const newDate = new Date();
+			if (store.state.ingame && store.state.playerNum == 1 && newDate.getTime() - lastDate.getTime() > 200) {
+				gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
+				lastDate = newDate;
+			}
 			ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
 			Pong.value.bot();
 			Pong.value.moovePaddles();
@@ -364,7 +364,7 @@ export default defineComponent({
 					if (store.state.playerNum == 2)
 						Pong.value.pointSounds[0].play();
 				}
-				if (Pong.value.scoreA >= 100 || Pong.value.scoreB >= 100) {
+				if (Pong.value.scoreA >= 10 || Pong.value.scoreB >= 10) {
 					Pong.value.endGameOnline();
 					store.commit("setGameConnect", false);
 				}
