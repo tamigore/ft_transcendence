@@ -65,15 +65,15 @@ export class ChatService {
             },
           },
         },
-        room: {
-          mute: {
-            every: {
-              id: {
-                not: userId,
-              },
-            },
-          },
-        },
+        // room: {
+        //   mute: {
+        //     every: {
+        //       id: {
+        //         not: userId,
+        //       },
+        //     },
+        //   },
+        // },
       },
       include: {
         user: true,

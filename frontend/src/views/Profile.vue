@@ -294,8 +294,8 @@
     <AccordionTab header="History">
       <div class="surface-section border-round box-shadow" style="padding: 5em;">
         <div class="surface-section">
-          <ul class="list-none p-0 m-0">
-            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 opacity-60 mb-4"
+          <div class="list-none p-0 m-0">
+            <div class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 opacity-60 mb-4"
               style="background: linear-gradient(to top right, #bd34e7, #0052b0);">
 
               <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center"
@@ -303,15 +303,15 @@
               <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center"
                 style="width: 200px;">Player 1</div>
               <div class="font-bold flex align-items-center justify-content-center" style="width: 200px;">
-                <h2 class="neonText pulsate mt-2">VS</h2>
+                <h2 class="mt-2">VS</h2>
               </div>
               <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center"
                 style="width: 200px;">Player 2</div>
               <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center"
                 style="width: 200px;">Score P2</div>
-            </li>
+            </div>
 
-            <li v-for="history in gameHistoric" :key="history.id" class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
+            <div v-for="history in gameHistoric" :key="history.id" class="flex justify-content-between flex-wrap border-top-1 surface-border py-3 px-3 mb-2"
               v-bind:class="[history.winnerID == id ? 'win' : 'loose']">
 
               <div class="font-bold flex align-items-center justify-content-center"
@@ -335,7 +335,7 @@
               </div>
               <div class="font-bold flex align-items-center justify-content-center"
                 style="width: 200px; min-height: 50px">
-                <h2 class="neonText pulsate mt-2">VS</h2>
+                <h2 class="mt-2">VS</h2>
               </div>
 
               <div class="align-items-center flex justify-content-center" style="width: 200px; min-height: 50px">
@@ -357,8 +357,8 @@
                 style="width: 200px; min-height: 50px">
                 {{userScore(history.score, false)}}
               </div>
-            </li>
-          </ul>
+            </div>
+          </div>
         </div>
       </div>
     </AccordionTab>
@@ -472,7 +472,9 @@ export default defineComponent({
           })
         .then((response: AxiosResponse) => {
           console.log(response);
-          this.gameHistoric = response.data;
+          console.log(response.data.length > 0);
+          if (response.data && response.data.length)
+            this.gameHistoric.map(response.data);
         })
         .catch((error: AxiosError) => {
           throw error;
@@ -1074,6 +1076,17 @@ export default defineComponent({
  
  
 <style scoped>
+.box-shadow {
+  border: 0.2rem solid #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0 .2rem #fff,
+              0 0 .2rem #fff,
+              0 0 1.2rem #bc13fe,
+              0 0 0.8rem #bc13fe,
+              0 0 1.2rem #bc13fe,
+              inset 0 0 1.2rem #bc13fe;
+}
+
 .popup {
   position: fixed;
   top: 50%;

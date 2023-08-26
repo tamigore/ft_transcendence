@@ -84,7 +84,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  addAdmin(@Body() dto: ModifyOtherDto) {
+  addAdmin(@Body() dto: any) {
     this.roomService.addAdmin(dto.roomId, dto.userId, dto.otherId);
   }
 
@@ -92,7 +92,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  addBanned(@Body() dto: ModifyOtherDto) {
+  addBanned(@Body() dto: any) {
     this.roomService.addBan(dto.roomId, dto.userId, dto.otherId);
   }
 
@@ -100,7 +100,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  addMute(@Body() dto: ModifyOtherDto) {
+  addMute(@Body() dto: any) {
     this.roomService.addMute(dto.roomId, dto.userId, dto.otherId);
   }
 
