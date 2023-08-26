@@ -35,9 +35,9 @@ class SocketioChat {
         console.log("last Room == message.room");
         if ((store.state.lastRoom.mute && store.state.lastRoom.mute.find(user => user.id === msg.user.id))
         || (store.state.user.blocked && store.state.user.blocked.find(user => user.id === msg.user.id)))
-        return ;
+          return ;
         else
-        store.commit("addMessage", msg);
+          store.commit("addMessage", msg);
       }
       else if (store.state.lastPrivate.id === msg.room.id) {
         console.log("last private == message.room");
@@ -57,13 +57,18 @@ class SocketioChat {
           {
             if (room.id === store.state.lastRoom.id)
             {
-              await axios.get(`api/chat/room/${room.id}`, {
-                headers: { "Authorization": `Bearer ${store.state.user.hash}` }
-              })
-                .then((response: AxiosResponse) => {
-                  store.commit("setMessages", response.data);
+              if (room.users && !room.users.find(user => user.id === store.state.user.id))
+                store.commit("setLastRoom", {});
+              else
+              {
+                await axios.get(`api/chat/room/${room.id}`, {
+                  headers: { "Authorization": `Bearer ${store.state.user.hash}` }
                 })
-                .catch((error: AxiosError) => { throw error; });
+                  .then((response: AxiosResponse) => {
+                    store.commit("setMessages", response.data);
+                  })
+                  .catch((error: AxiosError) => { throw error; });
+              }
             }
           }
         })
