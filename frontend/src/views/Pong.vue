@@ -1,9 +1,10 @@
 <template>
-
-  <MatchMaking />
-	
-	<PongGame />
-
+  <div v-if="!inGame">
+    <MatchMaking />
+  </div>
+  <div v-else>
+    <PongGame />
+  </div>
 </template>
 
 <script type="ts">
@@ -18,9 +19,9 @@ export default {
     PongGame,
   },
   computed: {
-		inGame() {
-			return store.state.ingame;
-		}
-	},
+    inGame() {
+      return store.state.ingame;
+    }
+  }
 }
 </script>

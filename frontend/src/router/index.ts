@@ -99,7 +99,7 @@ router.beforeEach(async (to, from) => {
       console.log(error);
       throw new Error("router get user failed: " + error);
     })
-    if (store.state.user.twoFA && store.state.user.twoFA?.length > 0)
+    if (store.state.user && store.state.user.twoFA && store.state.user.twoFA?.length > 0)
     {
       const pwd = prompt("Two factor authentification requiered");
       await axios.post(`api/tfa/authenticate`, { id: store.state.user.id, tfa_code: pwd } ,{
@@ -124,7 +124,7 @@ router.beforeEach(async (to, from) => {
             console.log("App LogoutPost error: ", error);
             throw new Error("Logout failed: " + error);
           })
-          return { path: '/' };
+          return {path: '/'};
         }
       })
       .catch((error) => {
@@ -132,17 +132,12 @@ router.beforeEach(async (to, from) => {
       })
     }
   }
-  if ( store.state.user &&
-    !store.state.user.loggedIn &&
+  if ((!store.state.user || (store.state.user &&
+    !store.state.user.loggedIn)) &&
     to.name !== 'home'
   ) {
     console.log("user.loggedIn is false");
     return { path: '/' };
-  }
-  if (store.state.user && store.state.user.loggedIn && store.state.user.rooms && store.state.user.rooms.length > 0) {
-    for (const room of store.state.user.rooms) {
-      socket.emit('join_room', {user: store.state.user, room: room});
-    }
   }
 })
 

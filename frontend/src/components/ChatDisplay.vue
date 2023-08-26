@@ -80,7 +80,7 @@
                   <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
                     <div v-for="msg in Messages" :key="msg.id">
                       <div class="flex">
-                        <ChatBubble :message="msg" :owner="msg.userId == User.id" />
+                        <ChatBubble :message="msg" :room="Room.room" :owner="msg.userId == User.id" />
                       </div>
                     </div>
                   </div>
@@ -106,7 +106,7 @@
                   <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
                     <div v-for="msg in Messages" :key="msg.id">
                       <div class="flex">
-                        <ChatBubble :message="msg" :owner="msg.userId == User.id" />
+                        <ChatBubble :message="msg" :room="Room" :owner="msg.userId == User.id" />
                       </div>
                     </div>
                   </div>

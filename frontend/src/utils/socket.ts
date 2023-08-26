@@ -31,19 +31,19 @@ class SocketioChat {
 
     this.socket.on('servMessage', (msg: Message) => {
       console.log("new servMessage" + msg);
-      store.commit("setLastMessage", msg);
       if (store.state.lastRoom.id === msg.room.id) {
         console.log("last Room == message.room");
         if ((store.state.lastRoom.mute && store.state.lastRoom.mute.find(user => user.id === msg.user.id))
-          || (store.state.user.blocked && store.state.user.blocked.find(user => user.id === msg.user.id)))
-          return ;
+        || (store.state.user.blocked && store.state.user.blocked.find(user => user.id === msg.user.id)))
+        return ;
         else
-          store.commit("addMessage", msg);
+        store.commit("addMessage", msg);
       }
       else if (store.state.lastPrivate.id === msg.room.id) {
         console.log("last private == message.room");
         store.commit("addMessage", msg);
       }
+      store.commit("setLastMessage", msg);
     });
 
     this.socket.on('update', async () => {

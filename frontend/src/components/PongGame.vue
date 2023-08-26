@@ -1,7 +1,7 @@
 <template>
-  <div v-if="Pong" class="game-container">
+  <div v-if="Pong" class="game-container flex align-items-center justify-content-center">
     
-
+    <Button @click="LeaveGame()">LeaveGame</Button>
     <div v-if="!Pong.inMultiplayer" class="Button-container">
       <Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
       <Button @click="Pong.startMatchMultiLocal()" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
@@ -11,7 +11,7 @@
       <Button @click="Pong.setBlocks()" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
     </div>
  
-    <div class="flexContainer">
+    <div class="flex align-items-center justify-content-center">
       <div class="input-container">
      
         <p>{{ "scoreA " + Pong.scoreA }}</p>
@@ -28,7 +28,6 @@
 </template>
 
 <style>
-
 .flexContainer {
   display: flex;
   justify-content: center;
@@ -37,8 +36,6 @@
   height: 60vh; /* Set the container's height to the full viewport height */
   border: 1px solid black; /* Just for visualization */
 }
-
-
 
 .gameCanvasStyle {
   flex: 1;
@@ -61,7 +58,7 @@
   /* Center Buttons horizontally */
   align-items: center;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   object-fit: contain;
 }
 
@@ -157,7 +154,30 @@ import { EffectBlock } from "../class/EffectBlock";
 
 export default defineComponent({
   name: 'FpsComponent',
-
+  methods: {
+    LeaveGame() {
+      if (store.state.ingame && store.state.playerNum != 0) {
+        console.log(`player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
+        let looser = store.state.game.player1Id;
+        let winner = store.state.game.player2Id;
+        if (store.state.game.player2Id === store.state.user.id) {
+          looser = store.state.game.player2Id;
+          winner = store.state.game.player1Id;
+        }
+        gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
+      }
+      else if (store.state.ingame && store.state.playerNum === 0) {
+        console.log("spectator leave not done");
+      }
+      else if (store.state.inQueue) {
+        gameSocket.emit("queueLeave", { gameId: store.state.game.id });
+      }
+      gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+      store.commit("setInQueue", false);
+      store.commit("setGameConnect", false);
+      store.commit("setGameRoom", "");
+    },
+  },
   setup() {
     const myCanvas = ref<(HTMLCanvasElement | null)>(null);
     let ctx: CanvasRenderingContext2D | null = null;
