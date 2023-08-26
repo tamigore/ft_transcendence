@@ -15,10 +15,6 @@
 					<Checkbox :binary="true" v-model="boxes" class="mr-2"></Checkbox>
 					<label>Play with Boxes</label>
 				</div>
-				<div class="flex align-items-center text-indigo-300">
-					<Checkbox :binary="true" v-model="wall" class="mr-2"></Checkbox>
-					<label>Play with Wall</label>
-				</div>
 			</div>
 		</div>
 	</div>
@@ -44,7 +40,6 @@ export default defineComponent({
 		return {
 			boxes: false as boolean,
 			solo: false as boolean,
-			wall: false as boolean,
 			imageGrid: [
 				{ id: "1", img: require('@/assets/profiles/profil_1.jpg') },
 				{ id: "2", img: require('@/assets/profiles/profil_2.jpg') },
