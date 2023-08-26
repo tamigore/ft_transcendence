@@ -19,6 +19,7 @@ export interface ServerToClientEvents {
   ballCreation(e: BallState): void;
   gameEnder(): void;
   disconnecting(): void;
+	servInviteGame(e: { game: Game}): void;
 
   servNewSpectator(user: User ): void;
   servOnSpecBlock(e: {block: BlockState, userId : number }): void;
@@ -44,6 +45,8 @@ export interface ClientToServerEvents {
   ballSetter(e: { ballInfo: BallState, room: string }): void;
   gameLeave(e: { room: string, player: number }): void;
   queueLeave(e: { gameId: number }): void;
+	inviteGame(e: { game: Game, room: string }): void;
+	inviteJoinRoom(e: { room: string }): void;
   
   newSpectator(e: { room: string, user: User }): void;
   onSpecBlock(e: { room: string, block: BlockState, userId : number }): void;

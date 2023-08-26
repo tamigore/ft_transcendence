@@ -1,4 +1,14 @@
 
+le inviute:
+
+	 user1 -> via chatsocket demande a -> user2
+	 user1 joinGameRoom inQueue wait for instruction
+						 si user2 pas de rep au bout de x temps ou rep negatif -> leaveGameRoom et quit queue
+	 si accept
+	 					user2 ->joinRoom
+	 creation of game [user1Id, user2Id] -> renvoie la game dans la GameRoom -> l'un des 2 user lance la game
+
+
 
 - spectate depuis le chat ou depuis friend interface
 

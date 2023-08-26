@@ -60,29 +60,30 @@ export class GameService {
       });
   }
 
-  async setPrivateGame(dto: {user1Id: number, user2Id: number}): Promise<Game> {
-    const game = await this.prisma.game.create({
-      data: {
-        name: "onInvite",
-        isBlocked: false,
-        player1: {
-          connect: {
-            id: dto.user1Id,
-          },
-        },
-        player2: {
-          connect: {
-            id: dto.user2Id,
-          },
-        },
-      },
-      include: {
-        player1: true,
-        player2: true,
-      },
-    });
-    return game;
-    }
+  // async inviteGame(dto: {user1Id: number, user2Id: number}) {
+  //   const game = await this.prisma.game.create({
+  //     data: {
+  //       name: "onInvite",
+  //       isBlocked: false,
+  //       player1: {
+  //         connect: {
+  //           id: dto.user1Id,
+  //         },
+  //       },
+  //       player2: {
+  //         connect: {
+  //           id: dto.user2Id,
+  //         },
+  //       },
+  //     },
+  //     include: {
+  //       player1: true,
+  //       player2: true,
+  //     },
+  //   });
+		
+	// 	console.log("inviteGame : ", game);
+  //   }
 
   async matchMaker(dto: Matchmaker): Promise<Game> {
     console.log(`typeof ${typeof dto.userId}`);
