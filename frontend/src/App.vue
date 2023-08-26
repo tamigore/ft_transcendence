@@ -180,7 +180,7 @@ export default defineComponent({
     if (store_item) {
       store.replaceState(Object.assign({}, store.state, JSON.parse(store_item)));
     }
-     window.addEventListener('beforeunload', () => {
+     window.addEventListener('beforeunload', async () => {
       sessionStorage.setItem('store', JSON.stringify(store.state));
       socket.disconnect();
 
@@ -212,12 +212,8 @@ export default defineComponent({
 			store.commit("setInSolo", false);
       // end LeaveGame
       gameSocket.disconnect();
-      let ok = 1;
-      while (ok < 200000) {
-				console.log("wait disconnect");
-        ok++;
-        }
-      
+      if (store.state.user && store.state.user.loggedIn)
+        await this.LogoutPost();
     });
 		store.commit("setInQueue", false);
 		store.commit("setGameConnect", false);

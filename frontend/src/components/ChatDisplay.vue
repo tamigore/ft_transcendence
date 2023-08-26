@@ -35,8 +35,8 @@
       <div class="flex border-round align-items-start justify-content-start pl-8 pr-8 m-4">
         <!-- Colonne des salles (1/4 de la largeur) -->
         <div class="flex flex-col w-4">
-          <TabView class= "w-full">
-            <TabPanel header="Rooms" @click="selectRoom(lastRoom)">
+          <TabView class= "w-full" v-model:activeIndex="active">
+            <TabPanel header="Rooms">
               <div id="roomContainer" class="scroll" style="height: 69vh;">
               <div v-for="Room in Rooms" :key="Room.room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
                 <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.room.id == lastRoom.id ? 'box-shadow' : '']" @click="selectRoom(Room.room)">
@@ -55,7 +55,7 @@
               </div>
             </TabPanel>
 
-            <TabPanel header="Private Message" @click="selectPrivate(lastPrivate)">
+            <TabPanel header="Private Message">
               <div id="roomContainer" class="scroll" style="height: 69vh;">
                 <div v-for="Room in Private" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4">
                   <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" v-bind:class="[Room.id == lastPrivate.id ? 'box-shadow' : 'box-shadow-dark']"  @click="selectPrivate(Room)">
@@ -155,6 +155,7 @@ export default defineComponent({
       toogle: false as boolean,
       password: "" as string,
       isPrivate: false as boolean,
+      active: 0 as number,
    };
   },
 
