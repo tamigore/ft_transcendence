@@ -44,6 +44,13 @@ export class GameService {
   }
 
   async queueLeave(gameId: number) {
+	const game = await this.prisma.game.findFirst({
+		where: {
+			id: gameId,
+		  }
+	});
+	if(!game)
+		return ;
     return await this.prisma.game.delete({
       where: {
         id: gameId,
@@ -148,7 +155,8 @@ export class GameService {
         return game;
       })
       .catch((error) => {
-        throw error;
+        // throw error;
+				return null;
       });
     return game;
   }
@@ -191,7 +199,7 @@ export class GameService {
     _looser: number,
     _score: string,
   ) {
-    if (!game) {
+    if (!game || !game.id || !_winner || !_looser || !_score) {
       console.log("gameToHistoric : game is null");
       return null;
     }
@@ -222,6 +230,8 @@ export class GameService {
         },
       })
       .then((historic) => {
+				if (!historic)
+					return null;
         this.updateInGame(historic.winnerID, false);
         this.updateInGame(historic.looserID, false);
         this.logger.log("---------YOOO LE HISTORIC : ", historic);

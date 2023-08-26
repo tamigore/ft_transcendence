@@ -1,10 +1,8 @@
 <template>
-  <div v-if="!inGame">
+  <div v-if="!inGame && !inSolo">
     <MatchMaking />
   </div>
-  <div v-else>
     <PongGame />
-  </div>
 </template>
 
 <script type="ts">
@@ -21,6 +19,12 @@ export default {
   computed: {
     inGame() {
       return store.state.ingame;
+    },
+	inSolo() {
+      return store.state.insolo;
+    },
+		inQueue() {
+      return store.state.inQueue;
     }
   }
 }
