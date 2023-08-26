@@ -11,6 +11,7 @@ const store = createStore({
         lastPrivate: {} as Room,
         lastMessage: {} as Message,
         ingame: false as boolean,
+		insolo: false as boolean,
         inQueue: false as boolean,
         playerNum: 0 as number,
         gameRoom: "" as string,
@@ -18,6 +19,10 @@ const store = createStore({
         specGames: [] as Game[],
     },
     mutations: {
+		setInSolo : function(state, insolo: boolean)
+		{
+			state.insolo = insolo;
+		},
         setSpecGames : function(state, games: Game[]) {
             state.specGames = games.filter(game =>game.historic == null || game.historic == undefined);
         },

@@ -80,13 +80,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async onJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() e: { user: User; room: string },
-  ): Promise<boolean> {
+  ) {
     this.logger.log("---joinGameRoom------", e.user.username, e.room);
-    client.join(e.room);
-    //this.server.in(client.id).socketsJoin(e.room);
-    console.log("in join client.rooms : ", client.rooms);
+    // client.join(e.room);
+    this.server.in(client.id).socketsJoin(e.room);
+    console.log("====== in join client.rooms : ", e.user.username, client.rooms);
     this.server.to(e.room).emit("gameRoomJoiner", e);
-    return true;
+		console.log("gameRoomJoinerSent");
+    // return true;
   }
 
   @SubscribeMessage("leaveGameRoom")
@@ -106,11 +107,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { room: string; ball: BallState },
   ) {
+		
     client.rooms.forEach((room) => {
       if (room === body.room) {
         return false;
       }
     });
+		console.log("in onReadyGame");
     this.logger.log("LauchGame");
     this.server.to(body.room).emit("LaunchGame", body.ball);
   }
