@@ -120,9 +120,7 @@ class SocketioChat {
 
     this.socket.on("inviteGame", (e: {user1: User, user2: User}) => {
       console.log("invite received");
-      // const res = window.prompt("You are invited to a game, will you accept ?: ", "yes / no");
-      // if (res && res === "yes")
-      // {
+      if (window.confirm(`User: ${e.user1.username} want to invite you to a pong game.`)) {
         console.log("pongGame accept invite");
         store.commit("setInQueue", true);
         store.commit("setGameRoom", e.user1.username);
@@ -132,8 +130,7 @@ class SocketioChat {
           user2username: store.state.user.username,
         });
         router.push({path: "/pong"});
-      // }
-        // socket.emit("acceptInvite", e);
+      }
     });
 
     // this.socket.on("pongGame1", () => {
