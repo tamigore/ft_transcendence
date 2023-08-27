@@ -278,7 +278,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const game = await this.gameService.inviteGame(body);
 		console.log("inviteGame : ", game);
 		if (!game)
+		{
+			console.log("========game not created");
 			return ;
+		}
 		this.server.to(body.user1username).emit("servInviteGame",{ game});
 
   }

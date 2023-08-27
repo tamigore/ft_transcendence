@@ -11,14 +11,24 @@ const store = createStore({
         lastPrivate: {} as Room,
         lastMessage: {} as Message,
         ingame: false as boolean,
-		insolo: false as boolean,
+				insolo: false as boolean,
         inQueue: false as boolean,
+				inInvite: false as boolean,
+				dateInvite: Date.now() as number,
         playerNum: 0 as number,
         gameRoom: "" as string,
         game: {} as Game,
         specGames: [] as Game[],
     },
     mutations: {
+			setDateInvite : function(state)
+			{
+				state.dateInvite = Date.now();
+			},
+			setInInvite : function(state, inInvite: boolean)
+		{
+			state.inInvite = inInvite;
+		},
 		setInSolo : function(state, insolo: boolean)
 		{
 			state.insolo = insolo;
