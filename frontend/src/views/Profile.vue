@@ -909,6 +909,12 @@ export default defineComponent({
             life: 3000 });
             return;
           }
+          if (this.usernames.includes(this.editedUsername)) {
+            this.toast.add({severity: 'warn', summary: '',
+            detail: `This username already exists.`,
+            life: 3000 });
+            return;
+          }
           if (this.editedUsername.length > 25) {
             this.toast.add({severity: 'warn', summary: '',
             detail: `Username cannot exceed 25 characters.`,
