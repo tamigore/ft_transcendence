@@ -121,6 +121,7 @@ const store = createStore({
             state.user.bio = user.bio;
             state.user.img = user.img;
             state.user.twoFA = user.twoFA;
+            state.user.twoFAState = user.twoFA ? true : false;
             if (user.blocked)
                 state.user.blocked = user.blocked;
             if (user.friend)

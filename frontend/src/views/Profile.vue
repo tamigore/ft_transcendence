@@ -30,13 +30,11 @@
     <div class="popup">
       <div class="popup-header">
         <span class="p-font-weight-bold text-900">Two Authorization Factor</span>
-       
-        
+
         <div class="px-4">
           <Button v-if="!TwoFAState" @click="Enable2FA">Enable</Button>
           <Button v-else @click="Disable2FA">Disable</Button>
         </div>
-
 
         <Button icon="pi pi-times" rounded class="p-button-secondary"
           style="background-color: rgb(211, 177, 224); color: rgb(30, 27, 31);" @click="close2FA">
@@ -598,7 +596,6 @@ export default defineComponent({
     },
 
     open2FA() {
-      this.ModifyStore2FA(0);
       this.ShowTwoFA = true;
     },
 

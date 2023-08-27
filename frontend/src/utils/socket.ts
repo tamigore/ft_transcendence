@@ -121,7 +121,7 @@ class SocketioChat {
     });
 
     this.socket.on("inviteGame", async (e: {user1: User, user2: User}) => {
-      console.log("invite received");
+      // console.log("invite received");
       // const res = await window.confirm(`User: ${e.user1.username} want to invite you to a pong game.`)
       // if (res) {
       console.log("pongGame accept invite");
