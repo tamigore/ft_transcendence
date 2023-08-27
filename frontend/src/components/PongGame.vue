@@ -192,7 +192,7 @@ export default defineComponent({
 					looser = store.state.game.player2Id;
 					winner = store.state.game.player1Id;
 				}
-				if (store.state.playerNum == 1)
+				// if (store.state.playerNum == 1)
 					gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
 			}
 			else if (store.state.ingame && store.state.playerNum === 0) {
@@ -394,6 +394,7 @@ export default defineComponent({
 				store.commit("setGameRoom", "");
 				store.commit("setGameConnect", false);
 				store.commit("setPlayerNum", 0);
+				store.commit("setGame", null);
 				Pong.value.restartMatch();
 				console.log("gameEnder is ended");
 			});
