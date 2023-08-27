@@ -15,6 +15,7 @@ export class TfaController {
   constructor(private tfaService: TfaService) {}
 
   @Get("off")
+  @UseGuards(AtGuard)
   async turnOff(@GetCurrentUserId() id: number): Promise<string> {
     return this.tfaService.deactivate(id);
   }
