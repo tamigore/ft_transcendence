@@ -185,18 +185,18 @@ export default defineComponent({
 		LeaveGame() {
 
 			if (store.state.ingame && store.state.playerNum != 0) {
-				console.log(`Pong Game player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
+				//console.log(`Pong Game player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
 				let looser = store.state.game.player1Id;
 				let winner = store.state.game.player2Id;
 				if (store.state.game.player2Id === store.state.user.id) {
 					looser = store.state.game.player2Id;
 					winner = store.state.game.player1Id;
 				}
-				// if (store.state.playerNum == 1)
+				if (store.state.playerNum == 1)
 					gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
 			}
 			else if (store.state.ingame && store.state.playerNum === 0) {
-				console.log("spectator leave not done");
+				//console.log("spectator leave not done");
 			}
 			else if (store.state.inQueue) {
 				gameSocket.emit("queueLeave", { gameId: store.state.game.id });
@@ -218,7 +218,8 @@ export default defineComponent({
 		const Pong = ref(new PongGameClass(hitSound));
 		const paddleSprite = new Image();
 		let lastDate = new Date();
-
+		const lastBall = new BallClass(Pong.value, 0, 0, 0, 0, 0, 'blue', 0);
+		
 		const drawPaddle = (x: number, y: number, width: number, height: number, sprite: HTMLImageElement) => {
 			if (!ctx)
 				return;
@@ -239,6 +240,13 @@ export default defineComponent({
 		const drawBall = () => {
 			if (!ctx)
 				return;
+			// if (Math.abs(lastBall.x - Pong.value.theBall.x) > 10)
+			// {
+			// 	console.log(" THE BALL WAS HERE : ");
+			// 	console.log(lastBall.ballState());
+			// 	console.log("THE BALL IS HERE : ", Pong.value.theBall.ballState());
+			// } 
+			lastBall.setBallState(Pong.value.theBall.ballState());
 			ctx.beginPath();
 			ctx.arc(Pong.value.theBall.x, Pong.value.theBall.y, Pong.value.theBall.radius, 0, Math.PI * 2);
 			ctx.shadowColor = "rgb(" + 13 + "," + 213 + "," + 252 + ")";
@@ -248,6 +256,7 @@ export default defineComponent({
 			ctx.fill();
 			ctx.closePath();
 			for (const ball of Pong.value.myBalls) {
+				//console.log("ANOTHER BALL IS HERERE");
 				ctx.beginPath();
 				ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
 				ctx.shadowColor = "rgb(" + 13 + "," + 213 + "," + 252 + ")";
@@ -277,7 +286,7 @@ export default defineComponent({
 				Pong.value.moovePaddles();
 				Pong.value.theBall.ballColision();
 				const newDate = new Date();
-				if (store.state.ingame && store.state.playerNum == 1 && newDate.getTime() - lastDate.getTime() > 200) {
+				if (store.state.ingame  && newDate.getTime() - lastDate.getTime() > 200) {
 					gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
 					lastDate = newDate;
 				}
@@ -312,15 +321,15 @@ export default defineComponent({
 
 
 			gameSocket.on("gameRoomJoiner", (data) => {
-				console.log("===BEFORE CHECK gameRoomJoiner before ingame = ");
+				//console.log("===BEFORE CHECK gameRoomJoiner before ingame = ");
 				if (store.state.ingame == true)
 					return;
-				console.log("---gameRoomJoiner after ingame = ", store.state.ingame);
+				//console.log("---gameRoomJoiner after ingame = ", store.state.ingame);
 				store.commit("setGameRoom", data.room);
 				if (store.state.playerNum == 1 && store.state.gameRoom != "")
 					store.commit("setPlayer2Game", data.user);
 				if (store.state.playerNum == 2) {
-					console.log("gameJoiner player 2");
+					//console.log("gameJoiner player 2");
 					store.commit("setInQueue", false);
 					Pong.value.startMultiOnline();
 					gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
@@ -328,7 +337,7 @@ export default defineComponent({
 			})
 
 			gameSocket.on("LaunchGame", (e: BallState) => {
-				console.log("====LAUCNH GAME");
+				//console.log("====LAUCNH GAME");
 				store.commit("setGameConnect", true);
 				store.commit("setInQueue", false);
 				Pong.value.startMultiOnline();
@@ -344,6 +353,7 @@ export default defineComponent({
 			});
 
 			gameSocket.on("setBall", (e: BallState) => {
+				//console.log("setBall", e);
 				if (store.state.playerNum != e.player)
 					if (e.ballId == 0)
 						Pong.value.theBall.setBallState(e);
@@ -356,6 +366,7 @@ export default defineComponent({
 			});
 
 			gameSocket.on("scoreMessage", (e: number) => {
+				console.log("scoreMessage", e);
 				if (e == 2) {
 					Pong.value.scoreA++;
 					if (store.state.playerNum == 1)
@@ -366,7 +377,7 @@ export default defineComponent({
 					if (store.state.playerNum == 2)
 						Pong.value.pointSounds[0].play();
 				}
-				if (Pong.value.scoreA >= 10 || Pong.value.scoreB >= 10) {
+				if (Pong.value.scoreA >= 1000 || Pong.value.scoreB >= 1000) {
 					Pong.value.endGameOnline();
 					store.commit("setGameConnect", false);
 				}
@@ -396,7 +407,7 @@ export default defineComponent({
 			});
 
 			gameSocket.on("gameEnder", () => {
-				console.log("gameEnder is started");
+				//console.log("gameEnder is started");
 				Pong.value.inMultiplayer = false;
 				Pong.value.gameIsRunning = false;
 				store.commit("setGameRoom", "");
@@ -404,21 +415,21 @@ export default defineComponent({
 				store.commit("setPlayerNum", 0);
 				store.commit("setGame", null);
 				Pong.value.restartMatch();
-				console.log("gameEnder is ended");
+				//console.log("gameEnder is ended");
 			});
 
 			gameSocket.on("servNewSpectator", (user) => {
-				console.log("=== start multi AVANT = ", Pong.value.theBall.ballState());
+				//console.log("=== start multi AVANT = ", Pong.value.theBall.ballState());
 				if (store.state.user.id == user.id) {
-					console.log("=== start multi new spec ?");
+					//console.log("=== start multi new spec ?");
 					Pong.value.startMultiOnline();
 				}
 				if (store.state.playerNum != 1)
 					return;
-				console.log("servNewSpectator", user);
+				//console.log("servNewSpectator", user);
 
 				gameSocket.emit("onSpecBall", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState(), userId: user.id });
-				console.log("servNewSpectator the ball = ", Pong.value.theBall.ballState());
+				//console.log("servNewSpectator the ball = ", Pong.value.theBall.ballState());
 				for (const ball of Pong.value.myBalls) {
 					gameSocket.emit("onSpecBall", { room: store.state.gameRoom, ball: ball.ballState(), userId: user.id });
 				}
@@ -434,7 +445,7 @@ export default defineComponent({
 			gameSocket.on("servOnSpecBall", (data) => {
 				if (store.state.user.id != data.userId)
 					return;
-				console.log("servOnSpecBall", data);
+				//console.log("servOnSpecBall", data);
 				if (data.ball.ballId == 0)
 					Pong.value.theBall.setBallState(data.ball);
 				else {
@@ -445,7 +456,7 @@ export default defineComponent({
 			gameSocket.on("servOnSpecPaddle", (data) => {
 				if (store.state.user.id != data.userId)
 					return;
-				console.log("servOnSpecPaddle", data);
+				//console.log("servOnSpecPaddle", data);
 				if (data.paddle.player == 1)
 					Pong.value.setPaddleState(data.paddle);
 				else {
@@ -457,7 +468,7 @@ export default defineComponent({
 			gameSocket.on("servOnSpecScore", (data) => {
 				if (store.state.user.id != data.userId)
 					return;
-				console.log("servOnSpecScore", data);
+				//console.log("servOnSpecScore", data);
 				Pong.value.scoreA = data.scoreA;
 				Pong.value.scoreB = data.scoreB;
 			});
@@ -465,13 +476,13 @@ export default defineComponent({
 			gameSocket.on("servOnSpecBlock", (data) => {
 				if (store.state.user.id != data.userId)
 					return;
-				console.log("servOnSpecBlock", data);
+				//console.log("servOnSpecBlock", data);
 				Pong.value.myBlocks.push(new EffectBlock(Pong.value, data.block.x, data.block.y,
 					data.block.width, data.block.height, data.block.effect, data.block.num, data.block.id));
 			});
 
 			gameSocket.on("servInviteGame", (data) => {
-				console.log("servInviteGame :", data.game);
+				//console.log("servInviteGame :", data.game);
 
 				store.commit("setGame", data.game);
 				store.commit("setGameConnect", true);
@@ -480,9 +491,11 @@ export default defineComponent({
 				else if (data.game.player1Id == store.state.user.id)
 					store.commit("setPlayerNum", 1);
 				store.commit("setInQueue", false);
-				Pong.value.startMultiOnline();
-				if (store.state.playerNum == 1)
+				if (store.state.playerNum == 2)
+				{
+					Pong.value.startMultiOnline();
 					gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
+				}
 			})
 		});
 

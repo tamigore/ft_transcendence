@@ -20,7 +20,7 @@ export class EffectBlock {
 
   constructor(Pong: PongGameClass, x: number, y: number, width: number, height: number,
     effect: string, num: number, _id?: number) {
-    console.log("EffectBlock constructor");
+    //console.log("EffectBlock constructor");
 
     this.x = x;
     this.y = y;
@@ -88,12 +88,12 @@ export class EffectBlock {
         return;
       this.sound.volume = 0.4;
       this.sound.play();
-      console.log("newBall-----------------");
+      //console.log("newBall-----------------");
       ball.pong.newBall('blue', this.x + this.width / 2, this.y + this.height / 2, 1, ball.veloX / Math.abs(ball.veloX));
     }
     else if (this.effect === "biggerPaddle") {
       this.sound.play();
-      console.log("biggerPaddle");
+      //console.log("biggerPaddle");
       let paddleStateData: PaddleState;
       if (ball.veloX > 0) {
         ball.pong.leftPaddleHeight *= 1.2;
@@ -108,7 +108,7 @@ export class EffectBlock {
     }
     else if (this.effect === "smallerPaddle") {
       this.sound.play();
-      console.log("smallerPaddle");
+      //console.log("smallerPaddle");
       let paddleStateData: PaddleState;
       if (ball.veloX > 0) {
         ball.pong.leftPaddleHeight /= 1.1;

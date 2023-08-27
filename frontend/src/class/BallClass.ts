@@ -57,6 +57,11 @@ export class BallClass {
 			this.veloY = -Math.abs(this.veloY);
 		}
 		if (this.x <= 1) {
+			if (Date.now() - this.pong.lastGoal[this.id] < 200)
+			{
+				this.pong.lastGoal[this.id] = Date.now();
+				return;
+			}
 			if (!store.state.ingame) {
 				this.hp--;
 				this.pong.scoreB += 1;
@@ -110,7 +115,7 @@ export class BallClass {
 	onlinePoint = (_player: number) => {
 		if (!store.state.ingame || store.state.playerNum != _player)
 			return;
-		console.log("onlinePoint-----------");
+		//console.log("onlinePoint-----------");
 		gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
 		gameSocket.emit("goalMessage", { room: store.state.gameRoom, player: _player });
 	}
@@ -147,7 +152,7 @@ export class BallClass {
 				if (this.y + this.radius >= block.y && this.y - this.radius <= block.y + block.height) {
 					if (!store.state.ingame || store.state.playerNum == 1) {
 						block.triggerEffect(this);
-						// console.log("ballBlockColision = ", block.id);
+						// //console.log("ballBlockColision = ", block.id);
 						gameSocket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
 						this.pong.removeBlock(block.id);
 					}
@@ -187,13 +192,13 @@ export class BallClass {
 
 	ballColision = (): BallClass => {
 
-		if (this.pong.alreadyComputed) {
-			this.pong.alreadyComputed = false;
-			this.x += this.veloX;
-			this.y += this.veloY;
+		// if (this.pong.alreadyComputed) {
+		// 	this.pong.alreadyComputed = false;
+		// 	this.x += this.veloX;
+		// 	this.y += this.veloY;
 
-			return this;
-		}
+		// 	return this;
+		// }
 
 		this.ballBlockColision();
 		// const nbr = this.pong.num_ping + this.pong.num_pong;
@@ -204,7 +209,7 @@ export class BallClass {
 				this.pong.leftPaddleWidth, 1)) {
 			this.pong.num_ping += 1;
 			if (store.state.playerNum == 1) {
-				console.log("ballsetter emit");
+				//console.log("ballsetter emit");
 				gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
 			}
 		}
@@ -214,7 +219,7 @@ export class BallClass {
 				this.pong.rightPaddleWidth, -1)) {
 			this.pong.num_pong += 1;
 			if (store.state.playerNum == 2) {
-				console.log("ballsetter emit");
+				//console.log("ballsetter emit");
 				gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
 			}
 		}
