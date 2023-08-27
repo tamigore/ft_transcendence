@@ -280,5 +280,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!game)
 			return ;
 		this.server.to(body.user1username).emit("servInviteGame",{ game});
+
+  }
+	@SubscribeMessage("refusInvite")
+  async onRefusInvite(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { gameRoom: string },
+  ) {
+		
+		this.server.to(body.gameRoom).emit("c",{ });
   }
 }

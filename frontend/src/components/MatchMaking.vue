@@ -76,6 +76,7 @@ export default defineComponent({
 	},
 
 	methods: {
+		
 		async acceptInvite() {
 			console.log("accept invite");
 			store.commit("setInQueue", true);
