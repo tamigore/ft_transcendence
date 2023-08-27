@@ -117,7 +117,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       user2: User;
     },
   ): Promise<void> {
-    console.log("inviteGame player 2: ", payload.user2.chatSocket);
+    console.log("===inviteGame player 2: ", payload.user2.chatSocket);
     this.server.to(payload.user2.chatSocket).emit("inviteGame", payload);
   }
 

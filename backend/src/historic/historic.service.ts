@@ -1,13 +1,13 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-// import { Historic } from "@prisma/client";
+import { Historic } from "@prisma/client";
 
 @Injectable()
 export class HistoricService {
   private logger: Logger = new Logger("HistoricService");
   constructor(private prisma: PrismaService) {}
 
-  async getGamesByPlayerId(userId: number) {
+  async getGamesByPlayerId(userId: number): Promise<Historic[]> {
     return await this.prisma.historic
       .findMany({
         where: {
@@ -60,11 +60,11 @@ export class HistoricService {
       });
   }
 
-  async getAllHistoric() {
+  async getAllHistoric(): Promise<Historic[]> {
     return await this.prisma.historic.findMany({});
   }
 
-  async setGameByGameId(body: any) {
+  async setGameByGameId(body: any): Promise<void> {
     await this.prisma.historic
       .create({
         data: {

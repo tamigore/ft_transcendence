@@ -264,7 +264,15 @@ export default defineComponent({
 				return;
 			if (Pong.value.inMultiplayer && !store.state.ingame)
 				Pong.value.restartMatch();
-
+			if (store.state.inInvite && !store.state.game && Date.now() - store.state.dateInvite > 10000) {
+				store.commit("setInInvite", false);
+				gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+				store.commit("setPlayerNum", 0);
+				store.commit("setInQueue", false);
+				store.commit("setGameConnect", false);
+				store.commit("setGameRoom", "");
+				store.commit("setInSolo", false);
+			}
 				Pong.value.bot();
 				Pong.value.moovePaddles();
 				Pong.value.theBall.ballColision();
