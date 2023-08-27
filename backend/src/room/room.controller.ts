@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { GetCurrentUserId } from "../common/decorators";
 import { Room, User } from "@prisma/client";
-import { ModifyOtherDto } from "./dto/room.dto";
+// import { ModifyOtherDto } from "./dto/room.dto";
 import { RoomService } from "./room.service";
 import { AtGuard } from "src/common/guards";
 
@@ -24,7 +24,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  findRooms(): Promise<Room[]> {
+  findRooms() {
     return this.roomService.findAll();
   }
 
@@ -32,7 +32,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  async findRoomsIncludes(): Promise<Room[]> {
+  async findRoomsIncludes() {
     const rooms = await this.roomService.findAllIncludes();
     console.debug(rooms);
     return rooms;
@@ -42,7 +42,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  async findPublicRooms(): Promise<Room[]> {
+  async findPublicRooms() {
     return await this.roomService.findAllPublic();
   }
 
@@ -50,7 +50,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*")
-  findPrivateRooms(@Param("id") param: string): Promise<Room[]> {
+  findPrivateRooms(@Param("id") param: string) {
     const id: number = parseInt(param);
     return this.roomService.findPrivateRooms(id);
   }
@@ -59,7 +59,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*")
-  findRoom(@Param("id") param: string): Promise<Room> {
+  findRoom(@Param("id") param: string) {
     const id: number = parseInt(param);
     return this.roomService.findById(id);
   }
@@ -116,7 +116,7 @@ export class RoomController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  createPrivateRoom(@Body() dto: { user1: User; user2: User }): Promise<Room> {
+  createPrivateRoom(@Body() dto: { user1: User; user2: User }) {
     return this.roomService.getPrivateRoom(dto.user1, dto.user2);
   }
 

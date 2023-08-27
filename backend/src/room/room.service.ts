@@ -114,12 +114,12 @@ export class RoomService implements OnModuleInit {
     return false;
   }
 
-  async findAll(): Promise<Room[]> {
+  async findAll() {
     this.logger.log("findAll rooms");
     return await this.prisma.room.findMany();
   }
 
-  async findAllIncludes(): Promise<Room[]> {
+  async findAllIncludes() {
     this.logger.log("findAll Include rooms");
     return await this.prisma.room
       .findMany({
@@ -136,7 +136,7 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async findAllPublic(): Promise<Room[]> {
+  async findAllPublic() {
     this.logger.log("findAllPublic rooms");
     return await this.prisma.room
       .findMany({
@@ -154,7 +154,7 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async findByName(name: string): Promise<Room> {
+  async findByName(name: string) {
     this.logger.log(`findByName room: ${name}`);
     return await this.prisma.room
       .findUnique({
@@ -165,7 +165,7 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async findById(id: number): Promise<Room> {
+  async findById(id: number) {
     this.logger.log(`findById room: ${id}`);
     return await this.prisma.room
       .findUnique({
@@ -176,7 +176,7 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async findByIdWithAll(id: number): Promise<Room> {
+  async findByIdWithAll(id: number) {
     this.logger.log(`findById room: ${id}`);
     return await this.prisma.room
       .findUnique({
@@ -236,6 +236,9 @@ export class RoomService implements OnModuleInit {
         },
         include: {
           users: true,
+          admins: true,
+          ban: true,
+          mute: true,
         },
       })
       .then((newRoom) => {
@@ -248,7 +251,7 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async findPrivateRooms(userId: number): Promise<Room[]> {
+  async findPrivateRooms(userId: number) {
     return await this.prisma.room
       .findMany({
         where: {
@@ -271,7 +274,7 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async getPrivateRoom(user1: User, user2: User): Promise<Room> {
+  async getPrivateRoom(user1: User, user2: User) {
     this.logger.log(
       `getPrivateRoom of ${user1.username} and ${user2.username}`,
     );

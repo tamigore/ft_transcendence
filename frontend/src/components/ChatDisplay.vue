@@ -35,7 +35,7 @@
       <div class="flex border-round align-items-start justify-content-start pl-8 pr-8 m-4">
         <!-- Colonne des salles (1/4 de la largeur) -->
         <div class="flex flex-col w-4">
-          <TabView class= "w-full" v-model:activeIndex="active">
+          <TabView class= "w-full" v-model:activeIndex="active" @update:activeIndex="setIndex">
             <TabPanel header="Rooms">
               <div id="roomContainer" class="scroll" style="height: 69vh;">
               <div v-for="Room in Rooms" :key="Room.room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
@@ -201,12 +201,14 @@ export default defineComponent({
       const obj = [] as { isIn: boolean; room: Room; }[];
       for (let i = 0; i < store.state.rooms.length; i++) {
         if (store.state.rooms[i].users)
-          obj[i] = { isIn: store.state.rooms[i].users.find(
-            user => user.id === store.state.user.id) ? true : false, room : store.state.rooms[i]
+          obj[i] = {
+            isIn: store.state.rooms[i].users.find(
+              user => user.id === store.state.user.id) ? true : false,
+            room : store.state.rooms[i]
           };
         else console.error("wrong get room");
       }
-      console.log(`Rooms computed: ${obj}`); 
+      console.log("Rooms computed: ", obj); 
       return obj as { isIn: boolean; room: Room; }[];
     },
 
@@ -223,7 +225,7 @@ export default defineComponent({
     },
   },
 
-  created() {
+  mounted() {
     this.getRooms();
     this.getPrivate();
   },
@@ -235,6 +237,22 @@ export default defineComponent({
   },
 
   methods: {
+    async setIndex(index: number) {
+      console.log("index: ", index);
+      if (index === 0)
+      {
+        console.log("In Room");
+        if (store.state.lastRoom && store.state.lastRoom.id)
+          await this.selectRoom(store.state.lastRoom);
+      }
+      else
+      {
+        console.log("In Private");
+        if (store.state.lastPrivate && store.state.lastPrivate.id)
+          await this.selectPrivate(store.state.lastPrivate);
+      }
+    },
+
     InRoom (room: Room) {
       console.log(`InRoom methods: ${room}`);
       if (!room || !room.users)
@@ -290,7 +308,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log(`getRooms response: ${response.data}`);
+          console.log("getRooms response: ", response.data);
           store.commit("setRooms", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
@@ -301,7 +319,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log(`getMessages response: ${response.data}`);
+          console.log("getMessages response: ", response.data);
           store.commit("setMessages", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
@@ -395,18 +413,20 @@ export default defineComponent({
       .catch((error: AxiosError) => { throw error; });
     },
 
-    selectRoom(value: Room) {
-      if (value.users.find(user => user.id === store.state.user.id))
+    async selectRoom(value: Room) {
+      if (value.users && value.users.find(user => user.id === store.state.user.id))
       {
-        store.commit("setLastRoom", value);
-        this.getMessages(value);
+        if (value.id != store.state.lastRoom.id)
+          store.commit("setLastRoom", value);
+        await this.getMessages(value);
         this.isPrivate = false;
       }
     },
 
-    selectPrivate(value: Room) {
-      store.commit("setLastPrivate", value);
-      this.getMessages(value);
+    async selectPrivate(value: Room) {
+      if (value.id != store.state.lastPrivate.id)
+        store.commit("setLastPrivate", value);
+      await this.getMessages(value);
       this.isPrivate = true;
     },
 

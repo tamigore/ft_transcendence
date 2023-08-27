@@ -100,6 +100,7 @@ export default defineComponent({
       ]),
     }
   },
+
   props: {
     message: {
       type: Object as () => Message,
@@ -111,6 +112,14 @@ export default defineComponent({
     },
     owner: { type: Boolean, required: true},
   },
+
+  mounted() {
+    console.log("ChatBubble message: ", this.message);
+    console.log("ChatBubble room: ", this.room);
+    // const lastRoom = store.state.lastRoom;
+    // console.log("LastRoom: ", lastRoom);
+  },
+
   computed: {
     isFriend(): boolean {
       if (!store.state.user.friend || store.state.user.friend.length == 0)
@@ -125,15 +134,21 @@ export default defineComponent({
   },
   methods: {
     hasHigherRights(): boolean {
-      if (!this.message || !this.room || (!this.room.ownerId && !this.room.admin)
-        || (!this.room.ownerId && this.room.admin?.find((user) => {user.id === store.state.user.id})))
-        return false;
-      if (this.room.ownerId === store.state.user.id
-        || (this.room.admin
-          && this.room.admin?.find((user) => {user.id === store.state.user.id})
-          && !this.room.admin?.find((user) => {user.id === this.message.userId})
-          && this.room.ownerId !== this.message.userId))
+      if (this.room.ownerId === store.state.user.id) {
+        console.log("hasHigherRights : OWNER");
         return true;
+      }
+      if (this.room.admins)
+      {
+        if (this.room.admins.find(user => user.id === store.state.user.id) &&
+          this.room.ownerId !== this.message.userId &&
+          !this.room.admins.find(user => user.id === this.message.userId)) {
+          console.log("hasHigherRights : ADMIN");
+          return true;
+        }
+      }
+      else
+        console.log("NO ADMIN...");
       return false;
     },
 

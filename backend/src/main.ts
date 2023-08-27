@@ -14,7 +14,7 @@ async function bootstrap() {
   // Protecting endpoints from receiving incorrect data
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: ["http://:8080", `http://${process.env.DOMAIN}:8080`],
+    origin: ["http://localhost:8080", `http://${process.env.DOMAIN}:8080`],
     credentials: true,
     // methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     // allowedHeaders: [

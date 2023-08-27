@@ -271,8 +271,8 @@
               </div>
             </li>
 
-            <li v-for="user in leaderBoard" :key="user.id" class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
-              <div class="text-500 w-6 md:w-2 font-medium">index</div>
+            <li id="myLi" v-for="(user, index) in leaderBoard" :key="user.id" class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
+              <div class="text-500 w-6 md:w-2 font-medium">{{index + 1}}</div>
               <div class="align-items-center flex w-8">
                 <div
                   style="width: 75px; height: 75px; float: left; margin-right: 5%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px #bd34e7; cursor: default;">
@@ -479,7 +479,7 @@ export default defineComponent({
           console.log(response);
           console.log(response.data.length > 0);
           if (response.data && response.data.length)
-            this.gameHistoric.map(response.data);
+            this.gameHistoric = response.data;
         })
         .catch((error: AxiosError) => {
           throw error;

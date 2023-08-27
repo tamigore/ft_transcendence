@@ -62,16 +62,22 @@ const store = createStore({
             state.lastPrivate.id = room.id;
             state.lastPrivate.name = room.name;
             state.lastPrivate.ownerId = room.ownerId;
+            state.lastRoom.users = room.users;
         },
         setLastRoom(state, room: Room) {
             console.log('setLastRoom: ', room);
             state.lastRoom.id = room.id;
             state.lastRoom.name = room.name;
             state.lastRoom.ownerId = room.ownerId;
+            state.lastRoom.admins = room.admins;
+            state.lastRoom.ban = room.ban;
+            state.lastRoom.users = room.users;
+            state.lastRoom.mute = room.mute;
         },
         setRooms(state, rooms: Room[]) {
-            console.log('setRooms: ', rooms);
+            // console.log('setRooms: ', rooms);
             state.rooms = rooms;
+            console.log('setRooms: ', state.rooms);
         },
         addRoom(state, room: Room) {
             console.log('addRoom: ', room);
@@ -85,8 +91,8 @@ const store = createStore({
             }
         },
         setPrivate(state, rooms: Room[]) {
-            console.log('setRooms: ', rooms);
             state.private = rooms;
+            console.log('setPrivate: ', state.private);
         },
         addPrivate(state, room: Room) {
             console.log('addPrivate: ', room);

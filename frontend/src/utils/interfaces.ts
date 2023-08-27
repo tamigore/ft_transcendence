@@ -77,7 +77,7 @@ export interface Room {
   hash: string | null,
   ownerId: number,
   owner: User,
-  admin: User[],
+  admins: User[],
   users: User[],
   ban: User[],
   mute: User[],
