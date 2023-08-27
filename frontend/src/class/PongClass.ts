@@ -291,7 +291,9 @@ export class PongGameClass {
 
 	startMultiOnline() {
 		// if (store.state.playerNum == 2)
-			this.restartMatch(true);
+		this.restartMatch(true);
+		gameSocket.emit("ballSetter", { ballInfo: this.theBall.ballState(), room: store.state.gameRoom });
+		console.log("startMultiOnline----------- the ball : ", this.theBall.ballState());
 		// else
 		// 	this.restartMatch(false);
 		this.inMultiplayer = true;
@@ -302,14 +304,15 @@ export class PongGameClass {
 		this.leftPlayerKeyUp = '';
 		this.rightPlayerKeyDown = '';
 		this.rightPlayerKeyUp = '';
+		console.log("playerNUm = ", store.state.playerNum);
 		if (store.state.playerNum == 1) {
-			//console.log("player 1 KEYS");
+			console.log("player 1 KEYS");
 			this.leftPlayerKeyDown = 's';
 			this.leftPlayerKeyUp = 'w';
 			this.blockId = 1;
 		}
 		else if (store.state.playerNum == 2) {
-			//console.log("player 2 KEYS");
+			console.log("player 2 KEYS");
 			this.rightPlayerKeyDown = 's';
 			this.rightPlayerKeyUp = 'w';
 			this.blockId = 2;

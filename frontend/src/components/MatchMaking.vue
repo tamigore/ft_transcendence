@@ -134,7 +134,7 @@ export default defineComponent({
 					});
 					console.log(" apres join room gameSocket id : ", gameSocket.id);
 					console.log("matchamking response :", response);
-					if (response.data.player2)
+					if (response.data.player2 && response.data.player2.id === store.state.user.id)
 						store.commit("setPlayerNum", 2);
 					else
 						store.commit("setPlayerNum", 1);

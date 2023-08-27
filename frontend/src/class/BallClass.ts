@@ -85,6 +85,11 @@ export class BallClass {
 			}
 		}
 		else if (this.x >= this.pong.width - 1) {
+			if (Date.now() - this.pong.lastGoal[this.id] < 200)
+			{
+				this.pong.lastGoal[this.id] = Date.now();
+				return;
+			}
 			if (!store.state.ingame) {
 				if (this.pong.wallIsUp) {
 					this.veloX = -this.veloX;
