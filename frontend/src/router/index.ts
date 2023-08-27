@@ -158,7 +158,8 @@ router.beforeEach(async (to, from) => {
       gameSocket.emit("queueLeave", { gameId: store.state.game.id });
     }
     if (store.state.ingame || store.state.inQueue)
-    gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+      gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+    console.log("leaving Pong");
     store.commit("setPlayerNum", 0);
     store.commit("setInQueue", false);
     store.commit("setGameConnect", false);

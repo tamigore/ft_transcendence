@@ -12,12 +12,12 @@
 			<div class="px-4">
 				<Button @click="LaunchSingle()"> Single Player </Button>
 			</div>
-			<div class="px-4">
+			<!-- <div class="px-4">
 				<Button @click="inviteGame()"> invite </Button>
 			</div>
 			<div class="px-4">
 				<Button @click="acceptInvite()"> accept invite </Button>
-			</div>
+			</div> -->
 			<!-- <Button @click="LeaveGame()"> Leave game </Button> -->
 
 			<div class="flex align-items-center justify-content-between mb-6">

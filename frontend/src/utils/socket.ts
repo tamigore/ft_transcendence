@@ -112,25 +112,28 @@ class SocketioChat {
       await axios.post("/api/user/chatsocket", { socket: this.socket.id }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       });
+      store.commit("setChatSocket", this.socket.id);
     });
+
 
     this.socket.on("connect_error", () => {
       console.log("Ws connect failed");
     });
 
-    this.socket.on("inviteGame", (e: {user1: User, user2: User}) => {
+    this.socket.on("inviteGame", async (e: {user1: User, user2: User}) => {
       console.log("invite received");
-      if (window.confirm(`User: ${e.user1.username} want to invite you to a pong game.`)) {
-        console.log("pongGame accept invite");
-        store.commit("setInQueue", true);
-        store.commit("setGameRoom", e.user1.username);
-        gameSocket.emit("inviteJoinGameRoom", { room: e.user1.username as string });
-        gameSocket.emit("inviteGame", {
-          user1username: e.user1.username,
-          user2username: store.state.user.username,
-        });
-        router.push({path: "/pong"});
-      }
+      // const res = await window.confirm(`User: ${e.user1.username} want to invite you to a pong game.`)
+      // if (res) {
+      console.log("pongGame accept invite");
+      store.commit("setInQueue", true);
+      store.commit("setGameRoom", e.user1.username);
+      gameSocket.emit("inviteJoinGameRoom", { room: e.user1.username as string });
+      gameSocket.emit("inviteGame", {
+        user1username: e.user1.username,
+        user2username: store.state.user.username,
+      });
+      router.push({path: "/pong"});
+      // }
     });
 
     // this.socket.on("pongGame1", () => {
