@@ -260,22 +260,25 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	
 
 
-	// @SubscribeMessage("inviteJoinGameRoom")
-  // async oninvitejoinRoom(
-	// 	@ConnectedSocket() client: Socket,
-  //   @MessageBody() body: { room: string },
-	// ) {
-	// 	console.log("inviteGame");
-	// 	this.server.in(client.id).socketsJoin(body.room);
-	// }
+	@SubscribeMessage("inviteJoinGameRoom")
+  async oninvitejoinRoom(
+		@ConnectedSocket() client: Socket,
+    @MessageBody() body: { room: string },
+	) {
+		console.log("inviteGame");
+		this.server.in(client.id).socketsJoin(body.room);
+	}
 
 
-	// @SubscribeMessage("inviteGame")
-  // async onInviteGame(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() body: { game: Game, userId: number, room: string },
-  // ) {
-  //   console.log("inviteGame");
-	// 	this.server.to(body.room).emit("servInviteGame", body.game);
-  // }
+	@SubscribeMessage("inviteGame")
+  async onInviteGame(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { user1username: string, user2username: string },
+  ) {
+    const game = await this.gameService.inviteGame(body);
+		console.log("inviteGame : ", game);
+		if (!game)
+			return ;
+		this.server.to(body.user1username).emit("servInviteGame",{ game});
+  }
 }

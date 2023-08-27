@@ -469,18 +469,20 @@ export default defineComponent({
 					data.block.width, data.block.height, data.block.effect, data.block.num, data.block.id));
 			});
 
-			// gameSocket.on("servInviteGame", (data) => {
-			// 	console.log("servInviteGame ");
-			// 	if (store.state.playerNum == 2) 
-			// 		return ;
-			// 	store.commit("setGame", data.game);
-			// 	store.commit("setGameConnect", true);
-			// 	store.commit("setPlayerNum", 1);
-			// 	console.log("inviteGame player 2");
-			// 	store.commit("setInQueue", false);
-			// 	Pong.value.startMultiOnline();
-			// 	gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
-			// })
+			gameSocket.on("servInviteGame", (data) => {
+				console.log("servInviteGame :", data.game);
+				
+				store.commit("setGame", data.game);
+				store.commit("setGameConnect", true);
+				if (data.game.player2Id == store.state.user.id)
+					store.commit("setPlayerNum", 2);
+				else if (data.game.player1Id == store.state.user.id)
+					store.commit("setPlayerNum", 1);
+				store.commit("setInQueue", false);
+				Pong.value.startMultiOnline();
+				if (store.state.playerNum == 1)
+				gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
+			})
 		});
 
 		onUnmounted(() => {

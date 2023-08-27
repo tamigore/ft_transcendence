@@ -1,28 +1,10 @@
+invite : faire le invite par message puis check les bugs
 
-le inviute:
+check les games online
 
-	 user1 -> via chatsocket demande a -> user2
-	 user1 joinGameRoom inQueue wait for instruction
-						 si user2 pas de rep au bout de x temps ou rep negatif -> leaveGameRoom et quit queue
-	 si accept
-	 					user2 ->joinRoom
-	 creation of game [user1Id, user2Id] -> renvoie la game dans la GameRoom -> l'un des 2 user lance la game
+afficher les scores correctement
 
 
 
-- spectate depuis le chat ou depuis friend interface
-
-- pong reactif
-
-- rajouter des son de victoire et de defaite
-
-- faire page accueile du pong ?
-
-
-- secu ingame in queue dans le matchamking
-
-- dans le back, quand delete une game check si elle existe
-
-
-
+- spectate depuis le chat ou depuis friend interface ?
 
