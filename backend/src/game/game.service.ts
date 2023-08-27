@@ -1,18 +1,20 @@
 import { PrismaService } from "../prisma/prisma.service";
-import { Game} from "@prisma/client";
+import { Game } from "@prisma/client";
 import { UserService } from "../user//user.service";
 import { Matchmaker, Spectate } from "./game.interfaces";
 import { Injectable, Logger } from "@nestjs/common";
 // import { Server } from "socket.io";
 // import { WebSocketServer } from "@nestjs/websockets";
 
-
 @Injectable()
 export class GameService {
   private logger: Logger = new Logger("GameService");
-  constructor(private prisma: PrismaService, private userServ: UserService) {}
-	
-	// @WebSocketServer()
+  constructor(
+    private prisma: PrismaService,
+    private userServ: UserService,
+  ) {}
+
+  // @WebSocketServer()
   // server: Server;
 
   async findSpectate() {
@@ -51,32 +53,34 @@ export class GameService {
   }
 
   async queueLeave(gameId: number) {
-	const game = await this.prisma.game.findFirst({
-		where: {
-			id: gameId,
-		  }
-	});
-	if(!game)
-		return ;
-    return await this.prisma.game.delete({
+    const game = await this.prisma.game.findFirst({
       where: {
         id: gameId,
-      }
-      }).then(() => {
+      },
+    });
+    if (!game) return;
+    return await this.prisma.game
+      .delete({
+        where: {
+          id: gameId,
+        },
+      })
+      .then(() => {
         console.log("queueLeave : game deleted");
       });
   }
 
-  async inviteGame(dto: {user1username: string, user2username: string}): Promise<Game> {
+  async inviteGame(dto: {
+    user1username: string;
+    user2username: string;
+  }): Promise<Game> {
+    const user1 = await this.userServ.findByUsername(dto.user1username);
+    const user2 = await this.userServ.findByUsername(dto.user2username);
 
-		const user1 = await this.userServ.findByUsername(dto.user1username);
-		const user2 = await this.userServ.findByUsername(dto.user2username);
-
-		if (!user1 || !user2)
-		{
-			console.log("echec cuisant");
-			return null;
-		}
+    if (!user1 || !user2) {
+      console.log("echec cuisant");
+      return null;
+    }
     const game = await this.prisma.game.create({
       data: {
         name: "onInvite",
@@ -97,10 +101,9 @@ export class GameService {
         player2: true,
       },
     });
-		return (game);
-		// this.server.to(user1.username).emit("servInviteGame", game);
-
-    }
+    return game;
+    // this.server.to(user1.username).emit("servInviteGame", game);
+  }
 
   async matchMaker(dto: Matchmaker): Promise<Game> {
     console.log(`typeof ${typeof dto.userId}`);
@@ -112,7 +115,7 @@ export class GameService {
             isBlocked: dto.isBlocked as boolean,
             NOT: {
               player1Id: dto.userId as number,
-            }
+            },
           },
         });
         console.log("INMATCHMAKER : ", dto.userName);
@@ -159,12 +162,9 @@ export class GameService {
         }
       })
       .then((game) => {
-        if (!game.player2)
-        {
+        if (!game.player2) {
           this.updateInQueue(game.player1Id, true);
-        }
-        else if (game.player2)
-        {
+        } else if (game.player2) {
           this.updateInQueue(game.player1Id, false);
           this.updateInGame(game.player1Id, true);
           this.updateInGame(game.player2Id, true);
@@ -174,7 +174,7 @@ export class GameService {
       })
       .catch((error) => {
         // throw error;
-				return null;
+        return null;
       });
     return game;
   }
@@ -248,8 +248,7 @@ export class GameService {
         },
       })
       .then((historic) => {
-				if (!historic)
-					return null;
+        if (!historic) return null;
         this.updateInGame(historic.winnerID, false);
         this.updateInGame(historic.looserID, false);
         this.logger.log("---------YOOO LE HISTORIC : ", historic);

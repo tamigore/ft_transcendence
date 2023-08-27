@@ -3,10 +3,16 @@ import { server } from "@/utils/helper";
 import { User, Message, Room } from "./interfaces"
 import store from "@/store";
 import axios, { AxiosResponse, AxiosError } from "axios";
+import gameSocket from "./gameSocket";
+import router from "@/router";
+
 export interface ServerToClientEvents {
   servMessage: (e: Message) => void;
   update: () => void;
   updatePrivate: () => void;
+  inviteGame: (e: { user1: User; user2: User }) => void;
+  pongGame1: () => void;
+  pongGame2: (e: { user1: User; user2: User }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -15,6 +21,8 @@ export interface ClientToServerEvents {
   kick_user: (e: { user: User; user_to_kick: User; room: Room }) => boolean;
   cliMessage: (e: Message) => boolean;
   update: (e: { room: Room }) => void;
+  acceptInvite: (e: { user1: User; user2: User }) => void;
+  inviteGame: (e: { user1: User; user2: User }) => void;
 }
 
 class SocketioChat {
@@ -99,8 +107,9 @@ class SocketioChat {
         .catch((error: AxiosError) => { throw error; });
     });
 
-    this.socket.on("connect", () => {
-      axios.post("/api/user/chatsocket", { socket: socket.id }, {
+    this.socket.on("connect", async () => {
+      console.log(this.socket.id)
+      await axios.post("/api/user/chatsocket", { socket: this.socket.id }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       });
     });
@@ -108,6 +117,45 @@ class SocketioChat {
     this.socket.on("connect_error", () => {
       console.log("Ws connect failed");
     });
+
+    this.socket.on("inviteGame", (e: {user1: User, user2: User}) => {
+      console.log("invite received");
+      // const res = window.prompt("You are invited to a game, will you accept ?: ", "yes / no");
+      // if (res && res === "yes")
+      // {
+        console.log("pongGame accept invite");
+        store.commit("setInQueue", true);
+        store.commit("setGameRoom", e.user1.username);
+        gameSocket.emit("inviteJoinGameRoom", { room: e.user1.username as string });
+        gameSocket.emit("inviteGame", {
+          user1username: e.user1.username,
+          user2username: store.state.user.username,
+        });
+        router.push({path: "/pong"});
+      // }
+        // socket.emit("acceptInvite", e);
+    });
+
+    // this.socket.on("pongGame1", () => {
+    //   console.log("invite friend");
+    //   store.commit("setInQueue", true);
+    //   store.commit("setGameRoom", store.state.user.username);
+    //   gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
+    //   console.log("invite friend END");
+    //   router.push({path: "/pong"});
+    // });
+
+    // this.socket.on("pongGame2", (e: {user1: User, user2: User}) => {
+    //   console.log("pongGame accept invite");
+		// 	store.commit("setInQueue", true);
+		// 	store.commit("setGameRoom", e.user1.username);
+		// 	gameSocket.emit("inviteJoinGameRoom", { room: e.user1.username as string });
+		// 	gameSocket.emit("inviteGame", {
+		// 		user1username: e.user1.username,
+		// 		user2username: store.state.user.username,
+		// 	});
+    //   router.push({path: "/pong"});
+    // });
   }
 }
 

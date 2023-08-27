@@ -5,11 +5,19 @@
 			<div class="text-900 text-3xl font-medium mb-3">Welcome to the Pong Game</div>
 		</div>
 
-		<div>
-			<Button @click="SearchGame()"> Multiplayer </Button>
-			<Button @click="LaunchSingle()"> Single Player </Button>
-			<Button @click="inviteGame()"> invite </Button>
-			<Button @click="acceptInvite()"> accept invite </Button>
+		<div class="flex flex-row">
+			<div class="px-4">
+				<Button @click="SearchGame()"> Multiplayer </Button>
+			</div>
+			<div class="px-4">
+				<Button @click="LaunchSingle()"> Single Player </Button>
+			</div>
+			<div class="px-4">
+				<Button @click="inviteGame()"> invite </Button>
+			</div>
+			<div class="px-4">
+				<Button @click="acceptInvite()"> accept invite </Button>
+			</div>
 			<!-- <Button @click="LeaveGame()"> Leave game </Button> -->
 
 			<div class="flex align-items-center justify-content-between mb-6">
