@@ -273,18 +273,18 @@ export default defineComponent({
 			if (Pong.value.inMultiplayer && !store.state.ingame)
 				Pong.value.restartMatch();
 
-			const newDate = new Date();
-			if (store.state.ingame && store.state.playerNum == 1 && newDate.getTime() - lastDate.getTime() > 200) {
-				gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
-				lastDate = newDate;
-			}
-			ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
-			Pong.value.bot();
-			Pong.value.moovePaddles();
-			Pong.value.theBall.ballColision();
-			for (const ball of Pong.value.myBalls) {
-				ball.ballColision();
-			}
+				ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
+				Pong.value.bot();
+				Pong.value.moovePaddles();
+				Pong.value.theBall.ballColision();
+				for (const ball of Pong.value.myBalls) {
+					ball.ballColision();
+				}
+				const newDate = new Date();
+				if (store.state.ingame && store.state.playerNum == 1 && newDate.getTime() - lastDate.getTime() > 200) {
+					gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
+					lastDate = newDate;
+				}
 			drawBlocks();
 			drawBall();
 			drawPaddle(Pong.value.paddleOffset, Pong.value.leftPaddleY, Pong.value.leftPaddleWidth, Pong.value.leftPaddleHeight,
@@ -483,6 +483,14 @@ export default defineComponent({
 				if (store.state.playerNum == 1)
 				gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
 			})
+
+			gameSocket.on("getRefusInvite",() =>
+			{
+			gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+			store.state.inQueue = false;
+			store.state.gameRoom = "";
+			})
+
 		});
 
 		onUnmounted(() => {

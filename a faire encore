@@ -1,10 +1,18 @@
 invite : faire le invite par message puis check les bugs
 
+player1 envoie message d'invite -> "joueur : 'username1' veut jouer avec vous OUI/NON (10s pour rep)"
+
+si OUI -> player2 lamce la game ->les 2 recoivent la game et sa se lance
+
+si NON ou temps ecoule -> player2 envoie message socket.emit(refusInvite) de refus (player1 leaveRoom et setQueue false)
+player1 -> recoit socket.on("getRefusInvite")
+
+
+
 check les games online
 
 afficher les scores correctement
 
 
 
-- spectate depuis le chat ou depuis friend interface ?
 

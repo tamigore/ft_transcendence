@@ -200,7 +200,7 @@ export default defineComponent({
 			else if (store.state.ingame && store.state.playerNum === 0) {
 				console.log("spectator leave not done");
 			}
-			else if (store.state.inQueue) {
+			else if (store.state.inQueue && store.state.game) {
 				gameSocket.emit("queueLeave", { gameId: store.state.game.id });
 			}
 			if (store.state.ingame || store.state.inQueue)
