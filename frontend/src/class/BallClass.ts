@@ -19,6 +19,7 @@ export class BallClass {
 	id: number;
 	hp: number;
 	pong: PongGameClass;
+	lastPoint: Date;
 
 	constructor(pong: PongGameClass, x: number, y: number, veloX: number, veloY: number, radius: number, color: string, hp?: number) {
 		this.x = x;
@@ -30,6 +31,7 @@ export class BallClass {
 		this.pong = pong;
 		this.id = pong.ballId++;
 		this.hp = -1;
+		this.lastPoint = new Date();
 		if (hp)
 			this.hp = hp;
 	}
@@ -65,6 +67,9 @@ export class BallClass {
 				this.pong.pointSounds[1].play();
 			}
 			else if (store.state.playerNum == 1) {
+				if (this.lastPoint.getMilliseconds() - Date.now() > -200)
+					return;
+				this.lastPoint = new Date();
 				this.hp--;
 				this.x = this.pong.width / 2;
 				this.y = this.pong.height / 2;
@@ -89,6 +94,9 @@ export class BallClass {
 				this.pong.pointSounds[0].play();
 			}
 			else if (store.state.playerNum == 2) {
+				if (this.lastPoint.getMilliseconds() - Date.now() > -200)
+					return;
+				this.lastPoint = new Date();
 				this.x = this.pong.width / 2;
 				this.y = this.pong.height / 2;
 				this.veloX = -this.pong.randStartSpeedX();
