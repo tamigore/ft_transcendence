@@ -47,12 +47,22 @@ export default defineComponent({
             },
             visible: () => !this.isBlock,
           },
-          { label: 'Admin', icon: 'pi pi-fw pi-sign-out',
+          { label: 'Add Admin', icon: 'pi pi-fw pi-cog',
             command: () => {
               this.addAdmin();
             },
             visible: () => {
-              if (!this.message || !this.room || !this.room.ownerId)
+              if (!this.room.owner || this.isAdmin())
+                return (false);
+              return this.room.ownerId === store.state.user.id;
+            },
+          },
+          { label: 'Del Admin', icon: 'pi pi-fw pi-cog',
+            command: () => {
+              this.delAdmin();
+            },
+            visible: () => {
+              if (!this.room.owner || !this.isAdmin())
                 return (false);
               return this.room.ownerId === store.state.user.id;
             },
@@ -67,13 +77,25 @@ export default defineComponent({
             command: () => {
               this.banUser();
             },
-            visible: () => this.hasHigherRights(),
+            visible: () => this.hasHigherRights() && !this.isBan(),
+          },
+          { label: 'Unban', icon: 'pi pi-fw pi-trash',
+            command: () => {
+              this.unbanUser();
+            },
+            visible: () => this.hasHigherRights() && this.isBan(),
           },
           { label: 'Mute', icon: 'pi pi-fw pi-eye-slash',
             command: () => {
               this.muteUser();
             },
-            visible: () => this.hasHigherRights(),
+            visible: () => this.hasHigherRights() && !this.isMute(),
+          },
+          { label: 'Unmute', icon: 'pi pi-fw pi-eye-slash',
+            command: () => {
+              this.unmuteUser();
+            },
+            visible: () => this.hasHigherRights() && this.isMute(),
           },
           { label: 'Add Friend', icon: 'pi pi-fw pi-user-plus',
             command: () => {
@@ -91,6 +113,7 @@ export default defineComponent({
             command: () => {
               this.invitePong();
             },
+            visible: () => !this.isIngame,
           },
           { label: 'Private Message', icon: 'pi pi-fw pi-comments',
             command: () => {
@@ -131,8 +154,23 @@ export default defineComponent({
         return false;
       return store.state.user.blocked.find(user => {user.id === this.message.userId}) ? true : false;
     },
+    isIngame(): boolean {
+      return (store.state.inQueue || store.state.ingame);
+    }
   },
   methods: {
+    isAdmin() {
+      return (this.room.admins && this.room.admins.find(user => user.id === this.message.userId))
+    },
+
+    isBan() {
+      return (this.room.ban && this.room.ban.find(user => user.id === this.message.userId))
+    },
+
+    isMute() {
+      return (this.room.mute && this.room.mute.find(user => user.id === this.message.userId))
+    },
+
     hasHigherRights(): boolean {
       if (this.room.ownerId === store.state.user.id) {
         console.log("hasHigherRights : OWNER");
@@ -208,6 +246,22 @@ export default defineComponent({
       .catch(err => { throw new Error(err) });
     },
 
+    async delAdmin() {
+      console.log("delAdmin");
+      await axios.post('/api/room/delAdmin', {
+        roomId: this.room.id,
+        userId: store.state.user.id,
+        otherId: this.message.userId,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then(async (res) => {
+        console.log(res);
+        socket.emit("update", {room: this.room});
+      })
+      .catch(err => { throw new Error(err) });
+    },
+
     async kickUser(): Promise<void> {
       console.log("kickUser");
       
@@ -245,6 +299,26 @@ export default defineComponent({
       .catch(err => { throw new Error(err) });
     },
 
+    async unbanUser(): Promise<void> {
+      console.log("banUser");
+      
+      await axios.post('/api/room/delBan', {
+        roomId: this.room.id,
+        userId: store.state.user.id,
+        otherId: this.message.userId,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then(async (res) => {
+        console.log(res);
+        if (res && res.data && res.data.ban) {
+          store.commit("setBan", res.data.ban);
+        }
+        socket.emit("update", {room: this.room});
+      })
+      .catch(err => { throw new Error(err) });
+    },
+
     async muteUser() {
       console.log("muteUser");
       await axios.post('/api/room/addMute', {
@@ -255,8 +329,26 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res) => {
-        await this.update();
+        // await this.update();
         console.log(res);
+        socket.emit("update", {room: this.room});
+      })
+      .catch(err => { throw new Error(err) });
+    },
+
+    async unmuteUser() {
+      console.log("muteUser");
+      await axios.post('/api/room/delMute', {
+        roomId: this.room.id,
+        userId: store.state.user.id,
+        otherId: this.message.userId,
+      }, {
+        headers: {"Authorization": `Bearer ${store.state.user.hash}`}
+      })
+      .then(async (res) => {
+        // await this.update();
+        console.log(res);
+        socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
@@ -270,7 +362,8 @@ export default defineComponent({
         console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
-        await this.update();
+        // await this.update();
+        socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
@@ -284,7 +377,8 @@ export default defineComponent({
         console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
-        await this.update();
+        // await this.update();
+        socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },

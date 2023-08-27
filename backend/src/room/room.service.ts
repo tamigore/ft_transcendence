@@ -170,6 +170,7 @@ export class RoomService implements OnModuleInit {
     return await this.prisma.room
       .findUnique({
         where: { id: id },
+        include: { mute: true },
       })
       .catch((err) => {
         throw new Error(err);
@@ -410,6 +411,40 @@ export class RoomService implements OnModuleInit {
       });
   }
 
+  async delAdmin(roomId: number, userId: number, adminId: number) {
+    this.logger.log(`delAdmin: ${userId} to room: ${roomId}`);
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: { owner: true },
+        });
+        if (!this.isOwner(room, userId))
+          throw new Error(`User ${userId} doesn't own room ${roomId}`);
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            admins: {
+              disconnect: [
+                {
+                  id: adminId,
+                },
+              ],
+            },
+          },
+          include: {
+            admins: true,
+          },
+        });
+      })
+      .then((room) => {
+        this.logger.log("delAdmin success: ", room);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
   async addBan(roomId: number, userId: number, banId: number) {
     this.logger.log(`addBan: ${userId} to room: ${roomId}`);
     await this.prisma
@@ -467,6 +502,49 @@ export class RoomService implements OnModuleInit {
       });
   }
 
+  async delBan(roomId: number, userId: number, banId: number) {
+    this.logger.log(`delBan: ${userId} to room: ${roomId}`);
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: {
+            owner: true,
+            admins: true,
+            users: true,
+            ban: true,
+            mute: true,
+            messages: true,
+          },
+        });
+        if (!this.higherRights(room, userId, banId))
+          throw new Error(
+            `User ${userId} donesn't have rights on room ${roomId}`,
+          );
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            ban: {
+              disconnect: [
+                {
+                  id: banId,
+                },
+              ],
+            },
+          },
+          include: {
+            ban: true,
+          },
+        });
+      })
+      .then((room) => {
+        this.logger.log("delBan success: ", room);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
   async addMute(roomId: number, userId: number, muteId: number) {
     this.logger.log(`addMute: ${userId} to room: ${roomId}`);
     await this.prisma
@@ -504,6 +582,49 @@ export class RoomService implements OnModuleInit {
       })
       .then((room) => {
         this.logger.log("addMute success: ", room);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  async delMute(roomId: number, userId: number, muteId: number) {
+    this.logger.log(`delMute: ${userId} to room: ${roomId}`);
+    await this.prisma
+      .$transaction(async (prisma) => {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: {
+            owner: true,
+            admins: true,
+            users: true,
+            ban: true,
+            mute: true,
+            messages: true,
+          },
+        });
+        if (!this.higherRights(room, userId, muteId))
+          throw new Error(
+            `User ${userId} donesn't have rights on room ${roomId}`,
+          );
+        return await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            mute: {
+              disconnect: [
+                {
+                  id: muteId,
+                },
+              ],
+            },
+          },
+          include: {
+            mute: true,
+          },
+        });
+      })
+      .then((room) => {
+        this.logger.log("delMute success: ", room);
       })
       .catch((error) => {
         throw new Error(error);

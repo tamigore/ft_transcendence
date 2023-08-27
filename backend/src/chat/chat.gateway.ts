@@ -56,6 +56,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = await this.roomService.findById(body.room.id);
     if (!room) return null; //throw new Error("onMessage no room found");
     if (room.private) this.server.in(user.chatSocket).socketsJoin(room.name);
+    if (room.mute && room.mute.find((verif) => verif.id === user.id))
+      return null;
     this.chatService.createMessage(body);
     this.server.to(body.room.name).emit("servMessage", body);
   }

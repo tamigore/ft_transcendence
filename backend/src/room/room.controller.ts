@@ -88,6 +88,14 @@ export class RoomController {
     this.roomService.addAdmin(dto.roomId, dto.userId, dto.otherId);
   }
 
+  @Post("delAdmin")
+  @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @HttpCode(HttpStatus.OK)
+  delAdmin(@Body() dto: any) {
+    this.roomService.delAdmin(dto.roomId, dto.userId, dto.otherId);
+  }
+
   @Post("addBan")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
@@ -96,12 +104,28 @@ export class RoomController {
     this.roomService.addBan(dto.roomId, dto.userId, dto.otherId);
   }
 
+  @Post("delBan")
+  @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @HttpCode(HttpStatus.OK)
+  delBan(@Body() dto: any) {
+    this.roomService.delBan(dto.roomId, dto.userId, dto.otherId);
+  }
+
   @Post("addMute")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
   addMute(@Body() dto: any) {
     this.roomService.addMute(dto.roomId, dto.userId, dto.otherId);
+  }
+
+  @Post("delMute")
+  @UseGuards(AtGuard)
+  @Header("Access-Control-Allow-Origin", "*")
+  @HttpCode(HttpStatus.OK)
+  delMute(@Body() dto: any) {
+    this.roomService.delMute(dto.roomId, dto.userId, dto.otherId);
   }
 
   @Post("create")
