@@ -192,7 +192,8 @@ export default defineComponent({
 					looser = store.state.game.player2Id;
 					winner = store.state.game.player1Id;
 				}
-				gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
+				if (store.state.playerNum == 1)
+					gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
 			}
 			else if (store.state.ingame && store.state.playerNum === 0) {
 				console.log("spectator leave not done");
