@@ -67,6 +67,9 @@ export class GameService {
       })
       .then(() => {
         console.log("queueLeave : game deleted");
+      })
+      .catch(() => {
+        return null;
       });
   }
 
@@ -172,7 +175,7 @@ export class GameService {
         this.logger.log(game);
         return game;
       })
-      .catch((error) => {
+      .catch(() => {
         // throw error;
         return null;
       });
@@ -244,7 +247,7 @@ export class GameService {
         include: {
           winner: true,
           looser: true,
-          // game: true,
+          game: true,
         },
       })
       .then((historic) => {
@@ -255,6 +258,7 @@ export class GameService {
         return historic;
       })
       .catch((error) => {
+        return null;
         throw error;
       });
   }

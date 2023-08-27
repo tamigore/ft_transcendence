@@ -3,7 +3,7 @@
 		<div v-if="Pong" class="flex flex-column align-items-center justify-content-center">
 
 			<div v-if="inSolo || inGame" class="flex p-4">
-				<div class="flex px-2">
+				<div v-if="inGame" class="flex px-2">
 					<p style="color: aliceblue;">{{ Pong.scoreA }}</p>
 				</div>
 				<div v-if="inSolo" class="flex px-2">
@@ -29,7 +29,7 @@
 					</div>
 				</div>
 				<Button @click="LeaveGame()">LeaveGame</Button>
-				<div class="flex px-2">
+				<div v-if="inGame" class="flex px-2">
 					<p style="color: aliceblue;">{{ Pong.scoreB }}</p>
 				</div>
 			</div>
