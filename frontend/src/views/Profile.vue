@@ -871,6 +871,8 @@ export default defineComponent({
     },
 
     async ModifyUserUsername() {
+      this.getAllUsernames();
+      console.log(this.usernames);
       if (this.isEditingUsername) {
         if (this.editedUsername !== null) {
           if (this.editedUsername.trim() === '') {
