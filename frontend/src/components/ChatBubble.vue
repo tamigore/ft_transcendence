@@ -385,9 +385,9 @@ export default defineComponent({
     },
 
     invitePong(): void {
-      // console.log("invitePong : ", this.message.user.username, " || ingame ? ", this.message.user.username);
-      // if (this.message.user.ingame)
-      //   return;
+      console.log("invitePong : ", this.message.user.username, " || ingame ? ", this.message.user.username);
+      if (this.message.user.ingame)
+        return;
       socket.emit("inviteGame", {user1: store.state.user, user2: this.message.user})
       console.log("invite friend");
       store.commit("setInQueue", true);
