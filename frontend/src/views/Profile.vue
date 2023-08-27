@@ -33,7 +33,7 @@
        
         
         <div class="px-4">
-          <Button v-if="!TwoFA || TwoFA?.length === 0" @click="Enable2FA">Enable</Button>
+          <Button v-if="!TwoFAState" @click="Enable2FA">Enable</Button>
           <Button v-else @click="Disable2FA">Disable</Button>
         </div>
 
@@ -367,6 +367,45 @@
         </div>
       </div>
     </AccordionTab>
+    <AccordionTab header="Statistics">
+      <div class="surface-section border-round box-shadow" style="padding: 5em;">
+        <div class="surface-section">
+
+          <ul class="list-none p-0 m-0">
+
+            <li class="flex justify-content-between flex-wrap border-top-1 surface-border py-4 px-3 opacity-60 mb-4"
+              style="background: linear-gradient(to top right, #bd34e7, #0052b0);">
+              <div class="flex justify-content-between flex-wrap w-full">
+                <div class="text-900 text-2xl font-bold flex align-items-center justify-content-start w-7">PARTS</div>
+                  <div class="flex justify-content-between flex-wrap w-5">
+                    <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">lost</div>
+                    <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">won</div>
+                    <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">total</div>
+                  </div>
+              </div>
+            </li>
+
+            <li v-if="gameHistoric" class="flex justify-content-between flex-wrap border-top-1 surface-border py-4 px-3 opacity-60 mb-4">
+              <div class="flex justify-content-between flex-wrap w-full">
+                <div class="text-900 text-2xl font-bold flex align-items-center justify-content-start w-7"></div>
+                <div class="flex justify-content-between flex-wrap w-5">
+                  <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">
+                    {{gameHistoric.loose?.length}}
+                  </div>
+                  <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">
+                    {{gameHistoric.win?.length}}
+                  </div>
+                  <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">
+                    {{gameHistoric.loose?.length + gameHistoric.win?.length}}
+                  </div>
+                </div>
+              </div>
+            </li>
+
+          </ul>
+        </div>
+      </div>
+    </AccordionTab>
   </Accordion>
 </template>
  
@@ -407,8 +446,8 @@ export default defineComponent({
       return this.getImageById(this.imgId);
     },
 
-    TwoFA() {
-      return store.state.user.twoFA;
+    TwoFAState() {
+      return store.state.user.twoFAState;
     }
   },
 
@@ -531,6 +570,7 @@ export default defineComponent({
     },
 
     open2FA() {
+      this.ModifyStore2FA(0);
       this.ShowTwoFA = true;
     },
 
@@ -572,6 +612,7 @@ export default defineComponent({
 
     async Enable2FA() {
       console.log("Enable2FA");
+      this.ModifyStore2FA(1);
       await axios
         .get(`/api/tfa/on`,
           {
@@ -593,6 +634,7 @@ export default defineComponent({
 
     async Disable2FA() {
       console.log("Disable2FA");
+      this.ModifyStore2FA(0);
       await axios
         .get(`/api/tfa/off`,
           {
@@ -1075,8 +1117,8 @@ export default defineComponent({
     ModifyStoreAvatarId(id) {
       store.commit('setAvatarId', id);
     },
-    ModifyStore2FA(twoFA) {
-      store.commit('setTwoFA', twoFA);
+    ModifyStore2FA(twoFAState) {
+      store.commit('setTwoFAState', twoFAState);
     }
   },
 })
