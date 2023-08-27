@@ -1,55 +1,46 @@
 <template>
 	<div v-show="inSolo || inGame">
-  <div v-if="Pong" class="flex flex-column align-items-center justify-content-center">
-    
-    <div  v-if="inSolo || inGame"  class="flex p-4">
-      <div v-if="inSolo" class="flex px-2">
-        <div class="flex px-2">
-          <Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
-        </div>
-        <div class="flex px-2">
-          <Button @click="Pong.startWall()" :disabled="Pong.gameIsRunning">WALL</Button>
-        </div>
-        <div class="flex px-2">
-          <Button @click="Pong.startMatchMultiLocal()" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
-        </div>
-        <div class="flex px-2">
-          <Button @click="Pong.startNoPlayer()" :disabled="Pong.gameIsRunning">NoPlayer</Button>
-        </div>
-        <div class="flex px-2">
-          <Button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</Button>
-        </div>
-        <div class="flex px-2">
-          <Button @click="Pong.setBlocks()" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
-        </div>
-      </div>
-      <Button @click="LeaveGame()">LeaveGame</Button>
-    </div>
+		<div v-if="Pong" class="flex flex-column align-items-center justify-content-center">
 
-    <!-- <div v-if="!Pong.inMultiplayer" class="Button-container">
-      <Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
-      <Button @click="Pong.startMatchMultiLocal()" :disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
-      <Button @click="Pong.startNoPlayer()" :disabled="Pong.gameIsRunning">NoPlayer</Button>
-      <Button @click="Pong.startWall()" :disabled="Pong.gameIsRunning">WALL</Button>
-      <Button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</Button>
-      <Button @click="Pong.setBlocks()" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus }}</Button>
-    </div> -->
- 
-    <div class="flex align-items-center justify-content-center">
-      <div class="input-container">
-     
-        <p>{{ "scoreA " + Pong.scoreA }}</p>
-      </div>
-      <canvas ref="myCanvas" class="gameCanvasStyle" :style="computedCanvasStyle" :width="`${Pong.width}`"
-        :height="`${Pong.height}`">
-      </canvas>
-      <div class="input-container">
-       
-        <p>{{ "scoreB " + Pong.scoreB }}</p>
-      </div>
-    </div>
-  </div>
-</div>
+			<div v-if="inSolo || inGame" class="flex p-4">
+				<div class="flex px-2">
+					<p style="color: aliceblue;">{{ Pong.scoreA }}</p>
+				</div>
+				<div v-if="inSolo" class="flex px-2">
+					<div class="flex px-2">
+						<Button @click="Pong.startMatchSolo()" :disabled="Pong.gameIsRunning">Solo</Button>
+					</div>
+					<div class="flex px-2">
+						<Button @click="Pong.startWall()" :disabled="Pong.gameIsRunning">WALL</Button>
+					</div>
+					<div class="flex px-2">
+						<Button @click="Pong.startMatchMultiLocal()"
+							:disabled="Pong.gameIsRunning">MultiplayerLocal</Button>
+					</div>
+					<div class="flex px-2">
+						<Button @click="Pong.startNoPlayer()" :disabled="Pong.gameIsRunning">NoPlayer</Button>
+					</div>
+					<div class="flex px-2">
+						<Button @click="Pong.restartMatch(false)" :disabled="!Pong.gameIsRunning">Restart</Button>
+					</div>
+					<div class="flex px-2">
+						<Button @click="Pong.setBlocks()" :disabled="Pong.gameIsRunning">{{ "BLOCKS " + Pong.blockStatus
+						}}</Button>
+					</div>
+				</div>
+				<Button @click="LeaveGame()">LeaveGame</Button>
+				<div class="flex px-2">
+					<p style="color: aliceblue;">{{ Pong.scoreB }}</p>
+				</div>
+			</div>
+
+			<div class="flex align-items-center justify-content-center">
+				<canvas ref="myCanvas" class="gameCanvasStyle" :style="computedCanvasStyle" :width="`${Pong.width}`"
+					:height="`${Pong.height}`">
+				</canvas>
+			</div>
+		</div>
+	</div>
 </template>
 
 <style>
@@ -142,7 +133,7 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-
+	color: #fff;
 }
 
 .left-input,
@@ -184,11 +175,11 @@ export default defineComponent({
 	name: 'FpsComponent',
 	computed: {
 		inGame() {
-      return store.state.ingame;
-    },
-	inSolo() {
-      return store.state.insolo;
-    },
+			return store.state.ingame;
+		},
+		inSolo() {
+			return store.state.insolo;
+		},
 	},
 	methods: {
 		LeaveGame() {
@@ -273,18 +264,18 @@ export default defineComponent({
 			if (Pong.value.inMultiplayer && !store.state.ingame)
 				Pong.value.restartMatch();
 
-				ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
 				Pong.value.bot();
 				Pong.value.moovePaddles();
 				Pong.value.theBall.ballColision();
-				for (const ball of Pong.value.myBalls) {
-					ball.ballColision();
-				}
 				const newDate = new Date();
 				if (store.state.ingame && store.state.playerNum == 1 && newDate.getTime() - lastDate.getTime() > 200) {
 					gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
 					lastDate = newDate;
 				}
+				for (const ball of Pong.value.myBalls) {
+					ball.ballColision();
+				}
+				ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
 			drawBlocks();
 			drawBall();
 			drawPaddle(Pong.value.paddleOffset, Pong.value.leftPaddleY, Pong.value.leftPaddleWidth, Pong.value.leftPaddleHeight,
@@ -471,7 +462,7 @@ export default defineComponent({
 
 			gameSocket.on("servInviteGame", (data) => {
 				console.log("servInviteGame :", data.game);
-				
+
 				store.commit("setGame", data.game);
 				store.commit("setGameConnect", true);
 				if (data.game.player2Id == store.state.user.id)
@@ -481,16 +472,8 @@ export default defineComponent({
 				store.commit("setInQueue", false);
 				Pong.value.startMultiOnline();
 				if (store.state.playerNum == 1)
-				gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
+					gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
 			})
-
-			gameSocket.on("getRefusInvite",() =>
-			{
-			gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
-			store.state.inQueue = false;
-			store.state.gameRoom = "";
-			})
-
 		});
 
 		onUnmounted(() => {

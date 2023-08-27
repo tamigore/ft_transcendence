@@ -26,6 +26,7 @@ import store from "@/store";
 import socket from '@/utils/socket';
 import router from '@/router';
 import LoadAvatar from '@/components/LoadAvatar.vue';
+import gameSocket from '@/utils/gameSocket';
 
 export default defineComponent({
   name: "ChatBubble",
@@ -385,6 +386,12 @@ export default defineComponent({
 
     invitePong(): void {
       console.log("invitePong");
+      socket.emit("inviteGame", {user1: store.state.user, user2: this.message.user})
+      console.log("invite friend");
+      store.commit("setInQueue", true);
+      store.commit("setGameRoom", store.state.user.username);
+      gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
+      console.log("invite friend END");
       router.push({path: "/pong"});
     },
 
