@@ -494,6 +494,8 @@ body {
   display:block;
   width: auto;
   word-wrap:break-word;
+  word-break: break-all;
+  white-space:normal;
 }
 .msger-chat {
   flex: 1;

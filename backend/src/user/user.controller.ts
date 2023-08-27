@@ -108,6 +108,7 @@ export class UserController {
     @GetCurrentUserId() userId: number,
     @Body() chatSocket: any,
   ) {
+    console.log("updateChatSocket: ", chatSocket.socket);
     return this.userService.updateChatSocket(userId, chatSocket.socket);
   }
 

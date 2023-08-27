@@ -111,6 +111,7 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import router from './router';
 import socket from './utils/socket';
 import gameSocket from './utils/gameSocket';
+// import { User } from './utils/interfaces';
 // import MatchMaking from "@/components/MatchMaking.vue";
 
 
