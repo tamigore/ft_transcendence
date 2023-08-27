@@ -32,14 +32,14 @@
       </div>
 
       <!-- Colonnes des salles et du chat -->
-      <div class="flex border-round align-items-start justify-content-start pl-8 pr-8 m-4">
+      <div class="flex border-round align-items-start justify-content-start pl-8 pr-8 m-3">
         <!-- Colonne des salles (1/4 de la largeur) -->
         <div class="flex flex-col w-4">
           <TabView class= "w-full" v-model:activeIndex="active" @update:activeIndex="setIndex">
             <TabPanel header="Rooms">
               <div id="roomContainer" class="scroll" style="height: 69vh;">
               <div v-for="Room in Rooms" :key="Room.room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4" >
-                <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" :class="[Room.room.id == lastRoom.id ? 'box-shadow' : '']" @click="selectRoom(Room.room)">
+                <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground2" :class="[Room.room.id == lastRoom.id ? 'box-shadow' : '']" @click="selectRoom(Room.room)">
                   <div class="flex items-center" style="max-width: 53%;">
                     <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
                       {{ Room.room.name }}
@@ -58,7 +58,7 @@
             <TabPanel header="Private Message">
               <div id="roomContainer" class="scroll" style="height: 69vh;">
                 <div v-for="Room in Private" :key="Room.id" class="flex justify-content-between flex-wrap items-center py-2 ml-3 mr-4">
-                  <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground1" v-bind:class="[Room.id == lastPrivate.id ? 'box-shadow' : 'box-shadow-dark']"  @click="selectPrivate(Room)">
+                  <div class="flex justify-between flex-wrap items-center w-full p-3 cursor-pointer myBackground" v-bind:class="[Room.id == lastPrivate.id ? 'box-shadow' : 'box-shadow-dark']"  @click="selectPrivate(Room)">
                     <div class="flex item-center" style="max-width: 50%;">
                       <div class="p-2 white-space-nowrap overflow-hidden text-overflow-ellipsis">
                         {{ Room.name }}
@@ -73,11 +73,11 @@
             
         <!-- Colonne du chat (3/4 de la largeur) -->
         <div class="flex flex-col w-9">
-          <div v-if="!isPrivate" class="flex flex-column col" style="height: 70vh">
-            <div class="flex flex-column col mt-6 myBackground2" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
+          <div v-if="!isPrivate" class="flex flex-column col" style="height: 68vh">
+            <div class="flex flex-column col mt-6" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
               <div v-for="Room in Rooms" :key="Room.room.id">
                 <div v-if="Room.room.name == lastRoom.name">
-                  <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
+                  <div id="messageContainer" class="scroll" style="height: 50vh; overflow-y: auto;">
                     <div v-for="msg in Messages" :key="msg.id">
                       <div class="flex">
                         <ChatBubble :message="msg" :room="Room.room" :owner="msg.userId == User.id" />
@@ -99,11 +99,11 @@
               </div>
             </div>
           </div>
-          <div v-else class="flex flex-column col" style="height: 70vh">
+          <div v-else class="flex flex-column col" style="height: 68vh">
             <div class="flex flex-column col mt-6 myBackground2" v-bind:class="[ lastPrivate && lastPrivate.id  ? 'box-shadow' : 'box-shadow-dark']">
               <div v-for="Room in Private" :key="Room.id">
                 <div v-if="Room.name == lastPrivate.name">
-                  <div id="messageContainer" class="scroll" style="height: 60vh; overflow-y: auto;">
+                  <div id="messageContainer" class="scroll" style="height: 50vh; overflow-y: auto;">
                     <div v-for="msg in Messages" :key="msg.id">
                       <div class="flex">
                         <ChatBubble :message="msg" :room="Room" :owner="msg.userId == User.id" />
