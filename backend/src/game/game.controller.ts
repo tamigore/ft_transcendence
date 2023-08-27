@@ -37,14 +37,17 @@ export class GameController {
 
   @UseGuards(AtGuard)
   @Post("spectate")
+	 @HttpCode(HttpStatus.OK)
   setGameSpectator(@Body() dto: Spectate): Promise<Game> {
     return this.gameService.SpectateGame(dto);
   }
 
 
-	// @UseGuards(AtGuard)
-  // @Post("inviteGame")
-  // setPrivateGame(@Body() dto: {user1Id: number, user2Id: number}) {
-  //   this.gameService.inviteGame(dto);
-  // }
+	@UseGuards(AtGuard)
+  @Post("inviteGame")
+	 @HttpCode(HttpStatus.OK)
+  setPrivateGame(@Body() dto: {user1username: string, user2username: string}) {
+    console.log("invite Gaem controloer dto : ", dto);
+		this.gameService.inviteGame(dto);
+  }
 }

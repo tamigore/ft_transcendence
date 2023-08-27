@@ -9,6 +9,7 @@
 			<Button @click="SearchGame()"> Multiplayer </Button>
 			<Button @click="LaunchSingle()"> Single Player </Button>
 			<Button @click="inviteGame()"> invite </Button>
+			<Button @click="acceptInvite()"> accept invite </Button>
 			<!-- <Button @click="LeaveGame()"> Leave game </Button> -->
 
 			<div class="flex align-items-center justify-content-between mb-6">
@@ -67,16 +68,26 @@ export default defineComponent({
 	},
 
 	methods: {
-		// async inviteGame(user2Id: number) {
-		// 	console.log("invite friend");
-		// 	gameSocket.emit("inviteJoinRoom", {room : store.state.user.username as string});
-		// 	await await axios.post('/api/game/inviteGame', {
-		// 		user1Id: store.state.user.id as number,
-		// 		user2Id: user2Id,
-		// 	}, {
-		// 		headers: { "Authorization": `Bearer ${store.state.user.hash}` }
-		// 	})
-		// },
+		async acceptInvite() {
+			console.log("accept invite");
+			store.commit("setInQueue", true);
+			const userName = "eestela";
+			store.commit("setGameRoom", userName);
+			gameSocket.emit("inviteJoinGameRoom", { room: userName as string });
+			gameSocket.emit("inviteGame", {
+				user1username: userName,
+				user2username: store.state.user.username,
+			});
+		},
+
+		async inviteGame() {
+			console.log("invite friend");
+			store.commit("setInQueue", true);
+			store.commit("setGameRoom", store.state.user.username);
+			gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
+			console.log("invite friend END");
+
+		},
 
 		async getGames() {
 			await axios.get('/api/game/spectate', {
@@ -111,7 +122,7 @@ export default defineComponent({
 						room: response.data.player1.username as string,
 					});
 					console.log(" apres join room gameSocket id : ", gameSocket.id);
-					console.log("matchamking response :",response);
+					console.log("matchamking response :", response);
 					if (response.data.player2)
 						store.commit("setPlayerNum", 2);
 					else
