@@ -124,14 +124,14 @@ class SocketioChat {
       console.log("invite received");
       // const res = await window.confirm(`User: ${e.user1.username} want to invite you to a pong game.`)
       // if (res) {
-      console.log("pongGame accept invite");
-      store.commit("setInQueue", true);
-      store.commit("setGameRoom", e.user1.username);
-      gameSocket.emit("inviteJoinGameRoom", { room: e.user1.username as string });
-      gameSocket.emit("inviteGame", {
-        user1username: e.user1.username,
-        user2username: store.state.user.username,
-      });
+			console.log("===========accept invite");
+			store.commit("setInQueue", true);
+			store.commit("setGameRoom", e.user1.username);
+			gameSocket.emit("inviteJoinGameRoom", { room:  e.user1.username as string });
+			gameSocket.emit("inviteGame", {
+				user1username:  e.user1.username,
+				user2username: e.user2.username,
+			});
       router.push({path: "/pong"});
       // }
     });

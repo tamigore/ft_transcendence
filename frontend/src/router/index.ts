@@ -133,13 +133,13 @@ router.beforeEach(async (to, from) => {
       })
     }
   }
-  if ((!store.state.user || (store.state.user &&
-    !store.state.user.loggedIn)) &&
-    to.name !== 'home'
-  ) {
-    console.log("user.loggedIn is false");
-    return { path: '/' };
-  }
+  // if ((!store.state.user || (store.state.user &&
+  //   !store.state.user.loggedIn)) &&
+  //   to.name !== 'home'
+  // ) {
+  //   console.log("user.loggedIn is false");
+  //   return { path: '/' };
+  // }
   if (from.name === 'pong') {
     if (store.state.ingame && store.state.playerNum != 0) {
       console.log(`Pong Game player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);

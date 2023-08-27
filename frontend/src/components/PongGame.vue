@@ -3,7 +3,7 @@
 		<div v-if="Pong" class="flex flex-column align-items-center justify-content-center">
 
 			<div v-if="inSolo || inGame" class="flex p-4">
-				<div class="flex px-2">
+				<div v-if="inGame" class="flex px-2">
 					<p style="color: aliceblue;">{{ Pong.scoreA }}</p>
 				</div>
 				<div v-if="inSolo" class="flex px-2">
@@ -29,7 +29,7 @@
 					</div>
 				</div>
 				<Button @click="LeaveGame()">LeaveGame</Button>
-				<div class="flex px-2">
+				<div v-if="inGame" class="flex px-2">
 					<p style="color: aliceblue;">{{ Pong.scoreB }}</p>
 				</div>
 			</div>
@@ -264,7 +264,15 @@ export default defineComponent({
 				return;
 			if (Pong.value.inMultiplayer && !store.state.ingame)
 				Pong.value.restartMatch();
-
+			if (store.state.inInvite && !store.state.game && Date.now() - store.state.dateInvite > 10000) {
+				store.commit("setInInvite", false);
+				gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+				store.commit("setPlayerNum", 0);
+				store.commit("setInQueue", false);
+				store.commit("setGameConnect", false);
+				store.commit("setGameRoom", "");
+				store.commit("setInSolo", false);
+			}
 				Pong.value.bot();
 				Pong.value.moovePaddles();
 				Pong.value.theBall.ballColision();

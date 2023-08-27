@@ -390,13 +390,13 @@
                 <div class="text-900 text-2xl font-bold flex align-items-center justify-content-start w-7"></div>
                 <div class="flex justify-content-between flex-wrap w-5">
                   <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">
-                    {{gameHistoric.loose?.length}}
+                    {{getLose()}}
                   </div>
                   <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">
-                    {{gameHistoric.win?.length}}
+                    {{getWin()}}
                   </div>
                   <div class="text-900 text-2xl font-bold flex align-items-center justify-content-center">
-                    {{gameHistoric.loose?.length + gameHistoric.win?.length}}
+                    {{getTotal()}}
                   </div>
                 </div>
               </div>
@@ -509,6 +509,34 @@ export default defineComponent({
 
   methods:
   {
+    getLose() {
+      let i = 0;
+      if (this.gameHistoric)
+      {
+        for (let y = 0; y < this.gameHistoric.length; y++) {
+          if (this.gameHistoric[y].looserID === store.state.user.id)
+            i++;
+        }
+      }
+      return i;
+    },
+
+    getWin() {
+      let i = 0;
+      if (this.gameHistoric)
+      {
+        for (let y = 0; y < this.gameHistoric.length; y++) {
+          if (this.gameHistoric[y].winnerID === store.state.user.id)
+            i++;
+        }
+      }
+      return i;
+    },
+
+    getTotal() {
+      return this.getWin() + this.getLose()
+    },
+
     async getHistory() {
       await axios
         .get(`/api/historic/${store.state.user.id}`, {

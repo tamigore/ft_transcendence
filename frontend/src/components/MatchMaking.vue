@@ -93,6 +93,8 @@ export default defineComponent({
 			console.log("invite friend");
 			store.commit("setInQueue", true);
 			store.commit("setGameRoom", store.state.user.username);
+			store.commit("setDateInvite");
+			store.commit("setInInvite",true);
 			gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
 			console.log("invite friend END");
 
