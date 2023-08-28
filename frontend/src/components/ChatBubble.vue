@@ -58,16 +58,16 @@ export default defineComponent({
               return this.room.ownerId === store.state.user.id;
             },
           },
-          // { label: 'Del Admin', icon: 'pi pi-fw pi-cog',
-          //   command: () => {
-          //     this.delAdmin();
-          //   },
-          //   visible: () => {
-          //     if (!this.room.owner || !this.isAdmin())
-          //       return (false);
-          //     return this.room.ownerId === store.state.user.id;
-          //   },
-          // },
+          { label: 'Del Admin', icon: 'pi pi-fw pi-cog',
+            command: () => {
+              this.delAdmin();
+            },
+            visible: () => {
+              if (!this.room.owner || !this.isAdmin())
+                return (false);
+              return this.room.ownerId === store.state.user.id;
+            },
+          },
           { label: 'Kick', icon: 'pi pi-fw pi-sign-out',
             command: () => {
               this.kickUser();
@@ -80,36 +80,36 @@ export default defineComponent({
             },
             visible: () => this.hasHigherRights() && !this.isBan(),
           },
-          // { label: 'Unban', icon: 'pi pi-fw pi-trash',
-          //   command: () => {
-          //     this.unbanUser();
-          //   },
-          //   visible: () => this.hasHigherRights() && this.isBan(),
-          // },
+          { label: 'Unban', icon: 'pi pi-fw pi-trash',
+            command: () => {
+              this.unbanUser();
+            },
+            visible: () => this.hasHigherRights() && this.isBan(),
+          },
           { label: 'Mute', icon: 'pi pi-fw pi-eye-slash',
             command: () => {
               this.muteUser();
             },
             visible: () => this.hasHigherRights() && !this.isMute(),
           },
-          // { label: 'Unmute', icon: 'pi pi-fw pi-eye-slash',
-          //   command: () => {
-          //     this.unmuteUser();
-          //   },
-          //   visible: () => this.hasHigherRights() && this.isMute(),
-          // },
+          { label: 'Unmute', icon: 'pi pi-fw pi-eye-slash',
+            command: () => {
+              this.unmuteUser();
+            },
+            visible: () => this.hasHigherRights() && this.isMute(),
+          },
           { label: 'Add Friend', icon: 'pi pi-fw pi-user-plus',
             command: () => {
               this.addFriend();
             },
             visible: () => !this.isFriend,
           },
-          // { label: 'Remove Friend', icon: 'pi pi-fw pi-user-minus',
-          //   command: () => {
-          //     this.removeFriend();
-          //   },
-          //   visible: () => this.isFriend,
-          // },
+          { label: 'Remove Friend', icon: 'pi pi-fw pi-user-minus',
+            command: () => {
+              this.removeFriend();
+            },
+            visible: () => this.isFriend,
+          },
           { label: 'Invite Pong', icon: 'pi pi-fw pi-circle-fill',
             command: () => {
               this.invitePong();

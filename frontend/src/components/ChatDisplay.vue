@@ -340,10 +340,10 @@ export default defineComponent({
             return ;
           }
           console.log(`createRoom response.data: ${response.data}`);
+          this.getRooms();
           store.commit("setLastRoom", response.data);
           socket.emit("join_room", { user: store.state.user, room:  response.data });
           store.commit("setMessages", []);
-          this.getRooms();
         })
         .catch((error: AxiosError) => { throw error; });
         this.roomName = "";

@@ -40,7 +40,7 @@ export class RoomService implements OnModuleInit {
     pawnId: number,
   ): boolean {
     if (
-      this.isUser(room, pawnId) &&
+      // this.isUser(room, pawnId) &&
       !this.isOwner(room, pawnId) &&
       (this.isOwner(room, userId) ||
         (this.isAdmin(room, userId) && !this.isAdmin(room, pawnId)))
@@ -127,6 +127,7 @@ export class RoomService implements OnModuleInit {
           owner: true,
           admins: true,
           users: true,
+          mute: true,
           ban: true,
           messages: true,
         },
@@ -146,6 +147,7 @@ export class RoomService implements OnModuleInit {
           admins: true,
           users: true,
           ban: true,
+          mute: true,
           messages: true,
         },
       })
@@ -186,6 +188,7 @@ export class RoomService implements OnModuleInit {
           owner: true,
           admins: true,
           users: true,
+          mute: true,
           ban: true,
           messages: true,
         },
@@ -506,21 +509,21 @@ export class RoomService implements OnModuleInit {
     this.logger.log(`delBan: ${userId} to room: ${roomId}`);
     await this.prisma
       .$transaction(async (prisma) => {
-        const room = await prisma.room.findUnique({
-          where: { id: roomId },
-          include: {
-            owner: true,
-            admins: true,
-            users: true,
-            ban: true,
-            mute: true,
-            messages: true,
-          },
-        });
-        if (!this.higherRights(room, userId, banId))
-          throw new Error(
-            `User ${userId} donesn't have rights on room ${roomId}`,
-          );
+        // const room = await prisma.room.findUnique({
+        //   where: { id: roomId },
+        //   include: {
+        //     owner: true,
+        //     admins: true,
+        //     users: true,
+        //     ban: true,
+        //     mute: true,
+        //     messages: true,
+        //   },
+        // });
+        // if (!this.higherRights(room, userId, banId))
+        //   throw new Error(
+        //     `User ${userId} donesn't have rights on room ${roomId}`,
+        //   );
         return await prisma.room.update({
           where: { id: roomId },
           data: {

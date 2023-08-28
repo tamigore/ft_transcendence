@@ -120,18 +120,4 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log("===inviteGame player 2: ", payload.user2.chatSocket);
     this.server.to(payload.user2.chatSocket).emit("inviteGame", payload);
   }
-
-  // @SubscribeMessage("acceptInvite")
-  // async acceptInvite(
-  //   @MessageBody()
-  //   payload: {
-  //     user1: User;
-  //     user2: User;
-  //   },
-  // ): Promise<void> {
-  //   console.log("acceptInvite player 1: ", payload.user1.chatSocket);
-  //   console.log("acceptInvite player 2: ", payload.user2.chatSocket);
-  //   this.server.to(payload.user1.chatSocket).emit("pongGame1", payload);
-  //   this.server.to(payload.user2.chatSocket).emit("pongGame2", payload);
-  // }
 }
