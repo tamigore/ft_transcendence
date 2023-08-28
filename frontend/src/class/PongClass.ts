@@ -268,8 +268,12 @@ export class PongGameClass {
 		this.wallIsUp = false;
 		if (gameIsRunnig != undefined && gameIsRunnig) {
 			this.gameIsRunning = true;
-			this.theBall.veloX = this.randStartSpeedX() * Math.sign(Math.random() - 0.5);
-			this.theBall.veloY = this.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+			let sign = 0;
+			while (sign == 0)
+				sign = Math.sign(Math.random() - 0.5);
+			this.theBall.veloX = this.randStartSpeedX() * sign;
+			this.theBall.veloY = this.randStartSpeedY() * sign;
+			
 			if (rightBot != undefined && rightBot) {
 				this.rightPlayerKeyDown = '';
 				this.rightPlayerKeyUp = '';
@@ -292,13 +296,14 @@ export class PongGameClass {
 	startMultiOnline() {
 		// if (store.state.playerNum == 2)
 		this.restartMatch(true);
-		gameSocket.emit("ballSetter", { ballInfo: this.theBall.ballState(), room: store.state.gameRoom });
+		if (store.state.playerNum == 1)
+			gameSocket.emit("ballSetter", { ballInfo: this.theBall.ballState(), room: store.state.gameRoom });
 		console.log("startMultiOnline----------- the ball : ", this.theBall.ballState());
 		// else
 		// 	this.restartMatch(false);
 		this.inMultiplayer = true;
 		this.gameIsRunning = true;
-		//console.log("startMultiOnline-----------");
+		console.log("startMultiOnline-----------");
 		//console.log("game", store.state.game);
 		this.leftPlayerKeyDown = '';
 		this.leftPlayerKeyUp = '';
