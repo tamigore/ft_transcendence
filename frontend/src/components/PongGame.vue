@@ -505,7 +505,7 @@ export default defineComponent({
 			// 	}
 
 			gameSocket.on("servInviteGame", (data) => {
-				//console.log("servInviteGame :", data.game);
+				// console.log("servInviteGame :", data.game);
 				if (store.state.ingame == true)
 					return;
 				store.commit("setGame", data.game);
