@@ -84,9 +84,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log("---joinGameRoom------", e.user.username, e.room);
     // client.join(e.room);
     this.server.in(client.id).socketsJoin(e.room);
-    console.log("====== in join client.rooms : ", e.user.username, client.rooms);
+    console.log(
+      "====== in join client.rooms : ",
+      e.user.username,
+      client.rooms,
+    );
     this.server.to(e.room).emit("gameRoomJoiner", e);
-		console.log("gameRoomJoinerSent");
+    console.log("gameRoomJoinerSent");
     // return true;
   }
 
@@ -107,13 +111,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { room: string; ball: BallState },
   ) {
-		
     client.rooms.forEach((room) => {
       if (room === body.room) {
         return false;
       }
     });
-		console.log("in onReadyGame");
+    console.log("in onReadyGame");
     this.logger.log("LauchGame");
     this.server.to(body.room).emit("LaunchGame", body.ball);
   }
@@ -257,40 +260,33 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.gameService.queueLeave(body.gameId);
   }
 
-	
-
-
-	@SubscribeMessage("inviteJoinGameRoom")
+  @SubscribeMessage("inviteJoinGameRoom")
   async oninvitejoinRoom(
-		@ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket,
     @MessageBody() body: { room: string },
-	) {
-		console.log("inviteGame");
-		this.server.in(client.id).socketsJoin(body.room);
-	}
+  ) {
+    console.log("inviteGame");
+    this.server.in(client.id).socketsJoin(body.room);
+  }
 
-
-	@SubscribeMessage("inviteGame")
+  @SubscribeMessage("inviteGame")
   async onInviteGame(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { user1username: string, user2username: string },
+    @MessageBody() body: { user1username: string; user2username: string },
   ) {
     const game = await this.gameService.inviteGame(body);
-		console.log("inviteGame : ", game);
-		if (!game)
-		{
-			console.log("========game not created");
-			return ;
-		}
-		this.server.to(body.user1username).emit("servInviteGame",{ game});
-
+    console.log("inviteGame : ", game);
+    if (!game) {
+      console.log("========game not created");
+      return;
+    }
+    this.server.to(body.user1username).emit("servInviteGame", { game });
   }
-	@SubscribeMessage("refusInvite")
+  @SubscribeMessage("refusInvite")
   async onRefusInvite(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { gameRoom: string },
   ) {
-		
-		this.server.to(body.gameRoom).emit("c",{ });
+    this.server.to(body.gameRoom).emit("c", {});
   }
 }

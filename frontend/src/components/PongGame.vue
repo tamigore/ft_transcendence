@@ -183,7 +183,6 @@ export default defineComponent({
 	},
 	methods: {
 		LeaveGame() {
-			
 			if (store.state.ingame && store.state.playerNum != 0) {
 				//console.log(`Pong Game player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
 				let looser = store.state.game.player1Id;
@@ -192,11 +191,7 @@ export default defineComponent({
 					looser = store.state.game.player2Id;
 					winner = store.state.game.player1Id;
 				}
-				if (store.state.playerNum == 1)
-					gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
-			}
-			else if (store.state.ingame && store.state.playerNum === 0) {
-				//console.log("spectator leave not done");
+				gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
 			}
 			else if (store.state.inQueue) {
 				gameSocket.emit("queueLeave", { gameId: store.state.game.id });
