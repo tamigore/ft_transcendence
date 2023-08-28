@@ -19,7 +19,7 @@ export class BallClass {
 	id: number;
 	hp: number;
 	pong: PongGameClass;
-	lastPoint: Date;
+	lastPoint: number;
 
 	constructor(pong: PongGameClass, x: number, y: number, veloX: number, veloY: number, radius: number, color: string, hp?: number) {
 		this.x = x;
@@ -31,7 +31,7 @@ export class BallClass {
 		this.pong = pong;
 		this.id = pong.ballId++;
 		this.hp = -1;
-		this.lastPoint = new Date();
+		this.lastPoint = Date.now();
 		if (hp)
 			this.hp = hp;
 	}
@@ -57,11 +57,11 @@ export class BallClass {
 			this.veloY = -Math.abs(this.veloY);
 		}
 		if (this.x <= 1) {
-			if (Date.now() - this.pong.lastGoal[this.id] < 200)
-			{
-				this.pong.lastGoal[this.id] = Date.now();
+			if (Date.now() - this.lastPoint < 500) {
+				console.log("NOOOOOOO onlinePoint----------- for player 2");
 				return;
 			}
+			this.lastPoint = Date.now();
 			if (!store.state.ingame) {
 				console.log(" LocalPoint----------- for player 2");
 				this.hp--;
@@ -73,13 +73,9 @@ export class BallClass {
 				this.pong.pointSounds[1].play();
 			}
 			else if (store.state.playerNum == 1) {
-				if (Date.now() - this.pong.lastGoal[this.id] < 200)
-			{
-				console.log("NOOOOOOO onlinePoint----------- for player 2");
-				this.pong.lastGoal[this.id] = Date.now();
-				return;
-			}
-			console.log("onlinePoint----------- for player 2");
+				
+				this.lastPoint = Date.now();
+				console.log("onlinePoint----------- for player 2");
 				this.hp--;
 				this.x = this.pong.width / 2;
 				this.y = this.pong.height / 2;
@@ -90,11 +86,11 @@ export class BallClass {
 			}
 		}
 		else if (this.x >= this.pong.width - 1) {
-			if (Date.now() - this.pong.lastGoal[this.id] < 200)
-			{
-				this.pong.lastGoal[this.id] = Date.now();
+			if (Date.now() - this.lastPoint < 500) {
+				console.log("NOOOOOOO onlinePoint----------- for player 1");
 				return;
 			}
+			this.lastPoint = Date.now();
 			if (!store.state.ingame) {
 				if (this.pong.wallIsUp) {
 					this.veloX = -this.veloX;
@@ -110,14 +106,6 @@ export class BallClass {
 				this.pong.pointSounds[0].play();
 			}
 			else if (store.state.playerNum == 2) {
-				if (Date.now() - this.pong.lastGoal[this.id] < 200)
-			{
-				console.log("NOOOOOOO onlinePoint----------- for player 1");
-				this.pong.lastGoal[this.id] = Date.now();
-				return;
-			}
-			console.log("onlinePoint----------- for player 1");
-				this.lastPoint = new Date();
 				this.x = this.pong.width / 2;
 				this.y = this.pong.height / 2;
 				this.veloX = -this.pong.randStartSpeedX();
@@ -131,7 +119,7 @@ export class BallClass {
 	onlinePoint = (_player: number) => {
 		if (!store.state.ingame || store.state.playerNum == _player)
 			return;
-		console.log("onlinePoint sender");
+		console.log("onlinePoint sender : " + _player, "store state : ", store.state.playerNum);
 		gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
 		gameSocket.emit("goalMessage", { room: store.state.gameRoom, player: _player });
 	}
