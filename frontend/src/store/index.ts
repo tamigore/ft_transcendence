@@ -21,16 +21,13 @@ const store = createStore({
         specGames: [] as Game[],
     },
     mutations: {
-			setDateInvite : function(state)
-			{
-				state.dateInvite = Date.now();
-			},
-			setInInvite : function(state, inInvite: boolean)
-		{
+        setDateInvite : function(state) {
+            state.dateInvite = Date.now();
+        },
+        setInInvite : function(state, inInvite: boolean) {
 			state.inInvite = inInvite;
 		},
-		setInSolo : function(state, insolo: boolean)
-		{
+		setInSolo : function(state, insolo: boolean) {
 			state.insolo = insolo;
 		},
         setSpecGames : function(state, games: Game[]) {

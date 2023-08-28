@@ -184,8 +184,11 @@ export default defineComponent({
      window.addEventListener('beforeunload', async () => {
       sessionStorage.setItem('store', JSON.stringify(store.state));
       socket.disconnect();
-
-      
+      store.commit("setMessages", []);
+      store.commit("setLastPrivate", {});
+      store.commit("setLastRoom", {});
+      store.commit("setRooms", []);
+      store.commit("setPrivate", []);
       //MatchMaking.LeaveGame(); -- le before unload ne marche pas (pas de log de leaveGameroom dans le back)
 			if (store.state.ingame && store.state.playerNum != 0) {
 				console.log(`App player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
@@ -220,15 +223,6 @@ export default defineComponent({
 		store.commit("setGameConnect", false);
 		store.commit("setGameRoom", "");
 		store.commit("setInSolo", false);
-    if (!socket.connected && store.state.user.loggedIn) {
-      socket.connect();
-      store.commit("setChatSocket", socket.id);
-    }
-		if (!gameSocket.connected && store.state.user.loggedIn)
-		{
-			gameSocket.connect();
-			store.commit("setUserGameSocket", gameSocket.id);}
-    
   },
 	mounted(){
 		if (!socket.connected && store.state.user.loggedIn) {

@@ -4,7 +4,7 @@
   <div class="flex justify-content-center">
     <div class="flex flex-column flex-wrap col">
       <div class="flex flex-row flex-wrap col-24 h-4rem justify-content-left mb-2">
-        <div class="flex flex-row flex-wrap col-2 justify-content-center">
+        <!-- <div class="flex flex-row flex-wrap col-2 justify-content-center">
           <div v-if="connected">
             <Tag class="pr-6" icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)"
                     value="Connected"></Tag>
@@ -13,7 +13,7 @@
             <Tag class="pr-6" icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 102)"
                     value="Not Connected"></Tag>
           </div>
-        </div>
+        </div> -->
         <div class="flex justify-content-center">
           <form v-on:submit.prevent>
             <div class="p-inputgroup flex">

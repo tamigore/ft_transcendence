@@ -380,8 +380,17 @@ export default defineComponent({
 
     invitePong(): void {
       console.log("invitePong : ", this.message.user.username, " || ingame ? ", this.message.user.username);
+      this.privateMessage();
       if (store.state.inQueue || store.state.ingame)
         return;
+      if (!this.message.user.chatSocket || this.message.user.chatSocket === "") {
+        this.$toast.add({severity: "error", summary: "Can't invite Pong", detail: "sokcet must be set", life: 2000})
+        return ;
+      }
+      if (!store.state.user.chatSocket || store.state.user.chatSocket === "") {
+        this.$toast.add({severity: "error", summary: "Can't invite Pong", detail: "sokcet must be set", life: 2000})
+        return ;
+      }
       socket.emit("inviteGame", {user1: store.state.user, user2: this.message.user})
 			console.log("invite friend");
 			store.commit("setInQueue", true);
@@ -392,10 +401,10 @@ export default defineComponent({
 			gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
     },
 
-    async privateMessage(): Promise<void> {
+    async privateMessage(): Promise<Room> {
       console.log("privateMessage");
       
-      await axios.post('/api/room/private', {
+      return await axios.post('/api/room/private', {
         user1: store.state.user,
         user2: this.message.user,
       }, {
@@ -413,6 +422,7 @@ export default defineComponent({
           .catch((error: AxiosError) => { throw error; });
         socket.emit("join_room", { user: store.state.user, room: res.data });
         socket.emit("join_room", { user: this.message.user, room: res.data });
+        return res.data;
       })
       .catch((err: AxiosError) => { throw err });
     },
