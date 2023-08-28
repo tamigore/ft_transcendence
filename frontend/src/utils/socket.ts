@@ -128,6 +128,7 @@ class SocketioChat {
 			store.commit("setInQueue", true);
 			store.commit("setGameRoom", e.user1.username);
       router.push({path: "/pong"});
+			console.log("===========accept invite END : ", gameSocket.id, " ", e.user1.username, " ", e.user2.username);
 			gameSocket.emit("inviteJoinGameRoom", { room:  e.user1.username as string });
 			gameSocket.emit("inviteGame", {
 				user1username:  e.user1.username,
