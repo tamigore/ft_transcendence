@@ -1,8 +1,8 @@
 <template>
 
 <div v-if="showPopup">
-    <div class="popup">
-      <div class="popup-header">
+    <div class="popup2">
+      <div class="popup-header2">
         <span class="p-font-weight-bold text-900">blocks description</span>
         <Button icon="pi pi-times" rounded class="p-button-secondary"
           style="background-color: rgb(211, 177, 224); color: rgb(30, 27, 31);" @click="closePopup">
@@ -609,7 +609,7 @@ export default defineComponent({
 	overflow: hidden;
 }
 
-.popup {
+.popup2 {
   position: fixed;
   top: 30%;
   right: 1%;
@@ -622,7 +622,7 @@ export default defineComponent({
   z-index: 2;
 }
 
-.popup-header {
+.popup-header2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
