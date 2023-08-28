@@ -176,7 +176,7 @@ export default defineComponent({
 
 		async Spectate(game: Game) {
 			gameSocket.connect();
-			store.commit("setUserGamegameSocket", gameSocket.id);
+			// store.commit("setUserGamegameSocket", gameSocket.id);
 			axios.defaults.baseURL = server.nestUrl;
 			await axios.post('/api/game/spectate', {
 				userId: store.state.user.id as number,

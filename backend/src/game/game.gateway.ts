@@ -246,7 +246,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log("spectator score");
     this.server.to(body.room).emit("servOnSpecScore", {
       scoreA: body.scoreA,
-      scoreb: body.scoreB,
+      scoreB: body.scoreB,
       userId: body.userId,
     });
   }

@@ -230,6 +230,16 @@ export default defineComponent({
 			store.commit("setUserGameSocket", gameSocket.id);}
     
   },
+	mounted(){
+		if (!socket.connected && store.state.user.loggedIn) {
+      socket.connect();
+      store.commit("setChatSocket", socket.id);
+    }
+		if (!gameSocket.connected && store.state.user.loggedIn)
+		{
+			gameSocket.connect();
+			store.commit("setUserGameSocket", gameSocket.id);}
+	},
   
 });
 

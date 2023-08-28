@@ -70,7 +70,7 @@ export class BallClass {
 				this.y = this.pong.height / 2;
 				this.veloX = this.pong.randStartSpeedX();
 				this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
-				this.pong.pointSounds[1].play();
+				// this.pong.pointSounds[1].play();
 			}
 			else if (store.state.playerNum == 1) {
 				
@@ -81,7 +81,7 @@ export class BallClass {
 				this.y = this.pong.height / 2;
 				this.veloX = this.pong.randStartSpeedX();
 				this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
-				this.pong.pointSounds[1].play();
+				// this.pong.pointSounds[1].play();
 				this.onlinePoint(2);
 			}
 		}
@@ -103,14 +103,14 @@ export class BallClass {
 				this.y = this.pong.height / 2;
 				this.veloX = -this.pong.randStartSpeedX();
 				this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
-				this.pong.pointSounds[0].play();
+				// this.pong.pointSounds[0].play();
 			}
 			else if (store.state.playerNum == 2) {
 				this.x = this.pong.width / 2;
 				this.y = this.pong.height / 2;
 				this.veloX = -this.pong.randStartSpeedX();
 				this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
-				this.pong.pointSounds[1].play();
+				// this.pong.pointSounds[1].play();
 				this.onlinePoint(1);
 			}
 		}
@@ -137,11 +137,12 @@ export class BallClass {
 				if (!store.state.ingame && this.pong.gameIsBlocks && Math.random() < 0.5) {
 					this.pong.generateBlocks();
 				}
-				if (store.state.ingame && store.state.game.isBlocked && store.state.playerNum == 1 && Math.random() < 0.5) //test gen Block
+				if (store.state.ingame && store.state.playerNum == 1  && (store.state.game && store.state.game.isBlocked)
+						&& Math.random() < 0.5) //test gen Block
 					this.pong.generateBlocks();
 				this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
 
-				this.pong.hitSound.play();
+				// this.pong.hitSound.play();
 				if (this.id == 0)
 					this.pong.lastHit = new Date();
 				return true;
