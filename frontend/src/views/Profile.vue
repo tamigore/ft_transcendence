@@ -179,7 +179,15 @@
                 <Tag class="pr-6 mt-1" icon="pi pi-circle-fill"
                   style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)" value="Online"></Tag>
               </span>
-              <span v-if="friend.inGame">
+              <span v-else>
+                <Tag class="pr-6 mt-1" icon="pi pi-circle-fill"
+                  style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)" value="Online"></Tag>
+              </span>
+              <span v-if="friend.ingame">
+                <Tag class="mt-1" icon="pi pi-circle-fill"
+                  style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)" value="In game"></Tag>
+              </span>
+              <span v-else>
                 <Tag class="mt-1" icon="pi pi-circle-fill"
                   style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)" value="In game"></Tag>
               </span>
@@ -222,16 +230,6 @@
                   </span>
                 </div>
               </div>
-            </div>
-            <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1 ">
-              <span v-if="blocked.loggedIn">
-                <Tag class="pr-6" icon="pi pi-circle-fill"
-                  style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)" value="Online"></Tag>
-              </span>
-              <span v-if="blocked.ingame">
-                <Tag icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 126)"
-                  value="In game"></Tag>
-              </span>
             </div>
             <div class="w-6 md:w-2 flex justify-content-end space-x-2">
               <Button v-show="showDeleteIcon[index + 1]" icon="pi pi-eye" rounded class="mr-3" aria-label="ViewProfile"

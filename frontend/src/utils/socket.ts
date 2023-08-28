@@ -129,6 +129,8 @@ class SocketioChat {
     });
 
     this.socket.on("inviteGame", async (e: {user1: User, user2: User}) => {
+      if (store.state.ingame || store.state.inQueue)
+        return ;
 			gameSocket.connect();
 			// console.log("===========accept invite");
 			store.commit("setInQueue", true);

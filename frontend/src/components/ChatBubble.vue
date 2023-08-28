@@ -215,6 +215,7 @@ export default defineComponent({
 
     async blockUser(): Promise<void> {
       // console.log("blockUser");
+      this.removeFriend();
       await axios.post('/api/user/block/add', {
         id: this.message.userId,
       }, {
@@ -378,10 +379,17 @@ export default defineComponent({
       .catch(err => { throw new Error(err) });
     },
 
-    invitePong(): void {
+    async invitePong() {
       // console.log("invitePong : ", this.message.user.username, " || ingame ? ", this.message.user.username);
-      this.privateMessage();
-      if (store.state.inQueue || store.state.ingame)
+      const user = await axios.get(`api/user/all/${store.state.user.id}`, {
+        headers: { "Authorization": `Bearer ${store.state.user.hash}` }
+      })
+      .then((res) => {
+        console.log("ingame: ", res.data.ingame, "inqueue: ", res.data.inqueue)
+        return res.data;
+      })
+      .catch(() => {return null});
+      if (store.state.inQueue || store.state.ingame || !user || user.ingame || user.inqueue)
         return;
       gameSocket.connect();
       socket.emit("inviteGame", {user1: store.state.user, user2: this.message.user})

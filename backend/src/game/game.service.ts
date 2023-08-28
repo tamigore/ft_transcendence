@@ -66,7 +66,8 @@ export class GameService {
         },
       })
       .then(() => {
-        console.log("queueLeave : game deleted");
+        this.updateInQueue(game.player1Id, false);
+        // console.log("queueLeave : game deleted");
       })
       .catch(() => {
         return null;
@@ -81,7 +82,7 @@ export class GameService {
     const user2 = await this.userServ.findByUsername(dto.user2username);
 
     if (!user1 || !user2) {
-      console.log("echec cuisant");
+      // console.log("echec cuisant");
       return null;
     }
     const game = await this.prisma.game.create({
@@ -109,7 +110,7 @@ export class GameService {
   }
 
   async matchMaker(dto: Matchmaker): Promise<Game> {
-    console.log(`typeof ${typeof dto.userId}`);
+    // console.log(`typeof ${typeof dto.userId}`);
     const game = await this.prisma
       .$transaction(async () => {
         const game = await this.prisma.game.findFirst({
@@ -121,7 +122,7 @@ export class GameService {
             },
           },
         });
-        console.log("INMATCHMAKER : ", dto.userName);
+        // console.log("INMATCHMAKER : ", dto.userName);
 
         if (!game) {
           this.logger.log(
@@ -176,7 +177,6 @@ export class GameService {
         return game;
       })
       .catch(() => {
-        // throw error;
         return null;
       });
     return game;
@@ -221,7 +221,7 @@ export class GameService {
     _score: string,
   ) {
     if (!game || !game.id || !_winner || !_looser || !_score) {
-      console.log("gameToHistoric : game is null");
+      // console.log("gameToHistoric : game is null");
       return null;
     }
     return await this.prisma.historic
@@ -257,9 +257,8 @@ export class GameService {
         this.logger.log("---------YOOO LE HISTORIC : ", historic);
         return historic;
       })
-      .catch((error) => {
+      .catch(() => {
         return null;
-        throw error;
       });
   }
 }

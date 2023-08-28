@@ -141,7 +141,6 @@ app.use(DialogService);
 app.use(VueCookies, {
   expireTimes: "30d",
   path: "/",
-  // domain: "http://localhost:8080/",
   domain: "http://" + process.env.DOMAIN + ":8080/",
   secure: true,
   sameSite: "None"
