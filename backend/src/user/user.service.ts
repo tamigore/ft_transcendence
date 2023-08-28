@@ -58,11 +58,15 @@ export class UserService {
     });
   }
 
-  async findById(id: number): Promise<User> {
+  async findById(id: number) {
     this.logger.log(`findById user: ${id}`);
     return await this.prisma.user
       .findUnique({
         where: { id: id },
+        include: {
+          friend: true,
+          blocked: true,
+        },
       })
       .catch((error) => {
         throw new Error(error);
@@ -85,18 +89,22 @@ export class UserService {
       });
   }
 
-  async findByUsername(name: string): Promise<User> {
+  async findByUsername(name: string) {
     this.logger.log(`findByUsername user: ${name}`);
     return await this.prisma.user
       .findUnique({
         where: { username: name },
+        include: {
+          friend: true,
+          blocked: true,
+        },
       })
       .catch((error) => {
         throw new Error(error);
       });
   }
 
-  async findAllButSelf(userId: number): Promise<User[]> {
+  async findAllButSelf(userId: number) {
     this.logger.log(`findAllButSelf user: ${userId}`);
     const users = await this.prisma.user
       .findMany({
@@ -105,6 +113,10 @@ export class UserService {
             id: userId,
           },
         },
+        include: {
+          friend: true,
+          blocked: true,
+        },
       })
       .catch((error) => {
         throw new Error(error);
@@ -112,18 +124,22 @@ export class UserService {
     return users;
   }
 
-  async findByChatSocket(socket: string): Promise<User> {
+  async findByChatSocket(socket: string) {
     this.logger.log(`findByChatSocket : ${socket}`);
     return await this.prisma.user
       .findFirst({
         where: { chatSocket: socket },
+        include: {
+          friend: true,
+          blocked: true,
+        },
       })
       .catch((error) => {
         throw new Error(error);
       });
   }
 
-  async update(userId: number, updateUserDto: any): Promise<User> {
+  async update(userId: number, updateUserDto: any) {
     this.logger.log(
       `user id : ${userId} wants to update user: ${updateUserDto}`,
     );
@@ -136,6 +152,10 @@ export class UserService {
           loggedIn: updateUserDto.loggedIn,
           bio: updateUserDto.bio,
           img: updateUserDto.img,
+        },
+        include: {
+          friend: true,
+          blocked: true,
         },
       })
       .then((user) => {
@@ -175,13 +195,14 @@ export class UserService {
         where: { id: userId },
         data: {
           gameSocket: gameSocket,
+          ingame: gameSocket === "" ? false : true,
         },
       })
       .then((user) => {
         this.logger.log("gameSocket update success: ", user);
       })
-      .catch((error) => {
-        throw new Error(error);
+      .catch(() => {
+        return null;
       });
   }
 
@@ -250,7 +271,7 @@ export class UserService {
 
   async findBlocked(userId: number) {
     this.logger.log(`findBlocked user: ${userId}`);
-    const users = await this.prisma.user.findMany({
+    const users = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },

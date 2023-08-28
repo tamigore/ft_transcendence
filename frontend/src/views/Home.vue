@@ -12,7 +12,7 @@
           <section class="flex">
             <Button label="Sign Up" v-on:click="ToggleSignup()" type="button" class="mr-3 p-button-raised"></Button>
             <Button label="Sing In" v-on:click="ToggleSignin()" type="button" class="mr-3 p-button-outlined"></Button>
-            <Button label="Sing In 42 Intra" v-on:click="SigninIntra()" type="button" class="mr-3 p-button" rounded></Button>
+            <Button label="Sign In 42 Intra" v-on:click="SigninIntra()" type="button" class="mr-3 p-button" rounded></Button>
           </section>
         </section>
       </div>

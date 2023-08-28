@@ -43,7 +43,7 @@ export class AuthController {
   @Get("login42")
   @UseGuards(FortyTwoAuthGuard)
   async login42() {
-    console.log("login42 ??");
+    // console.log("login42 ??");
   }
 
   @Public()

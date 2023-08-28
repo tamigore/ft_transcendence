@@ -246,11 +246,11 @@ export class RoomService implements OnModuleInit {
         },
       })
       .then((newRoom) => {
-        this.logger.log("createRoom success: ", newRoom);
+        // this.logger.log("createRoom success: ", newRoom);
         return newRoom;
       })
       .catch((error) => {
-        this.logger.error("createRoom error: ", error);
+        // this.logger.error("createRoom error: ", error);
         throw new Error(error);
       });
   }
@@ -329,7 +329,7 @@ export class RoomService implements OnModuleInit {
         },
       })
       .then((updatedRoom) => {
-        this.logger.log("Room update success: ", updatedRoom);
+        // this.logger.log("Room update success: ", updatedRoom);
         return updatedRoom;
       })
       .catch((error) => {
@@ -350,8 +350,8 @@ export class RoomService implements OnModuleInit {
         if (typeof room === "undefined" || !room || this.isBan(room, userId))
           return false;
         if (room.hash) {
-          this.logger.debug(pwd);
-          this.logger.debug(room.hash);
+          // this.logger.debug(pwd);
+          // this.logger.debug(room.hash);
           const verif = await argon2.verify(room.hash, pwd);
           if (!verif) return false;
         }
@@ -407,7 +407,8 @@ export class RoomService implements OnModuleInit {
         });
       })
       .then((room) => {
-        this.logger.log("addAdmin success: ", room);
+        return room;
+        // this.logger.log("addAdmin success: ", room);
       })
       .catch((error) => {
         throw new Error(error);

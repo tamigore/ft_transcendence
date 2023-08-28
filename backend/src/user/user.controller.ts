@@ -23,7 +23,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  findUsers(): Promise<User[]> {
+  findUsers() {
     return this.userService.findAll();
   }
 
@@ -31,7 +31,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*")
-  findUserWithName(@Param("name") param: string): Promise<User> {
+  findUserWithName(@Param("name") param: string) {
     return this.userService.findByUsername(param);
   }
 
@@ -39,7 +39,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*")
-  findAllButSelf(@GetCurrentUserId() userId: number): Promise<User[]> {
+  findAllButSelf(@GetCurrentUserId() userId: number) {
     return this.userService.findAllButSelf(userId);
   }
 
@@ -47,7 +47,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*")
-  findAllFriends(@GetCurrentUserId() userId: number): Promise<User[]> {
+  findAllFriends(@GetCurrentUserId() userId: number) {
     return this.userService.findFriends(userId);
   }
 
@@ -55,7 +55,7 @@ export class UserController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*")
-  findAllBlocked(@GetCurrentUserId() userId: number): Promise<User[]> {
+  findAllBlocked(@GetCurrentUserId() userId: number) {
     return this.userService.findBlocked(userId);
   }
 

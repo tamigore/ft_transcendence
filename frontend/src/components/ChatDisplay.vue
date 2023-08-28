@@ -1,19 +1,8 @@
 <template>
   <div class="w-full h-full">
-  <!-- Connexion et création de salle -->
   <div class="flex justify-content-center">
     <div class="flex flex-column flex-wrap col">
       <div class="flex flex-row flex-wrap col-24 h-4rem justify-content-left mb-2">
-        <!-- <div class="flex flex-row flex-wrap col-2 justify-content-center">
-          <div v-if="connected">
-            <Tag class="pr-6" icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(102, 245, 102)"
-                    value="Connected"></Tag>
-          </div>
-          <div v-else>
-            <Tag class="pr-6" icon="pi pi-circle-fill" style="background-color: rgba(0, 0, 0, 0); color: rgb(245, 102, 102)"
-                    value="Not Connected"></Tag>
-          </div>
-        </div> -->
         <div class="flex justify-content-center">
           <form v-on:submit.prevent>
             <div class="p-inputgroup flex">
@@ -31,9 +20,7 @@
         </div>
       </div>
 
-      <!-- Colonnes des salles et du chat -->
       <div class="flex border-round align-items-start justify-content-start pl-8 pr-8 m-3">
-        <!-- Colonne des salles (1/4 de la largeur) -->
         <div class="flex flex-col w-4">
           <TabView class= "w-full" v-model:activeIndex="active" @update:activeIndex="setIndex">
             <TabPanel header="Rooms">
@@ -71,7 +58,6 @@
           </TabView>
         </div>
             
-        <!-- Colonne du chat (3/4 de la largeur) -->
         <div class="flex flex-col w-9">
           <div v-if="!isPrivate" class="flex flex-column col" style="height: 68vh">
             <div class="flex flex-column col mt-6" v-bind:class="[ lastRoom && lastRoom.id  ? 'box-shadow' : 'box-shadow-dark']">
@@ -175,12 +161,12 @@ export default defineComponent({
 
     lastMessage () {
       const message = store.state.lastMessage;
-      console.log(`lastMessage: ${message}`);
+      // console.log(`lastMessage: ${message}`);
       if (store.state.lastRoom.id !== message.room.id && store.state.lastPrivate.id !== message.room.id) {
-        console.log(`lastMessage is not in the room ?`);
+        // console.log(`lastMessage is not in the room ?`);
         if ((store.state.lastRoom.mute && !store.state.lastRoom.mute.find(user => user.id === message.user.id))
           || (store.state.user.blocked && !store.state.user.blocked.find(user => user.id === message.user.id))) {
-          console.log("message.room joined but not selected");
+          // console.log("message.room joined but not selected");
           if (message.room.private)
             this.$toast.add({severity: 'info', summary: 'New message',
               detail: `From user ${message.user.username}`,
@@ -208,7 +194,7 @@ export default defineComponent({
           };
         else console.error("wrong get room");
       }
-      console.log("Rooms computed: ", obj); 
+      // console.log("Rooms computed: ", obj); 
       return obj as { isIn: boolean; room: Room; }[];
     },
 
@@ -238,23 +224,23 @@ export default defineComponent({
 
   methods: {
     async setIndex(index: number) {
-      console.log("index: ", index);
+      // console.log("index: ", index);
       if (index === 0)
       {
-        console.log("In Room");
+        // console.log("In Room");
         if (store.state.lastRoom && store.state.lastRoom.id)
           await this.selectRoom(store.state.lastRoom);
       }
       else
       {
-        console.log("In Private");
+        // console.log("In Private");
         if (store.state.lastPrivate && store.state.lastPrivate.id)
           await this.selectPrivate(store.state.lastPrivate);
       }
     },
 
     InRoom (room: Room) {
-      console.log(`InRoom methods: ${room}`);
+      // console.log(`InRoom methods: ${room}`);
       if (!room || !room.users)
         return false;
       return room.users.find(user => user.id === store.state.user.id) ? true : false;
@@ -297,7 +283,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log(`getPrivate response: ${response.data}`);
+          // console.log(`getPrivate response: ${response.data}`);
           store.commit("setPrivate", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
@@ -308,7 +294,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log("getRooms response: ", response.data);
+          // console.log("getRooms response: ", response.data);
           store.commit("setRooms", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
@@ -319,7 +305,7 @@ export default defineComponent({
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
         .then((response: AxiosResponse) => {
-          console.log("getMessages response: ", response.data);
+          // console.log("getMessages response: ", response.data);
           store.commit("setMessages", response.data);
         })
         .catch((error: AxiosError) => { throw error; });
@@ -339,7 +325,7 @@ export default defineComponent({
             this.$toast.add({severity: "warn", summary: "Room name invalid", detail: "Room must have a unique name", life: 2000});
             return ;
           }
-          console.log(`createRoom response.data: ${response.data}`);
+          // console.log(`createRoom response.data: ${response.data}`);
           this.getRooms();
           store.commit("setLastRoom", response.data);
           socket.emit("join_room", { user: store.state.user, room:  response.data });
@@ -354,13 +340,13 @@ export default defineComponent({
       await axios.delete(`api/room/${room.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
-      .then((response: AxiosResponse) => {
-        console.log(`deleteRoom response.data: ${response.data}`);
+      .then(() => {
+        // console.log(`deleteRoom response.data: ${response.data}`);
         socket.emit("leave_room", { user: store.state.user, room: room });
         store.commit("delRoom", room);
         if (store.state.lastRoom.id == room.id) store.commit("setLastRoom", {});
-        })
-        .catch((error: AxiosError) => { throw error; });
+      })
+      .catch((error: AxiosError) => { throw error; });
     },
 
     async joinRoom(room: Room) {
@@ -376,7 +362,7 @@ export default defineComponent({
       })
       .then((res) => {
         if (!res.data) return;
-        console.log(`joinRoom response.data: ${res.data}`);
+        // console.log(`joinRoom response.data: ${res.data}`);
         const payload = {
           user: store.state.user,
           room: room,
@@ -397,8 +383,8 @@ export default defineComponent({
       }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
-      .then((res) => {
-        console.log(`leaveRoom response.data: ${res.data}`);
+      .then(() => {
+        // console.log(`leaveRoom response.data: ${res.data}`);
         const payload = {
           user: store.state.user,
           room: room,

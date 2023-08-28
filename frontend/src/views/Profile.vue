@@ -202,17 +202,7 @@
 
     <AccordionTab header="Bloqued">
       <div class="surface-section border-round box-shadow " style="padding: 5em">
-        <div class="p-inputgroup flex-1 mb-4">
-          <span class="p-inputgroup-addon">
-            <i class="pi pi-lock"></i>
-          </span>
-          <Dropdown v-model="selectedBlock" editable :options="filteredUsernames" @input="filterUsernames"
-            placeholder="Find by: Username / Id" class="w-full md:w-14rem" />
-          <Button @click="addFriend" style="background-color: rgb(197, 72, 255)">Add</Button>
-        </div>
-
         <ul class="list-none p-0 m-0">
-
           <!-- New list tiles -->
           <li class="h-32 flex align-items-center py-4 px-2 border-top-1 surface-border flex-wrap"
             v-for="(blocked, index) in userBlocked" :key="index" @mouseover="showDeleteIcon[index + 1] = true"
@@ -683,7 +673,7 @@ export default defineComponent({
         .then((response: AxiosResponse) => {
           console.log(response);
           if (response.data)
-            this.userBlocked = response.data[0].blocked.map((user) => user);
+            this.userBlocked = response.data.blocked.map((user) => user);
         })
         .catch((error: AxiosError) => {
           throw error;

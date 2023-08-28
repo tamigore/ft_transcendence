@@ -48,7 +48,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage("cliMessage")
   async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
     this.logger.log("onMessage");
-    this.logger.debug("body: ", body, "ConnectedSocket: ", client.id);
+    // this.logger.debug("body: ", body, "ConnectedSocket: ", client.id);
     const user = await this.userService.findById(body.user.id);
     if (!user) return null; //throw new Error("onMessage no user found");
     if (user.chatSocket != client.id)
@@ -117,7 +117,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       user2: User;
     },
   ): Promise<void> {
-    console.log("===inviteGame player 2: ", payload.user2.chatSocket);
     this.server.to(payload.user2.chatSocket).emit("inviteGame", payload);
   }
 }

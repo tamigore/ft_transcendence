@@ -210,7 +210,7 @@ export default defineComponent({
 				Pong.value.restartMatch();
 			if (store.state.ingame && store.state.playerNum == 0 && Pong.value.leftPlayerKeyUp != "")
 				Pong.value.startMultiOnline();
-			if (store.state.inInvite && !store.state.game && Date.now() - store.state.dateInvite > 2500) {
+			if (store.state.inInvite && !store.state.game && Date.now() - store.state.dateInvite > 1000) {
 				store.commit("setInInvite", false);
 				gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
 				store.commit("setPlayerNum", 0);
@@ -219,20 +219,19 @@ export default defineComponent({
 				store.commit("setGameRoom", "");
 				store.commit("setInSolo", false);
 			}
+			if (!Pong.value.inMultiplayer)
 				Pong.value.bot();
-				Pong.value.moovePaddles();
-				Pong.value.theBall.ballColision();
-				const newDate = Date.now();
-				if (store.state.playerNum && store.state.ingame  && newDate - lastDate > 200) {
-					// console.log("clock setter : ",  Pong.value.theBall.ballState());
-					// console.log("playerNum : ", store.state.playerNum);
-					gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
-					lastDate = newDate;
-				}
-				for (const ball of Pong.value.myBalls) {
-					ball.ballColision();
-				}
-				ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
+			Pong.value.moovePaddles();
+			Pong.value.theBall.ballColision();
+			const newDate = Date.now();
+			if (store.state.playerNum && store.state.ingame  && newDate - lastDate > 200) {
+				gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
+				lastDate = newDate;
+			}
+			for (const ball of Pong.value.myBalls) {
+				ball.ballColision();
+			}
+			ctx.clearRect(0, 0, Pong.value.width, Pong.value.height);
 			drawBlocks();
 			drawBall();
 			drawPaddle(Pong.value.paddleOffset, Pong.value.leftPaddleY, Pong.value.leftPaddleWidth, Pong.value.leftPaddleHeight,
@@ -258,17 +257,13 @@ export default defineComponent({
 				}
 			}
 
-
 			gameSocket.on("gameRoomJoiner", (data) => {
-				//console.log("===BEFORE CHECK gameRoomJoiner before ingame = ");
 				if (store.state.ingame == true)
 					return;
-				//console.log("---gameRoomJoiner after ingame = ", store.state.ingame);
 				if (store.state.playerNum == 1 && store.state.gameRoom != "")
 					store.commit("setPlayer2Game", data.user);
 				store.commit("setGameRoom", data.room);
 				if (store.state.playerNum == 2) {
-					//console.log("gameJoiner player 2");
 					store.commit("setInQueue", false);
 					Pong.value.startMultiOnline();
 					gameSocket.emit("ReadyGame", { room: store.state.gameRoom, ball: Pong.value.theBall.ballState() });
@@ -276,7 +271,6 @@ export default defineComponent({
 			})
 
 			gameSocket.on("LaunchGame", (e: BallState) => {
-				//console.log("====LAUCNH GAME");
 				store.commit("setGameConnect", true);
 				store.commit("setInQueue", false);
 				lastDate = Date.now();
@@ -293,7 +287,6 @@ export default defineComponent({
 			});
 
 			gameSocket.on("setBall", (e: BallState) => {
-				// console.log("setBall", e);
 				if (store.state.playerNum != e.player)
 					if (e.ballId == 0)
 						Pong.value.theBall.setBallState(e);
@@ -312,17 +305,24 @@ export default defineComponent({
 				lastPoint = Date.now();
 				if (e == 1) {
 					Pong.value.scoreA++;
-					// if (store.state.playerNum == 1)
-					// 	Pong.value.pointSounds[0].play();
 				}
 				else if (e == 2) {
 					Pong.value.scoreB++;
-					// if (store.state.playerNum == 2)
-					// 	Pong.value.pointSounds[0].play();
 				}
-				if (Pong.value.scoreA >= 10 || Pong.value.scoreB >= 10) {
-					Pong.value.endGameOnline();
+				if (Pong.value.scoreA >= 5 || Pong.value.scoreB >= 5) {
+					let looser = store.state.game.player1Id;
+					let winner = store.state.game.player2Id;
+					if (Pong.value.scoreA > Pong.value.scoreB) {
+						looser = store.state.game.player2Id;
+						winner = store.state.game.player1Id;
+					}
+					gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: `${Pong.value.scoreA} - ${Pong.value.scoreB}` });
+					gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+					store.commit("setPlayerNum", 0);
+					store.commit("setInQueue", false);
 					store.commit("setGameConnect", false);
+					store.commit("setGameRoom", "");
+					store.commit("setInSolo", false);
 				}
 			});
 

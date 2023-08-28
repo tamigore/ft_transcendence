@@ -33,7 +33,7 @@ const store = createStore({
         setSpecGames : function(state, games: Game[]) {
             state.specGames = games.filter(game =>game.historic == null || game.historic == undefined);
         },
-        setGameConnect : function(state, gameConnect: boolean) {
+        setGameConnect : async function(state, gameConnect: boolean) {
             state.ingame = gameConnect;
         },
         setUserGameSocket : function (state, gameSocket: string) {
@@ -65,33 +65,23 @@ const store = createStore({
             state.lastMessage = chatMessages;
         },
         setLastPrivate(state, room: Room) {
-            console.log('setLastPrivate: ', room);
-            state.lastPrivate.id = room.id;
-            state.lastPrivate.name = room.name;
-            state.lastPrivate.ownerId = room.ownerId;
-            state.lastRoom.users = room.users;
+            state.lastPrivate = room;
+            // console.log('setLastPrivate: ', state.lastPrivate);
         },
         setLastRoom(state, room: Room) {
-            console.log('setLastRoom: ', room);
-            state.lastRoom.id = room.id;
-            state.lastRoom.name = room.name;
-            state.lastRoom.ownerId = room.ownerId;
-            state.lastRoom.admins = room.admins;
-            state.lastRoom.ban = room.ban;
-            state.lastRoom.users = room.users;
-            state.lastRoom.mute = room.mute;
+            state.lastRoom = room;
+            // console.log('setLastRoom: ', state.lastRoom);
         },
         setRooms(state, rooms: Room[]) {
-            // console.log('setRooms: ', rooms);
             state.rooms = rooms;
-            console.log('setRooms: ', state.rooms);
+            // console.log('setRooms: ', state.rooms);
         },
         addRoom(state, room: Room) {
-            console.log('addRoom: ', room);
+            // console.log('addRoom: ', room);
             state.rooms.push(room);
         },
         delRoom(state, room: Room) {
-            console.log('delRoom: ', room);
+            // console.log('delRoom: ', room);
             const index = state.rooms.indexOf(room);
             if (index >= 0) {
                 state.rooms.splice(index, index);
@@ -99,26 +89,24 @@ const store = createStore({
         },
         setPrivate(state, rooms: Room[]) {
             state.private = rooms;
-            console.log('setPrivate: ', state.private);
+            // console.log('setPrivate: ', state.private);
         },
         addPrivate(state, room: Room) {
-            console.log('addPrivate: ', room);
+            // console.log('addPrivate: ', room);
             state.private.push(room);
         },
         setFriend(state, users: User[]) {
-            console.log('setFriend: ', users);
+            // console.log('setFriend: ', users);
             state.user.friend = users;
             state.user.friendBy = users;
         },
         setBlocked(state, users: User[]) {
-            console.log('setBlocked: ', users);
+            // console.log('setBlocked: ', users);
             state.user.friend = users;
             state.user.friendBy = users;
         },
         setUser(state, user: User) {
-            console.log('setUser: ', user);
-            // state.user.id = user.id;
-            // state.user.created_at = user.created_at;
+            // console.log('setUser: ', user);
             state.user.updated_at = user.updated_at;
             state.user.email = user.email;
             state.user.username = user.username;
@@ -129,13 +117,11 @@ const store = createStore({
             state.user.img = user.img;
             state.user.twoFA = user.twoFA;
             state.user.twoFAState = user.twoFA ? true : false;
-            if (user.blocked)
-                state.user.blocked = user.blocked;
-            if (user.friend)
-                state.user.friend = user.friend;
-            if (user.rooms) {
-                state.user.rooms = user.rooms;
-            }
+            state.user.blocked = user.blocked;
+            state.user.friend = user.friend;
+            state.user.rooms = user.rooms;
+            state.user.ingame = user.ingame;
+            state.user.inqueue = user.inqueue;
         },
         delUser(state) {
             state.user = {} as User;

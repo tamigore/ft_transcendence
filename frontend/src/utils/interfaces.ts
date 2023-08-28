@@ -30,6 +30,7 @@ export interface User {
   win: Historic,
   loose: Historic,
   ingame: boolean,
+  inqueue: boolean,
 }
 
 export interface Game {
