@@ -396,13 +396,13 @@ export default defineComponent({
 			store.commit("setGameRoom", store.state.user.username);
 			store.commit("setDateInvite");
 			store.commit("setInInvite",true);
+      router.push({path: "/pong"});
 			gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
       // console.log("invite friend");
       // store.commit("setInQueue", true);
       // store.commit("setGameRoom", store.state.user.username);
       // gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
       // console.log("invite friend END");
-      router.push({path: "/pong"});
     },
 
     async privateMessage(): Promise<void> {

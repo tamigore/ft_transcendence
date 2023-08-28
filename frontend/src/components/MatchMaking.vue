@@ -163,13 +163,11 @@ export default defineComponent({
 				}
 				gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
 			}
-			else if (store.state.ingame && store.state.playerNum === 0) {
-				console.log("spectator leave not done");
-			}
 			else if (store.state.inQueue) {
 				gameSocket.emit("queueLeave", { gameId: store.state.game.id });
 			}
-			gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
+			if (store.state.ingame || store.state.inQueue)
+				gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
 			store.commit("setInQueue", false);
 			store.commit("setGameConnect", false);
 			store.commit("setGameRoom", "");
