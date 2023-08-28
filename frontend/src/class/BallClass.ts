@@ -135,11 +135,15 @@ export class BallClass {
 				if (this.veloX >= ballMaxSpeedX || this.veloX <= - ballMaxSpeedX)
 					this.veloX = ballMaxSpeedX * sign;
 				if (!store.state.ingame && this.pong.gameIsBlocks && Math.random() < 0.5) {
+					console.log("gen Block LOCALE");
 					this.pong.generateBlocks();
 				}
 				if (store.state.ingame && store.state.playerNum == 1  && (store.state.game && store.state.game.isBlocked)
 						&& Math.random() < 0.5) //test gen Block
+						{
+					console.log("gen Block ONLINE");
 					this.pong.generateBlocks();
+						}
 				this.veloY = -((paddleY + paddleHeight / 2 - this.y) / paddleHeight / 2 * ballMaxSpeedY + 0.1 - Math.random() / 5);
 
 				// this.pong.hitSound.play();
