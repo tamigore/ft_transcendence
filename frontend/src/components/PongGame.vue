@@ -214,6 +214,7 @@ export default defineComponent({
 		const paddleSprite = new Image();
 		let lastDate = Date.now();
 		const lastBall = new BallClass(Pong.value, 0, 0, 0, 0, 0, 'blue', 0);
+		let lastPoint = Date.now();
 		
 		const drawPaddle = (x: number, y: number, width: number, height: number, sprite: HTMLImageElement) => {
 			if (!ctx)
@@ -365,6 +366,9 @@ export default defineComponent({
 
 			gameSocket.on("scoreMessage", (e: number) => {
 				console.log("---scoreMessage", e);
+				if (Date.now() - lastPoint < 1000)
+					return;
+				lastPoint = Date.now();
 				if (e == 1) {
 					Pong.value.scoreA++;
 					if (store.state.playerNum == 1)
