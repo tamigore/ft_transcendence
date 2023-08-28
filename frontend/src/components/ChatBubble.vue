@@ -140,8 +140,6 @@ export default defineComponent({
   mounted() {
     console.log("ChatBubble message: ", this.message);
     console.log("ChatBubble room: ", this.room);
-    // const lastRoom = store.state.lastRoom;
-    // console.log("LastRoom: ", lastRoom);
   },
 
   computed: {
@@ -330,7 +328,6 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res) => {
-        // await this.update();
         console.log(res);
         socket.emit("update", {room: this.room});
       })
@@ -347,7 +344,6 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res) => {
-        // await this.update();
         console.log(res);
         socket.emit("update", {room: this.room});
       })
@@ -363,7 +359,6 @@ export default defineComponent({
         console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
-        // await this.update();
         socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
@@ -378,7 +373,6 @@ export default defineComponent({
         console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
-        // await this.update();
         socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
@@ -386,8 +380,6 @@ export default defineComponent({
 
     invitePong(): void {
       console.log("invitePong : ", this.message.user.username, " || ingame ? ", this.message.user.username);
-      // if (this.message.user.ingame)
-      //   return;
       if (store.state.inQueue || store.state.ingame)
         return;
       socket.emit("inviteGame", {user1: store.state.user, user2: this.message.user})
@@ -398,11 +390,6 @@ export default defineComponent({
 			store.commit("setInInvite",true);
       router.push({path: "/pong"});
 			gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
-      // console.log("invite friend");
-      // store.commit("setInQueue", true);
-      // store.commit("setGameRoom", store.state.user.username);
-      // gameSocket.emit("inviteJoinGameRoom", { room: store.state.user.username as string });
-      // console.log("invite friend END");
     },
 
     async privateMessage(): Promise<void> {
