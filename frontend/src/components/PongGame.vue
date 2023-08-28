@@ -271,7 +271,7 @@ export default defineComponent({
 		const gameLoop = () => {
 			if (!ctx)
 				return;
-			if ((Pong.value.inMultiplayer && !store.state.ingame) || (Pong.value.gameIsRunning && !store.state.insolo))
+			if ((Pong.value.inMultiplayer && !store.state.ingame) || (Pong.value.gameIsRunning && !store.state.insolo && !store.state.ingame))
 				Pong.value.restartMatch();
 			if (store.state.inInvite && !store.state.game && Date.now() - store.state.dateInvite > 10000) {
 				store.commit("setInInvite", false);
@@ -287,8 +287,8 @@ export default defineComponent({
 				Pong.value.theBall.ballColision();
 				const newDate = new Date();
 				if (store.state.ingame  && newDate.getTime() - lastDate.getTime() > 200) {
-					console.log("clock setter : ",  Pong.value.theBall.ballState());
-					console.log("playerNum : ", store.state.playerNum);
+					// console.log("clock setter : ",  Pong.value.theBall.ballState());
+					// console.log("playerNum : ", store.state.playerNum);
 					gameSocket.emit("ballSetter", { ballInfo: Pong.value.theBall.ballState(), room: store.state.gameRoom });
 					lastDate = newDate;
 				}
@@ -327,9 +327,9 @@ export default defineComponent({
 				if (store.state.ingame == true)
 					return;
 				//console.log("---gameRoomJoiner after ingame = ", store.state.ingame);
-				store.commit("setGameRoom", data.room);
 				if (store.state.playerNum == 1 && store.state.gameRoom != "")
 					store.commit("setPlayer2Game", data.user);
+				store.commit("setGameRoom", data.room);
 				if (store.state.playerNum == 2) {
 					//console.log("gameJoiner player 2");
 					store.commit("setInQueue", false);
@@ -356,7 +356,7 @@ export default defineComponent({
 			});
 
 			gameSocket.on("setBall", (e: BallState) => {
-				console.log("setBall", e);
+				// console.log("setBall", e);
 				if (store.state.playerNum != e.player)
 					if (e.ballId == 0)
 						Pong.value.theBall.setBallState(e);
@@ -369,13 +369,13 @@ export default defineComponent({
 			});
 
 			gameSocket.on("scoreMessage", (e: number) => {
-				console.log("scoreMessage", e);
-				if (e == 2) {
+				console.log("---scoreMessage", e);
+				if (e == 1) {
 					Pong.value.scoreA++;
 					if (store.state.playerNum == 1)
 						Pong.value.pointSounds[0].play();
 				}
-				else if (e == 1) {
+				else if (e == 2) {
 					Pong.value.scoreB++;
 					if (store.state.playerNum == 2)
 						Pong.value.pointSounds[0].play();

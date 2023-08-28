@@ -304,7 +304,7 @@ export class PongGameClass {
 		this.leftPlayerKeyUp = '';
 		this.rightPlayerKeyDown = '';
 		this.rightPlayerKeyUp = '';
-		console.log("playerNUm = ", store.state.playerNum);
+		console.log("Start mluti online playerNUm = ", store.state.playerNum);
 		if (store.state.playerNum == 1) {
 			console.log("player 1 KEYS");
 			this.leftPlayerKeyDown = 's';
@@ -317,6 +317,8 @@ export class PongGameClass {
 			this.rightPlayerKeyUp = 'w';
 			this.blockId = 2;
 		}
+		console.log("Start mluti online leftplayerKey :", this.leftPlayerKeyUp, this.leftPlayerKeyDown);
+			console.log("Start mluti online rightplayerKey :", this.rightPlayerKeyUp, this.rightPlayerKeyDown);
 		this.rightPaddleHeight = 80;
 		this.leftPaddleHeight = 80;
 		// this.newBall();
@@ -472,6 +474,7 @@ export class PongGameClass {
 	}
 
 	sendKey = (_player: number, _up: boolean, _key: number) => {
+		// console.log("sendKey plauer ", _player, " up :", _up, " key ", _key);
 		if (store.state.ingame && this.inMultiplayer) {
 			const gameMoveData = {
 				player: _player,
