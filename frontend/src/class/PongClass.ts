@@ -268,8 +268,12 @@ export class PongGameClass {
 		this.wallIsUp = false;
 		if (gameIsRunnig != undefined && gameIsRunnig) {
 			this.gameIsRunning = true;
-			this.theBall.veloX = this.randStartSpeedX() * Math.sign(Math.random() - 0.5);
-			this.theBall.veloY = this.randStartSpeedY() * Math.sign(Math.random() - 0.5);
+			let sign = 0;
+			while (sign == 0)
+				sign = Math.sign(Math.random() - 0.5);
+			this.theBall.veloX = this.randStartSpeedX() * sign;
+			this.theBall.veloY = this.randStartSpeedY() * sign;
+			
 			if (rightBot != undefined && rightBot) {
 				this.rightPlayerKeyDown = '';
 				this.rightPlayerKeyUp = '';
@@ -292,19 +296,20 @@ export class PongGameClass {
 	startMultiOnline() {
 		// if (store.state.playerNum == 2)
 		this.restartMatch(true);
-		gameSocket.emit("ballSetter", { ballInfo: this.theBall.ballState(), room: store.state.gameRoom });
+		if (store.state.playerNum == 1)
+			gameSocket.emit("ballSetter", { ballInfo: this.theBall.ballState(), room: store.state.gameRoom });
 		console.log("startMultiOnline----------- the ball : ", this.theBall.ballState());
 		// else
 		// 	this.restartMatch(false);
 		this.inMultiplayer = true;
 		this.gameIsRunning = true;
-		//console.log("startMultiOnline-----------");
+		console.log("startMultiOnline-----------");
 		//console.log("game", store.state.game);
 		this.leftPlayerKeyDown = '';
 		this.leftPlayerKeyUp = '';
 		this.rightPlayerKeyDown = '';
 		this.rightPlayerKeyUp = '';
-		console.log("playerNUm = ", store.state.playerNum);
+		console.log("Start mluti online playerNUm = ", store.state.playerNum);
 		if (store.state.playerNum == 1) {
 			console.log("player 1 KEYS");
 			this.leftPlayerKeyDown = 's';
@@ -317,6 +322,8 @@ export class PongGameClass {
 			this.rightPlayerKeyUp = 'w';
 			this.blockId = 2;
 		}
+		console.log("Start mluti online leftplayerKey :", this.leftPlayerKeyUp, this.leftPlayerKeyDown);
+			console.log("Start mluti online rightplayerKey :", this.rightPlayerKeyUp, this.rightPlayerKeyDown);
 		this.rightPaddleHeight = 80;
 		this.leftPaddleHeight = 80;
 		// this.newBall();
@@ -472,6 +479,7 @@ export class PongGameClass {
 	}
 
 	sendKey = (_player: number, _up: boolean, _key: number) => {
+		// console.log("sendKey plauer ", _player, " up :", _up, " key ", _key);
 		if (store.state.ingame && this.inMultiplayer) {
 			const gameMoveData = {
 				player: _player,

@@ -63,6 +63,7 @@ export class BallClass {
 				return;
 			}
 			if (!store.state.ingame) {
+				console.log(" LocalPoint----------- for player 2");
 				this.hp--;
 				this.pong.scoreB += 1;
 				this.x = this.pong.width / 2;
@@ -72,16 +73,20 @@ export class BallClass {
 				this.pong.pointSounds[1].play();
 			}
 			else if (store.state.playerNum == 1) {
-				if (this.lastPoint.getMilliseconds() - Date.now() > -200)
-					return;
-				this.lastPoint = new Date();
+				if (Date.now() - this.pong.lastGoal[this.id] < 200)
+			{
+				console.log("NOOOOOOO onlinePoint----------- for player 2");
+				this.pong.lastGoal[this.id] = Date.now();
+				return;
+			}
+			console.log("onlinePoint----------- for player 2");
 				this.hp--;
 				this.x = this.pong.width / 2;
 				this.y = this.pong.height / 2;
 				this.veloX = this.pong.randStartSpeedX();
 				this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
 				this.pong.pointSounds[1].play();
-				this.onlinePoint(1);
+				this.onlinePoint(2);
 			}
 		}
 		else if (this.x >= this.pong.width - 1) {
@@ -95,6 +100,7 @@ export class BallClass {
 					this.veloX = -this.veloX;
 					return;
 				}
+				console.log("LOCAL----------- for player 1");
 				this.hp--;
 				this.pong.scoreA += 1;
 				this.x = this.pong.width / 2;
@@ -104,23 +110,28 @@ export class BallClass {
 				this.pong.pointSounds[0].play();
 			}
 			else if (store.state.playerNum == 2) {
-				if (this.lastPoint.getMilliseconds() - Date.now() > -200)
-					return;
+				if (Date.now() - this.pong.lastGoal[this.id] < 200)
+			{
+				console.log("NOOOOOOO onlinePoint----------- for player 1");
+				this.pong.lastGoal[this.id] = Date.now();
+				return;
+			}
+			console.log("onlinePoint----------- for player 1");
 				this.lastPoint = new Date();
 				this.x = this.pong.width / 2;
 				this.y = this.pong.height / 2;
 				this.veloX = -this.pong.randStartSpeedX();
 				this.veloY = this.pong.randStartSpeedY() * Math.sign(Math.random() - 0.5);
 				this.pong.pointSounds[1].play();
-				this.onlinePoint(2);
+				this.onlinePoint(1);
 			}
 		}
 	}
 
 	onlinePoint = (_player: number) => {
-		if (!store.state.ingame || store.state.playerNum != _player)
+		if (!store.state.ingame || store.state.playerNum == _player)
 			return;
-		//console.log("onlinePoint-----------");
+		console.log("onlinePoint sender");
 		gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
 		gameSocket.emit("goalMessage", { room: store.state.gameRoom, player: _player });
 	}
