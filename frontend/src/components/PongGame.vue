@@ -37,7 +37,7 @@
 	<div v-show="inSolo || inGame">
 		<div v-if="Pong" class="flex flex-column align-items-center justify-content-center pl-8 pr-8 m-3">
 
-			<div v-if="inSolo || inGame" class="flex py-8 mb-5">
+			<div v-if="inSolo || inGame" class="flex py-2 mb-5">
 				<div v-if="inGame" class="flex px-2">
 					<p style="color: aliceblue;">{{ Pong.scoreA }}</p>
 				</div>
@@ -210,7 +210,7 @@ export default defineComponent({
 				Pong.value.restartMatch();
 			if (store.state.ingame && store.state.playerNum == 0 && Pong.value.leftPlayerKeyUp != "")
 				Pong.value.startMultiOnline();
-			if (store.state.inInvite && !store.state.game && Date.now() - store.state.dateInvite > 1000) {
+			if (store.state.inInvite && !store.state.game && Date.now() - store.state.dateInvite > 2500) {
 				store.commit("setInInvite", false);
 				gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
 				store.commit("setPlayerNum", 0);
