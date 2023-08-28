@@ -1,8 +1,43 @@
 <template>
-	<div v-show="inSolo || inGame">
-		<div v-if="Pong" class="flex flex-column align-items-center justify-content-center">
 
-			<div v-if="inSolo || inGame" class="flex p-4">
+<div v-if="showPopup">
+    <div class="popup">
+      <div class="popup-header">
+        <span class="p-font-weight-bold text-900">blocks description</span>
+        <Button icon="pi pi-times" rounded class="p-button-secondary"
+          style="background-color: rgb(211, 177, 224); color: rgb(30, 27, 31);" @click="closePopup">
+        </Button>
+      </div>
+      <Divider />
+      <ul class="blocks-description px-4">
+        <li class="flex align-items-center mb-3">
+          <img :src="block" alt="block" class="mr-3" style="width: 18px" />
+          <div class="p-font-weight-bold" style="color: black;">Block ball</div>
+		</li>
+        <li class="flex align-items-center mb-3">
+          <img :src="tp" alt="tp" class="mr-3" style="width: 18px" />
+          <div class="p-font-weight-bold" style="color: black;">Ball teleportation</div>
+		</li>
+        <li class="flex align-items-center mb-3">
+          <img :src="larger" alt="larger" class="mr-3" style="width: 18px" />
+          <div class="p-font-weight-bold" style="color: black;">Increase paddle size</div>
+		</li>
+        <li class="flex align-items-center mb-3">
+          <img :src="smaller" alt="smaller" class="mr-3" style="width: 18px" />
+          <div class="p-font-weight-bold" style="color: black;">Decrease paddle size</div>
+		</li>
+        <li class="flex align-items-center mb-3">
+          <img :src="newball" alt="newball" class="mr-3" style="width: 18px" />
+          <div class="p-font-weight-bold" style="color: black;">Duplicate ball</div>
+		</li>
+      </ul>
+    </div>
+  </div>
+
+	<div v-show="inSolo || inGame">
+		<div v-if="Pong" class="flex flex-column align-items-center justify-content-center pl-8 pr-8 m-3">
+
+			<div v-if="inSolo || inGame" class="flex py-8 mb-5">
 				<div v-if="inGame" class="flex px-2">
 					<p style="color: aliceblue;">{{ Pong.scoreA }}</p>
 				</div>
@@ -29,6 +64,9 @@
 					</div>
 				</div>
 				<Button @click="LeaveGame(),Pong.restartMatch(false) ">LeaveGame</Button>
+				<div class="flex px-2">
+					<Button @click="openPopup" label="help blocks mode" icon="pi pi-question-circle" text></Button>
+				</div>
 				<div v-if="inGame" class="flex px-2">
 					<p style="color: aliceblue;">{{ Pong.scoreB }}</p>
 				</div>
@@ -42,122 +80,6 @@
 		</div>
 	</div>
 </template>
-
-<style>
-.flexContainer {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 60vw;
-	/* Set the container's width to the full viewport width */
-	height: 60vh;
-	/* Set the container's height to the full viewport height */
-	border: 1px solid black;
-	/* Just for visualization */
-}
-
-.gameCanvasStyle {
-	flex: 1;
-	z-index: 1;
-	display: flex;
-	position: relative;
-	/* width: var(--canvasWidth, 10px);
-  height: var(--canvasHeight, 10px); */
-	border: 0.2rem solid #fff;
-	border-radius: 1rem;
-	box-shadow: 0 0 .2rem #fff,
-		0 0 .2rem #fff,
-		0 0 1.2rem #bc13fe,
-		0 0 0.8rem #bc13fe,
-		0 0 1.2rem #bc13fe,
-		inset 0 0 1.2rem #bc13fe;
-	margin: auto;
-	background: rgba(0, 0, 0, 0.534);
-	justify-content: center;
-	/* Center Buttons horizontally */
-	align-items: center;
-	width: 100%;
-	/* height: 100%; */
-	object-fit: contain;
-}
-
-.info-container {
-	position: absolute;
-	top: 0;
-	bottom: 5%;
-	left: 1%;
-	margin-top: 50px;
-	height: 100px;
-	width: 10%;
-}
-
-.Button-container {
-	position: absolute;
-	bottom: 100%;
-	/* Make the Button container stick to the top of the game container */
-	left: 0;
-	/* Align to the left of the game container */
-	height: auto;
-	/* Let the height be determined by its content */
-	width: 100%;
-	/* Full width to match game container */
-	display: flex;
-	/* Make it a flex container */
-	justify-content: center;
-	/* Center Buttons horizontally */
-	align-items: center;
-	/* Center Buttons vertically */
-	gap: 10px;
-	/* Add some space between the Buttons */
-}
-
-.game-container {
-	flex: 1;
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-	align-items: flex-start;
-	margin-top: 5%;
-	margin-right: 5%;
-	padding-top: 120px;
-	/* Space for the Buttons. This should be greater than the height of the Buttons */
-}
-
-.pong-container {
-	display: flex;
-	align-items: center;
-}
-
--paddle-width .input-container {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	color: #fff;
-}
-
-.left-input,
-.right-input {
-	width: 150px;
-}
-
-.left-input {
-	text-align: right;
-}
-
-.right-input {
-	text-align: left;
-}
-
-.pong {
-	position: relative;
-	width: var(--width, 10px);
-	height: var(--height, 10px);
-	border: 1px solid #6b4d4d;
-	background-color: #2b222e;
-	overflow: hidden;
-}
-</style>
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted, ref, computed } from 'vue';
@@ -173,6 +95,16 @@ import { EffectBlock } from "../class/EffectBlock";
 
 export default defineComponent({
 	name: 'FpsComponent',
+	data() {
+		return {
+			showPopup: false as boolean,
+			block: require('@/assets/sprites/block.png'),
+			tp: require('@/assets/sprites/tp.png'),
+			newball: require('@/assets/sprites/newBall.png'),
+			larger: require('@/assets/sprites/larger.png'),
+			smaller: require('@/assets/sprites/smaller.png'),
+		};
+	},
 	computed: {
 		inGame() {
 			return store.state.ingame;
@@ -182,6 +114,13 @@ export default defineComponent({
 		},
 	},
 	methods: {
+
+		openPopup() {
+			this.showPopup = true;
+		},
+		closePopup() {
+			this.showPopup = false;
+		},
 		LeaveGame() {
 			if (store.state.ingame && store.state.playerNum != 0) {
 				//console.log(`Pong Game player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
@@ -546,3 +485,140 @@ export default defineComponent({
 },
 );
 </script>
+
+<style>
+.flexContainer {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 60vw;
+	/* Set the container's width to the full viewport width */
+	height: 60vh;
+	/* Set the container's height to the full viewport height */
+	border: 1px solid black;
+	/* Just for visualization */
+}
+
+.gameCanvasStyle {
+	flex: 1;
+	z-index: 1;
+	display: flex;
+	position: relative;
+	/* width: var(--canvasWidth, 10px);
+  height: var(--canvasHeight, 10px); */
+	border: 0.2rem solid #fff;
+	border-radius: 1rem;
+	box-shadow: 0 0 .2rem #fff,
+		0 0 .2rem #fff,
+		0 0 1.2rem #bc13fe,
+		0 0 0.8rem #bc13fe,
+		0 0 1.2rem #bc13fe,
+		inset 0 0 1.2rem #bc13fe;
+	margin: auto;
+	background: rgba(0, 0, 0, 0.534);
+	justify-content: center;
+	/* Center Buttons horizontally */
+	align-items: center;
+	width: 100%;
+	/* height: 100%; */
+	object-fit: contain;
+}
+
+.info-container {
+	position: absolute;
+	top: 0;
+	bottom: 5%;
+	left: 1%;
+	margin-top: 50px;
+	height: 100px;
+	width: 10%;
+}
+
+.Button-container {
+	position: absolute;
+	bottom: 100%;
+	/* Make the Button container stick to the top of the game container */
+	left: 0;
+	/* Align to the left of the game container */
+	height: auto;
+	/* Let the height be determined by its content */
+	width: 100%;
+	/* Full width to match game container */
+	display: flex;
+	/* Make it a flex container */
+	justify-content: center;
+	/* Center Buttons horizontally */
+	align-items: center;
+	/* Center Buttons vertically */
+	gap: 10px;
+	/* Add some space between the Buttons */
+}
+
+.game-container {
+	flex: 1;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: flex-start;
+	margin-top: 5%;
+	margin-right: 5%;
+	padding-top: 120px;
+	/* Space for the Buttons. This should be greater than the height of the Buttons */
+}
+
+.pong-container {
+	display: flex;
+	align-items: center;
+}
+
+-paddle-width .input-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: #fff;
+}
+
+.left-input,
+.right-input {
+	width: 150px;
+}
+
+.left-input {
+	text-align: right;
+}
+
+.right-input {
+	text-align: left;
+}
+
+.pong {
+	position: relative;
+	width: var(--width, 10px);
+	height: var(--height, 10px);
+	border: 1px solid #6b4d4d;
+	background-color: #2b222e;
+	overflow: hidden;
+}
+
+.popup {
+  position: fixed;
+  top: 30%;
+  right: 1%;
+  transform: translate(-50%, -50%);
+  background: #49354f;
+  padding: 25px;
+  border: 1px solid #c9a1dd;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 2;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+</style>

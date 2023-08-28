@@ -1,4 +1,8 @@
 <template>
+
+
+
+
 	<div class="surface-card p-4 shadow-8 border-round w-full">
 		<div class="text-center mb-5">
 			<img :src="require(`@/assets/pong.png`)" alt="Image" height="50" class="mb-3">
@@ -76,6 +80,7 @@ export default defineComponent({
 	},
 
 	methods: {
+
 		
 		async acceptInvite() {
 			console.log("accept invite");
