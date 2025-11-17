@@ -22,19 +22,17 @@ This README explains how the project is structured, required environment variabl
 **Table of contents**
 
 - **Getting Started**
-- **Using Docker (recommended for dev)**
-- **Running without Docker**
+- **Run Using Docker**
 - **Database / Prisma**
 - **Environment variables**
 - **Architecture & Important files**
 - **Testing**
 - **Makefile shortcuts**
-- **Contributing**
 - **License**
 
 ---
 
-**Getting Started (prerequisites)**
+**Getting Started**
 
 - Docker & Docker Compose (or docker CLI supporting `docker compose`).
 - Node.js (v18+ recommended) and `npm` if you run services without Docker.
@@ -42,7 +40,7 @@ This README explains how the project is structured, required environment variabl
 
 ---
 
-**Using Docker (recommended)**
+**Run Using Docker**
 
 1. Create a `.env` file at repository root or set environment variables (see "Environment variables" below).
 2. From project root run (Makefile wraps docker compose):
@@ -67,6 +65,12 @@ Note: The backend depends on the DB service health; docker-compose uses a health
 > docker compose down
 > docker volume rm ft_transcendence_postgres-data  # adjust name if your compose project differs
 > ```
+
+---
+
+**Run Localy**
+
+
 
 ---
 
@@ -157,6 +161,19 @@ Realtime
 
 ---
 
+**Testing**
+
+# backend (Jest)
+```
+docker compose run --rm backend npm run test -- chat
+```
+# frontend (Vitest)
+```
+docker compose run --rm frontend npm run test:unit
+```
+
+---
+
 **Makefile shortcuts**
 
 - `make all` — same as `docker compose up --build`.
@@ -165,6 +182,7 @@ Realtime
 - `make clean` — stops containers and removes containers.
 - `make fclean` — aggressive prune (images, volumes, networks). Use with caution.
 - `make status` — inspect docker compose status.
+- `make test` - test bakcend and frontend
 
 ---
 

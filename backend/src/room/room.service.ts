@@ -212,9 +212,12 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async createRoom(room: Room) {
-    this.logger.log("createRoom: " + room);
-    if (!room) return null;
+  async createRoom(
+    ownerId: number,
+    room: Pick<Room, "name"> & { hash?: string | null; private?: boolean },
+  ) {
+    this.logger.log(`createRoom requested by user ${ownerId}`);
+    if (!room || !room.name) return null;
     const findRoom = await this.findByName(room.name);
     if (typeof findRoom !== "undefined" && findRoom && findRoom.id)
       return findRoom;
@@ -226,14 +229,15 @@ export class RoomService implements OnModuleInit {
       .create({
         data: {
           name: room.name,
+          private: room.private ?? false,
           owner: {
             connect: {
-              id: room.ownerId,
+              id: ownerId,
             },
           },
           users: {
             connect: {
-              id: room.ownerId,
+              id: ownerId,
             },
           },
           hash: password,
@@ -278,7 +282,17 @@ export class RoomService implements OnModuleInit {
       });
   }
 
-  async getPrivateRoom(user1: User, user2: User) {
+  async getPrivateRoom(userId: number, otherUserId: number) {
+    if (userId === otherUserId) return null;
+    const [user1, user2] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: userId } }),
+      this.prisma.user.findUnique({ where: { id: otherUserId } }),
+    ]);
+
+    if (!user1 || !user2) {
+      throw new Error("Unable to locate users for private room creation");
+    }
+
     this.logger.log(
       `getPrivateRoom of ${user1.username} and ${user2.username}`,
     );

@@ -1,18 +1,25 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  Header,
   HttpCode,
   HttpStatus,
-  Post,
-  Header,
-  Get,
-  Delete,
-  Body,
   Param,
+  Post,
   UseGuards,
 } from "@nestjs/common";
 import { GetCurrentUserId } from "../common/decorators";
-import { Room, User } from "@prisma/client";
-// import { ModifyOtherDto } from "./dto/room.dto";
+import { Room } from "@prisma/client";
+import {
+  CreateRoomDto,
+  PrivateRoomDto,
+  RoomPasswordDto,
+  RoomTargetDto,
+} from "./dto";
 import { RoomService } from "./room.service";
 import { AtGuard } from "src/common/guards";
 
@@ -50,9 +57,15 @@ export class RoomController {
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   @Header("Access-Control-Allow-Origin", "*")
-  findPrivateRooms(@Param("id") param: string) {
-    const id: number = parseInt(param);
-    return this.roomService.findPrivateRooms(id);
+  findPrivateRooms(
+    @GetCurrentUserId() userId: number,
+    @Param("id") param: string,
+  ) {
+    const requestedId: number = parseInt(param);
+    if (requestedId !== userId) {
+      throw new ForbiddenException("Cannot access other users' private rooms");
+    }
+    return this.roomService.findPrivateRooms(userId);
   }
 
   @Get(":id")
@@ -76,80 +89,114 @@ export class RoomController {
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  addUser(@Body() dto: any): Promise<boolean> {
-    return this.roomService.addUser(dto.roomId, dto.userId, dto.pwd);
+  addUser(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: RoomPasswordDto,
+  ): Promise<boolean> {
+    return this.roomService.addUser(dto.roomId, userId, dto.pwd ?? "");
   }
 
   @Post("addAdmin")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  addAdmin(@Body() dto: any) {
-    this.roomService.addAdmin(dto.roomId, dto.userId, dto.otherId);
+  addAdmin(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: RoomTargetDto,
+  ) {
+    this.roomService.addAdmin(dto.roomId, userId, dto.otherId);
   }
 
   @Post("delAdmin")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  delAdmin(@Body() dto: any) {
-    this.roomService.delAdmin(dto.roomId, dto.userId, dto.otherId);
+  delAdmin(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: RoomTargetDto,
+  ) {
+    this.roomService.delAdmin(dto.roomId, userId, dto.otherId);
   }
 
   @Post("addBan")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  addBanned(@Body() dto: any) {
-    this.roomService.addBan(dto.roomId, dto.userId, dto.otherId);
+  addBanned(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: RoomTargetDto,
+  ) {
+    this.roomService.addBan(dto.roomId, userId, dto.otherId);
   }
 
   @Post("delBan")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  delBan(@Body() dto: any) {
-    this.roomService.delBan(dto.roomId, dto.userId, dto.otherId);
+  delBan(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: RoomTargetDto,
+  ) {
+    this.roomService.delBan(dto.roomId, userId, dto.otherId);
   }
 
   @Post("addMute")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  addMute(@Body() dto: any) {
-    this.roomService.addMute(dto.roomId, dto.userId, dto.otherId);
+  addMute(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: RoomTargetDto,
+  ) {
+    this.roomService.addMute(dto.roomId, userId, dto.otherId);
   }
 
   @Post("delMute")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  delMute(@Body() dto: any) {
-    this.roomService.delMute(dto.roomId, dto.userId, dto.otherId);
+  delMute(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: RoomTargetDto,
+  ) {
+    this.roomService.delMute(dto.roomId, userId, dto.otherId);
   }
 
   @Post("create")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  createRoom(@Body() dto: Room) {
-    return this.roomService.createRoom(dto);
+  createRoom(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: CreateRoomDto,
+  ) {
+    return this.roomService.createRoom(userId, dto);
   }
 
   @Post("private")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  createPrivateRoom(@Body() dto: { user1: User; user2: User }) {
-    return this.roomService.getPrivateRoom(dto.user1, dto.user2);
+  createPrivateRoom(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: PrivateRoomDto & { user2?: { id: number } },
+  ) {
+    const targetId = dto.otherId ?? dto.user2?.id;
+    if (!targetId) {
+      throw new BadRequestException("Missing recipient for private room");
+    }
+    return this.roomService.getPrivateRoom(userId, targetId);
   }
 
   @Post("delUser")
   @UseGuards(AtGuard)
   @Header("Access-Control-Allow-Origin", "*")
   @HttpCode(HttpStatus.OK)
-  removeUser(@Body() dto: any) {
-    this.roomService.removeUser(dto.roomId, dto.userId, dto.otherId);
+  removeUser(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: RoomTargetDto,
+  ) {
+    this.roomService.removeUser(dto.roomId, userId, dto.otherId);
   }
 
   @Delete(":id")

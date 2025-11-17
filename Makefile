@@ -35,6 +35,12 @@ status:
 	docker image ls
 	docker volume ls
 
+test:
+	@printf "Lancement des tests...\n"
+	@docker compose run --rm backend npm run test
+	@docker compose run --rm frontend npm run test:unit
+	@printf "Tests terminés.\n"
+
 re: stop all
 
 restart: clean all

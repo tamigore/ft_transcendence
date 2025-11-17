@@ -5,7 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -57,6 +59,8 @@
     "sass": "^1.66.1",
     "sass-loader": "^13.3.2",
     "typescript": "~5.1.6",
+    "vitest": "^1.2.2",
+    "jsdom": "^22.1.0",
     "vue-cli-plugin-vuetify": "~2.5.8",
     "vue-drawing-canvas": "^1.0.14"
   }

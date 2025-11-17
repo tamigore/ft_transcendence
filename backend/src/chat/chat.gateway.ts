@@ -8,14 +8,15 @@ import {
   ConnectedSocket,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-import { Logger } from "@nestjs/common";
+import { Logger, UseGuards } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
 import { ChatService } from "./chat.service";
 import { RoomService } from "src/room/room.service";
 import { User, Room } from "@prisma/client";
-// import { WsGuard } from "src/common/guards/ws.guard";
+import { WsGuard } from "src/common/guards";
 
 @WebSocketGateway(8082)
+@UseGuards(WsGuard)
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private logger: Logger = new Logger("ChatGateway");
   constructor(
@@ -44,7 +45,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  // @UseGuards(WsGuard)
   @SubscribeMessage("cliMessage")
   async onMessage(@ConnectedSocket() client: Socket, @MessageBody() body: any) {
     this.logger.log("onMessage");
@@ -62,7 +62,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(body.room.name).emit("servMessage", body);
   }
 
-  // @UseGuards(WsGuard)
   @SubscribeMessage("join_room")
   async onJoinRoom(
     @MessageBody()
@@ -81,7 +80,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     else this.server.emit("update");
   }
 
-  // @UseGuards(WsGuard)
   @SubscribeMessage("leave_room")
   async onLeaveRoom(
     @MessageBody()

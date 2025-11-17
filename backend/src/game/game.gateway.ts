@@ -17,6 +17,7 @@ import {
   PaddleState,
   BlockState,
 } from "./game.interfaces";
+import { WsG~uard } from "src/common/guards";
 
 @WebSocketGateway(8081)
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -26,12 +27,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  // @UseGuards(WsGuard)
   async handleConnection(@MessageBody() client: Socket) {
     this.logger.log("GameGateway handleConnection clientid: ", client.id);
   }
 
-  // @UseGuards(WsGuard)
   async handleDisconnect(client: Socket) {
     console.log("in handle client.rooms : ", client.rooms);
     this.logger.log("GameGateway handleDisconnect clientid: ", client.id);
@@ -39,7 +38,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("disconnecting")
   handleDisconnecting(@ConnectedSocket() client: Socket) {
-    console.log("==================Game disconnecting client", client.id);
+    import { Logger, UseGuards } from "@nestjs/common";
     console.log("client.rooms : ", client.rooms);
     client.rooms.forEach((room) => {
       this.logger.log(
@@ -48,8 +47,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  // @UseGuards(WsGuard)
   @SubscribeMessage("gameMessage")
+  @UseGuards(WsGuard)
   async onMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { moove: GameMove; room: string },

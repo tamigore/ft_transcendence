@@ -1,38 +1,47 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from "class-validator";
 
-export class ModifySelfDto {
-  @IsNotEmpty()
-  @IsString()
-  userId: number;
-
-  @IsNotEmpty()
-  @IsString()
+export class RoomIdDto {
+  @IsInt()
+  @Type(() => Number)
   roomId: number;
 }
 
-export class ModifyPwdDto {
-  @IsNotEmpty()
+export class RoomPasswordDto extends RoomIdDto {
+  @IsOptional()
   @IsString()
-  userId: number;
-
-  @IsNotEmpty()
-  @IsString()
-  roomId: number;
-
-  @IsString()
-  pwd: string;
+  pwd?: string;
 }
 
-export class ModifyOtherDto {
-  @IsNotEmpty()
-  @IsString()
-  userId: number;
-
-  @IsNotEmpty()
-  @IsString()
+export class RoomTargetDto extends RoomIdDto {
+  @IsInt()
+  @Type(() => Number)
   otherId: number;
+}
 
+export class CreateRoomDto {
   @IsNotEmpty()
   @IsString()
-  roomId: number;
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  hash?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  private?: boolean;
+}
+
+export class PrivateRoomDto {
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  otherId?: number;
 }
