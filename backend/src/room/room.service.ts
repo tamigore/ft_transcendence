@@ -40,7 +40,6 @@ export class RoomService implements OnModuleInit {
     pawnId: number,
   ): boolean {
     if (
-      // this.isUser(room, pawnId) &&
       !this.isOwner(room, pawnId) &&
       (this.isOwner(room, userId) ||
         (this.isAdmin(room, userId) && !this.isAdmin(room, pawnId)))
@@ -250,11 +249,9 @@ export class RoomService implements OnModuleInit {
         },
       })
       .then((newRoom) => {
-        // this.logger.log("createRoom success: ", newRoom);
         return newRoom;
       })
       .catch((error) => {
-        // this.logger.error("createRoom error: ", error);
         throw new Error(error);
       });
   }
@@ -343,7 +340,6 @@ export class RoomService implements OnModuleInit {
         },
       })
       .then((updatedRoom) => {
-        // this.logger.log("Room update success: ", updatedRoom);
         return updatedRoom;
       })
       .catch((error) => {
@@ -364,8 +360,6 @@ export class RoomService implements OnModuleInit {
         if (typeof room === "undefined" || !room || this.isBan(room, userId))
           return false;
         if (room.hash) {
-          // this.logger.debug(pwd);
-          // this.logger.debug(room.hash);
           const verif = await argon2.verify(room.hash, pwd);
           if (!verif) return false;
         }
@@ -422,7 +416,6 @@ export class RoomService implements OnModuleInit {
       })
       .then((room) => {
         return room;
-        // this.logger.log("addAdmin success: ", room);
       })
       .catch((error) => {
         throw new Error(error);
@@ -524,21 +517,6 @@ export class RoomService implements OnModuleInit {
     this.logger.log(`delBan: ${userId} to room: ${roomId}`);
     await this.prisma
       .$transaction(async (prisma) => {
-        // const room = await prisma.room.findUnique({
-        //   where: { id: roomId },
-        //   include: {
-        //     owner: true,
-        //     admins: true,
-        //     users: true,
-        //     ban: true,
-        //     mute: true,
-        //     messages: true,
-        //   },
-        // });
-        // if (!this.higherRights(room, userId, banId))
-        //   throw new Error(
-        //     `User ${userId} donesn't have rights on room ${roomId}`,
-        //   );
         return await prisma.room.update({
           where: { id: roomId },
           data: {
@@ -657,9 +635,6 @@ export class RoomService implements OnModuleInit {
           .findUnique({
             where: { id: roomId },
             include: { owner: true },
-          })
-          .catch((/*error*/) => {
-            return null; //throw new Error(error);
           });
         if (userId !== room.owner.id)
           throw new Error(`User ${userId} doesn't own room ${roomId}`);
@@ -683,9 +658,6 @@ export class RoomService implements OnModuleInit {
                 disconnect: true,
               },
             },
-          })
-          .catch((/*error*/) => {
-            return null; //throw new Error(error);
           });
         return prisma.room.delete({
           where: { id: roomId },
@@ -693,9 +665,6 @@ export class RoomService implements OnModuleInit {
       })
       .then((res) => {
         this.logger.log("remove success: ", res);
-      })
-      .catch((/*error*/) => {
-        return null; // throw new Error(error);
       });
   }
 
@@ -714,13 +683,11 @@ export class RoomService implements OnModuleInit {
             messages: true,
           },
         });
-        if (!room) return false;
-        if (userId !== removeId) {
-          if (!this.higherRights(room, userId, removeId)) return false;
-          // throw new Error(
-          //   `User ${userId} donesn't have rights on room ${roomId}`,
-          // );
-        }
+        if (!room)
+          return false;
+        if (userId !== removeId)
+          if (!this.higherRights(room, userId, removeId))
+            return false;
         return await prisma.room.update({
           where: { id: roomId },
           data: {
@@ -747,9 +714,8 @@ export class RoomService implements OnModuleInit {
       .then((room) => {
         this.logger.log("removeUser success: ", room);
       })
-      .catch((/*error*/) => {
+      .catch(() => {
         return false;
-        // throw new Error(error);
       });
   }
 

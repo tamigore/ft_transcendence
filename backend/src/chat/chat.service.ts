@@ -57,15 +57,6 @@ export class ChatService {
             },
           },
         },
-        // room: {
-        //   mute: {
-        //     every: {
-        //       id: {
-        //         not: userId,
-        //       },
-        //     },
-        //   },
-        // },
       },
       include: {
         user: true,

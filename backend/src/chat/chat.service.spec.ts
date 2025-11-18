@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { ForbiddenException } from "@nestjs/common";
 import type { Message } from "@prisma/client";
 import { ChatService } from "./chat.service";

@@ -11,14 +11,3 @@ import { WsGuard } from "src/common/guards";
   providers: [GameGateway, GameService, UserService, JwtService, WsGuard],
 })
 export class GameModule {}
-
-
-// import { Module } from "@nestjs/common";
-// import { HistoricService } from "./game.service";
-// import { GameController } from "./game.controller";
-
-// @Module({
-//   controllers: [GameController],
-//   providers: [HistoricService],
-// })
-// export class GameModule {}

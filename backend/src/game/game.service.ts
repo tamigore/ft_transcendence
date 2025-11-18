@@ -3,8 +3,6 @@ import { Game } from "@prisma/client";
 import { UserService } from "../user//user.service";
 import { Matchmaker, Spectate } from "./game.interfaces";
 import { Injectable, Logger } from "@nestjs/common";
-// import { Server } from "socket.io";
-// import { WebSocketServer } from "@nestjs/websockets";
 
 @Injectable()
 export class GameService {
@@ -13,9 +11,6 @@ export class GameService {
     private prisma: PrismaService,
     private userServ: UserService,
   ) {}
-
-  // @WebSocketServer()
-  // server: Server;
 
   async findSpectate() {
     return await this.prisma.game.findMany({
@@ -67,7 +62,6 @@ export class GameService {
       })
       .then(() => {
         this.updateInQueue(game.player1Id, false);
-        // console.log("queueLeave : game deleted");
       })
       .catch(() => {
         return null;
@@ -82,7 +76,6 @@ export class GameService {
     const user2 = await this.userServ.findByUsername(dto.user2username);
 
     if (!user1 || !user2) {
-      // console.log("echec cuisant");
       return null;
     }
     const game = await this.prisma.game.create({
@@ -106,11 +99,26 @@ export class GameService {
       },
     });
     return game;
-    // this.server.to(user1.username).emit("servInviteGame", game);
+  }
+
+  async findGameByRoom(room: string) {
+    return await this.prisma.game.findFirst({
+      where: {
+        player1: {
+          username: room,
+        },
+        historic: {
+          is: null,
+        },
+      },
+      include: {
+        player1: true,
+        player2: true,
+      },
+    });
   }
 
   async matchMaker(dto: Matchmaker): Promise<Game> {
-    // console.log(`typeof ${typeof dto.userId}`);
     const game = await this.prisma
       .$transaction(async () => {
         const game = await this.prisma.game.findFirst({
@@ -122,7 +130,6 @@ export class GameService {
             },
           },
         });
-        // console.log("INMATCHMAKER : ", dto.userName);
 
         if (!game) {
           this.logger.log(
@@ -221,7 +228,6 @@ export class GameService {
     _score: string,
   ) {
     if (!game || !game.id || !_winner || !_looser || !_score) {
-      // console.log("gameToHistoric : game is null");
       return null;
     }
     return await this.prisma.historic

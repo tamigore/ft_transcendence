@@ -66,22 +66,17 @@ const store = createStore({
         },
         setLastPrivate(state, room: Room) {
             state.lastPrivate = room;
-            // console.log('setLastPrivate: ', state.lastPrivate);
         },
         setLastRoom(state, room: Room) {
             state.lastRoom = room;
-            // console.log('setLastRoom: ', state.lastRoom);
         },
         setRooms(state, rooms: Room[]) {
             state.rooms = rooms;
-            // console.log('setRooms: ', state.rooms);
         },
         addRoom(state, room: Room) {
-            // console.log('addRoom: ', room);
             state.rooms.push(room);
         },
         delRoom(state, room: Room) {
-            // console.log('delRoom: ', room);
             const index = state.rooms.indexOf(room);
             if (index >= 0) {
                 state.rooms.splice(index, index);
@@ -89,24 +84,19 @@ const store = createStore({
         },
         setPrivate(state, rooms: Room[]) {
             state.private = rooms;
-            // console.log('setPrivate: ', state.private);
         },
         addPrivate(state, room: Room) {
-            // console.log('addPrivate: ', room);
             state.private.push(room);
         },
         setFriend(state, users: User[]) {
-            // console.log('setFriend: ', users);
             state.user.friend = users;
             state.user.friendBy = users;
         },
         setBlocked(state, users: User[]) {
-            // console.log('setBlocked: ', users);
             state.user.friend = users;
             state.user.friendBy = users;
         },
         setUser(state, user: User) {
-            // console.log('setUser: ', user);
             state.user.updated_at = user.updated_at;
             state.user.email = user.email;
             state.user.username = user.username;

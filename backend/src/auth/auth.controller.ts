@@ -39,11 +39,9 @@ export class AuthController {
   }
 
   @Public()
-  // @Header("Access-Control-Allow-Origin", "*")
   @Get("login42")
   @UseGuards(FortyTwoAuthGuard)
   async login42() {
-    // console.log("login42 ??");
   }
 
   @Public()

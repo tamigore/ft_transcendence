@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ForbiddenException } from "@nestjs/common";
 import { HistoricController } from "./historic.controller";
 import { HistoricService } from "./historic.service";

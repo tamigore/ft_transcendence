@@ -41,7 +41,6 @@ export class RoomController {
   @HttpCode(HttpStatus.OK)
   async findRoomsIncludes() {
     const rooms = await this.roomService.findAllIncludes();
-    // console.debug(rooms);
     return rooms;
   }
 

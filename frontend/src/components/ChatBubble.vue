@@ -208,13 +208,11 @@ export default defineComponent({
     },
 
     async searchUser(): Promise<void> {
-      // console.log("searchUser");
       if (this.message.user && this.message.user.username)
         router.push(`/profile/${this.message.user.username}`);
     },
 
     async blockUser(): Promise<void> {
-      // console.log("blockUser");
       this.removeFriend();
       await axios.post('/api/user/block/add', {
         id: this.message.userId,
@@ -222,7 +220,6 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res) => {
-        // console.log(res);
         if (res && res.data && res.data.blocked)
           store.commit("setBlocked", res.data.blocked);
         socket.emit("update", {room: this.room});
@@ -231,7 +228,6 @@ export default defineComponent({
     },
 
     async addAdmin(): Promise<void> {
-      // console.log("addAdmin");
       await axios.post('/api/room/addAdmin', {
         roomId: this.room.id,
         userId: store.state.user.id,
@@ -240,7 +236,6 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async () => {
-        // console.log(res);
         socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
@@ -256,15 +251,12 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async () => {
-        // console.log(res);
         socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
 
     async kickUser(): Promise<void> {
-      // console.log("kickUser");
-      
       await axios.post('/api/room/delUser', {
         roomId: this.room.id,
         userId: store.state.user.id,
@@ -273,15 +265,12 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async () => {
-        // console.log(res);
         socket.emit("leave_room", {user: this.message.user, room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
 
     async banUser(): Promise<void> {
-      // console.log("banUser");
-      
       await axios.post('/api/room/addBan', {
         roomId: this.room.id,
         userId: store.state.user.id,
@@ -290,7 +279,6 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res) => {
-        // console.log(res);
         if (res && res.data && res.data.ban) {
           store.commit("setBan", res.data.ban);
         }
@@ -300,8 +288,6 @@ export default defineComponent({
     },
 
     async unbanUser(): Promise<void> {
-      // console.log("banUser");
-      
       await axios.post('/api/room/delBan', {
         roomId: this.room.id,
         userId: store.state.user.id,
@@ -310,7 +296,6 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res) => {
-        // console.log(res);
         if (res && res.data && res.data.ban) {
           store.commit("setBan", res.data.ban);
         }
@@ -320,7 +305,6 @@ export default defineComponent({
     },
 
     async muteUser() {
-      // console.log("muteUser");
       await axios.post('/api/room/addMute', {
         roomId: this.room.id,
         userId: store.state.user.id,
@@ -329,14 +313,12 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async () => {
-        // console.log(res);
         socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
 
     async unmuteUser() {
-      // console.log("muteUser");
       await axios.post('/api/room/delMute', {
         roomId: this.room.id,
         userId: store.state.user.id,
@@ -345,19 +327,16 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async () => {
-        // console.log(res);
         socket.emit("update", {room: this.room});
       })
       .catch(err => { throw new Error(err) });
     },
 
     async addFriend(): Promise<void> {
-      // console.log("addFriend");
       await axios.post('/api/user/friends/add', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res) => {
-        // console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
         socket.emit("update", {room: this.room});
@@ -366,12 +345,10 @@ export default defineComponent({
     },
 
     async removeFriend(): Promise<void> {
-      // console.log("removeFriend");
       await axios.post('/api/user/friends/del', this.message.user, {
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res) => {
-        // console.log(res);
         if (res && res.data && res.data.friend)
           store.commit("setFriend", res.data.friend);
         socket.emit("update", {room: this.room});
@@ -380,7 +357,6 @@ export default defineComponent({
     },
 
     async invitePong() {
-      // console.log("invitePong : ", this.message.user.username, " || ingame ? ", this.message.user.username);
       const user = await axios.get(`api/user/all/${store.state.user.id}`, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       })
@@ -393,7 +369,6 @@ export default defineComponent({
         return;
       gameSocket.connect();
       socket.emit("inviteGame", {user1: store.state.user, user2: this.message.user})
-			// console.log("invite friend");
 			store.commit("setInQueue", true);
 			store.commit("setGameRoom", store.state.user.username);
 			store.commit("setDateInvite");
@@ -403,8 +378,6 @@ export default defineComponent({
     },
 
     async privateMessage(): Promise<Room> {
-      // console.log("privateMessage");
-      
       return await axios.post('/api/room/private', {
         user1: store.state.user,
         user2: this.message.user,
@@ -412,12 +385,10 @@ export default defineComponent({
         headers: {"Authorization": `Bearer ${store.state.user.hash}`}
       })
       .then(async (res: AxiosResponse) => {
-        // console.log(res);
         await axios.get(`api/room/private/${store.state.user.id}`, {
           headers: { "Authorization": `Bearer ${store.state.user.hash}` }
         })
           .then(async (response: AxiosResponse) => {
-            // console.log(`getPrivate response: ${response.data}`);
             store.commit("setPrivate", response.data);
           })
           .catch((error: AxiosError) => { throw error; });

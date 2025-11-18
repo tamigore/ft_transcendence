@@ -111,8 +111,6 @@ import axios, { AxiosError } from 'axios';
 import router from './router';
 import socket from './utils/socket';
 import gameSocket from './utils/gameSocket';
-// import { User } from './utils/interfaces';
-// import MatchMaking from "@/components/MatchMaking.vue";
 
 
 export default defineComponent({
@@ -161,7 +159,6 @@ export default defineComponent({
           headers: {"Authorization": `Bearer ${store.state.user.hash}`}
         })
         .then(() => {
-          // console.log("App LogoutPost response: ", response);
           store.commit("setHash", "");
           store.commit("setHashRt", "");
           store.commit("setLogged", false);
@@ -169,7 +166,6 @@ export default defineComponent({
           store.commit("delUser");
         })
         .catch((error: AxiosError) => {
-          // console.log("App LogoutPost error: ", error);
           throw new Error("Logout failed: " + error);
         })
         router.push("/");
@@ -191,25 +187,19 @@ export default defineComponent({
       store.commit("setPrivate", []);
       //MatchMaking.LeaveGame(); -- le before unload ne marche pas (pas de log de leaveGameroom dans le back)
 			if (store.state.ingame && store.state.playerNum != 0) {
-				// console.log(`App player1 = ${store.state.game.player1Id} || player2 = ${store.state.game.player2Id}`);
 				let looser = store.state.game.player1Id;
 				let winner = store.state.game.player2Id;
 				if (store.state.game.player2Id === store.state.user.id) {
 					looser = store.state.game.player2Id;
 					winner = store.state.game.player1Id;
 				}
-				// console.log("endGame emit");
 				gameSocket.emit("endGame", { room: store.state.gameRoom, game: store.state.game, winner: winner, looser: looser, score: "forfeit" });
 			}
-			// else if (store.state.ingame && store.state.playerNum === 0) {
-			// 	console.log("spectator leave not done");
-			// }
 			else if (store.state.inQueue && store.state.game) {
 				gameSocket.emit("queueLeave", { gameId: store.state.game.id });
 			}
 			if (store.state.ingame || store.state.inQueue)
 				gameSocket.emit("leaveGameRoom", { room: store.state.gameRoom });
-			// console.log("endGame emit then : ",store.state.ingame, store.state.playerNum);
 			store.commit("setInQueue", false);
 			store.commit("setGameConnect", false);
 			store.commit("setGameRoom", "");

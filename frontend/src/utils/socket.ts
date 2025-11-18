@@ -119,7 +119,6 @@ class SocketioChat {
     });
 
     this.socket.on("connect", async () => {
-      // console.log(this.socket.id)
       await axios.post("/api/user/chatsocket", { socket: this.socket.id }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
       });
@@ -134,11 +133,9 @@ class SocketioChat {
       if (store.state.ingame || store.state.inQueue)
         return ;
 			gameSocket.connect();
-			// console.log("===========accept invite");
 			store.commit("setInQueue", true);
 			store.commit("setGameRoom", e.user1.username);
       router.push({path: "/pong"});
-			// console.log("===========accept invite END : ", gameSocket.id, " ", e.user1.username, " ", e.user2.username);
 			gameSocket.emit("inviteJoinGameRoom", { room:  e.user1.username as string });
 			gameSocket.emit("inviteGame", {
 				user1username:  e.user1.username,

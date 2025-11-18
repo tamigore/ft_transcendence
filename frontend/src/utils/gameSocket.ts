@@ -37,7 +37,7 @@ export interface ClientToServerEvents {
   destroyBall(e: { room: string, ballId: number }): void;
   goalMessage(e: { room: string, player: number }): void;
   ballPing(e: { ballInfo: BallState, room: string }): void;
-  ReadyGame(e: { room: string, ball: BallState }): void;
+  ReadyGame(e: { room: string, ball?: BallState, gameId?: number }): void;
   gameMessage(e: { moove: GameMove, room: string }): void;
   paddlePosMessage(e: { state: PaddleState, room: string }): void;
   pingMessage(e: { ballInfo: BallState, room: string }): void;

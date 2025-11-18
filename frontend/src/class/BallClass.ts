@@ -161,7 +161,6 @@ export class BallClass {
 				if (this.y + this.radius >= block.y && this.y - this.radius <= block.y + block.height) {
 					if (!store.state.ingame || store.state.playerNum == 1) {
 						block.triggerEffect(this);
-						// //console.log("ballBlockColision = ", block.id);
 						gameSocket.emit("destroyBlock", { room: store.state.gameRoom, blockId: block.id });
 						this.pong.removeBlock(block.id);
 					}
@@ -200,17 +199,10 @@ export class BallClass {
 	}
 
 	ballColision = (): BallClass => {
-
-		// if (this.pong.alreadyComputed) {
-		// 	this.pong.alreadyComputed = false;
-		// 	this.x += this.veloX;
-		// 	this.y += this.veloY;
-
-		// 	return this;
-		// }
+		if (store.state.ingame)
+			return this;
 
 		this.ballBlockColision();
-		// const nbr = this.pong.num_ping + this.pong.num_pong;
 		this.ballWallColision();
 		if (this.x < this.pong.width / 3 &&
 			this.ballPaddleColision(Math.abs(this.pong.paddleOffset + this.pong.leftPaddleWidth - this.pong.width / 2),
@@ -218,7 +210,6 @@ export class BallClass {
 				this.pong.leftPaddleWidth, 1)) {
 			this.pong.num_ping += 1;
 			if (store.state.playerNum == 1) {
-				//console.log("ballsetter emit");
 				gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
 			}
 		}
@@ -228,7 +219,6 @@ export class BallClass {
 				this.pong.rightPaddleWidth, -1)) {
 			this.pong.num_pong += 1;
 			if (store.state.playerNum == 2) {
-				//console.log("ballsetter emit");
 				gameSocket.emit("ballSetter", { ballInfo: this.ballState(), room: store.state.gameRoom });
 			}
 		}
@@ -238,9 +228,6 @@ export class BallClass {
 		}
 		this.x += this.veloX;
 		this.y += this.veloY;
-
-		// if (nbr == this.pong.num_ping + this.pong.num_pong)
-		//  this.pong.alreadyComputed = this.preColision();
 
 		return this;
 	}

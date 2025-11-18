@@ -66,22 +66,11 @@ export class TfaService {
 
   async authenticateApi(id: number, tfa_code: string): Promise<boolean> {
     console.log(this.attempts);
-    // let message = "";
     const attempt = this.checkAttempt(id);
     console.log(attempt);
-    // if (attempt === LIMIT_ATTEMPTS_ERROR)
-    //   throw new UnauthorizedException(
-    //     "Limit of attempts exceeded: retry in a moment",
-    //   );
-    // else if (attempt === LIMIT_TIME_ERROR)
-    //   throw new RequestTimeoutException("Time exceeded: restart login");
-    // else if (attempt > NO_ATTEMPT_REMAINING)
-    //   message = `Wrong authentication code: ${attempt} attempts remaining`;
-    // else if (attempt === NO_ATTEMPT_REMAINING)
-    //   message = "Limit of attempts exceeded: retry in a moment";
-    // else throw new InternalServerErrorException("TFA attempt error code");
     const isCodeValid: boolean = await this.isTfaValid(tfa_code, id);
-    if (!isCodeValid) return false; //throw new UnauthorizedException(message);
+    if (!isCodeValid)
+      return false;
     this.attempts.delete(id);
     return true;
   }

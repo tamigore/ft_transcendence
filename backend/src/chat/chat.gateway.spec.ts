@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import type { Message } from "@prisma/client";
 import { ChatGateway } from "./chat.gateway";
 

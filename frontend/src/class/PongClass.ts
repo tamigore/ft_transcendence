@@ -294,17 +294,13 @@ export class PongGameClass {
 	}
 
 	startMultiOnline() {
-		// if (store.state.playerNum == 2)
 		this.restartMatch(true);
 		if (store.state.playerNum == 1)
 			gameSocket.emit("ballSetter", { ballInfo: this.theBall.ballState(), room: store.state.gameRoom });
 		console.log("startMultiOnline----------- the ball : ", this.theBall.ballState());
-		// else
-		// 	this.restartMatch(false);
 		this.inMultiplayer = true;
 		this.gameIsRunning = true;
 		console.log("startMultiOnline-----------");
-		//console.log("game", store.state.game);
 		this.leftPlayerKeyDown = '';
 		this.leftPlayerKeyUp = '';
 		this.rightPlayerKeyDown = '';
@@ -326,7 +322,6 @@ export class PongGameClass {
 			console.log("Start mluti online rightplayerKey :", this.rightPlayerKeyUp, this.rightPlayerKeyDown);
 		this.rightPaddleHeight = 80;
 		this.leftPaddleHeight = 80;
-		// this.newBall();
 	}
 
 	endGameOnline() {
@@ -344,7 +339,6 @@ export class PongGameClass {
 			looserId = 1;
 		}
 		const theScore = this.scoreA + " - " + this.scoreB as string;
-		//console.log("endGameOnline----------- score  = ", theScore);
 		if (store.state.playerNum == 2)
 			gameSocket.emit("endGame", {
 				room: store.state.gameRoom,
@@ -378,7 +372,6 @@ export class PongGameClass {
 		}
 		else {
 			let inertie = (diff / this.leftPaddleSpeed) + Math.sign(diff) * (Math.abs(diff) / 10 * (Math.random() * 0.3));
-			// this.inertie[player] += 2;
 			if (inertie % 1 > 0.5)
 				inertie += 1 - inertie % 1;
 			else
@@ -479,7 +472,6 @@ export class PongGameClass {
 	}
 
 	sendKey = (_player: number, _up: boolean, _key: number) => {
-		// console.log("sendKey plauer ", _player, " up :", _up, " key ", _key);
 		if (store.state.ingame && this.inMultiplayer) {
 			const gameMoveData = {
 				player: _player,
@@ -487,22 +479,6 @@ export class PongGameClass {
 				key: _key,
 			} as GameMove;
 			gameSocket.emit("gameMessage", { moove: gameMoveData, room: store.state.gameRoom });
-			if (_up == true) {
-				let _posY = 0;
-				let _height = this.leftPaddleHeight;
-				if (_player == 1)
-					_posY = this.leftPaddleY;
-				else if (_player == 2) {
-					_posY = this.rightPaddleY;
-					_height = this.rightPaddleHeight;
-				}
-				const paddleStateData = {
-					player: _player,
-					posY: _posY,
-					height: _height
-				} as PaddleState;
-				gameSocket.emit("paddlePosMessage", { state: paddleStateData, room: store.state.gameRoom })
-			}
 		}
 	}
 
