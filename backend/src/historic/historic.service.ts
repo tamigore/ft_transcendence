@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { Historic } from "@prisma/client";
+import { CreateHistoricDto } from "./dto";
 
 @Injectable()
 export class HistoricService {
@@ -28,10 +29,7 @@ export class HistoricService {
           looser: true,
         },
       })
-      .then((res) => {
-        console.error(res);
-        return res;
-      })
+      .then((res) => res)
       .catch((err) => {
         throw new Error(err);
       });
@@ -51,10 +49,7 @@ export class HistoricService {
           loose: true,
         },
       })
-      .then((res) => {
-        console.error(res);
-        return res;
-      })
+      .then((res) => res)
       .catch((err) => {
         throw new Error(err);
       });
@@ -64,24 +59,24 @@ export class HistoricService {
     return await this.prisma.historic.findMany({});
   }
 
-  async setGameByGameId(body: any): Promise<void> {
+  async setGameByGameId(dto: CreateHistoricDto): Promise<void> {
     await this.prisma.historic
       .create({
         data: {
           winner: {
             connect: {
-              id: body.winnerID,
+              id: dto.winnerId,
             },
           },
           looser: {
             connect: {
-              id: body.looserID,
+              id: dto.looserId,
             },
           },
-          score: body.score,
+          score: dto.score,
           game: {
             connect: {
-              id: body.gameId,
+              id: dto.gameId,
             },
           },
         },

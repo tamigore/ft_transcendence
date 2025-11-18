@@ -15,25 +15,28 @@ describe("ChatService", () => {
   } as unknown as PrismaService;
 
   let service: ChatService;
+  const createdMessage = {
+    id: 1,
+    text: "hello",
+    roomId: 2,
+    userId: 3,
+    created_at: new Date(),
+  } as Message;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    messageClient.create.mockResolvedValue({ id: 1 });
+    messageClient.create.mockResolvedValue(createdMessage);
     service = new ChatService(prismaMock);
   });
 
   it("creates messages with connected relations", async () => {
     const payload = {
-      id: 0,
       text: "hello",
       roomId: 2,
-      room: null as any,
       userId: 3,
-      user: null as any,
-      created_at: new Date(),
-    } as Message;
+    };
 
-    await service.createMessage(payload);
+    const result = await service.createMessage(payload);
 
     expect(messageClient.create).toHaveBeenCalledWith({
       data: {
@@ -42,6 +45,7 @@ describe("ChatService", () => {
         user: { connect: { id: payload.userId } },
       },
     });
+    expect(result).toBe(createdMessage);
   });
 
   it("returns all messages", async () => {

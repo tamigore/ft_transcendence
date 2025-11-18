@@ -5,11 +5,13 @@ import {
   HttpStatus,
   Get,
   UseGuards,
+  ForbiddenException,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { ChatService } from "./chat.service";
 import { Message } from "@prisma/client";
 import { AtGuard } from "src/common/guards";
-import { GetCurrentUserId, Public } from "src/common/decorators";
+import { GetCurrentUserId } from "src/common/decorators";
 
 @Controller("chat")
 export class ChatController {
@@ -26,13 +28,16 @@ export class ChatController {
     return await this.chatService.getRoomMessages(id, roomId);
   }
 
-  @Public()
   @Get("user/:id")
-  // @UseGuards(AtGuard)
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  async getUserMessages(@Param("id") param: string): Promise<Message[]> {
-    const userId: number = parseInt(param);
-    return await this.chatService.getUserMessages(userId);
+  async getUserMessages(
+    @GetCurrentUserId() requesterId: number,
+    @Param("id", ParseIntPipe) targetId: number,
+  ): Promise<Message[]> {
+    if (requesterId !== targetId)
+      throw new ForbiddenException("Cannot access other users' messages");
+    return await this.chatService.getUserMessages(requesterId);
   }
 
   @Get()

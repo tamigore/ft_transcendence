@@ -2,35 +2,27 @@ import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { Message } from "@prisma/client";
 
+type CreateMessageInput = Pick<Message, "text" | "roomId" | "userId">;
+
 @Injectable()
 export class ChatService {
   private logger: Logger = new Logger("ChatService");
   constructor(private prisma: PrismaService) {}
 
-  async createMessage(message: Message) {
+  async createMessage(message: CreateMessageInput): Promise<Message> {
     this.logger.log("createMessage");
-    await this.prisma.message
-      .create({
+    try {
+      return await this.prisma.message.create({
         data: {
           text: message.text,
-          room: {
-            connect: {
-              id: message.roomId,
-            },
-          },
-          user: {
-            connect: {
-              id: message.userId,
-            },
-          },
+          room: { connect: { id: message.roomId } },
+          user: { connect: { id: message.userId } },
         },
-      })
-      .then((newMessage) => {
-        this.logger.log(`createMessage success: ${newMessage}`);
-      })
-      .catch((error: any) => {
-        this.logger.error(error);
       });
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
   }
 
   async getMessages() {

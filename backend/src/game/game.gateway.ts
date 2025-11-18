@@ -17,7 +17,7 @@ import {
   PaddleState,
   BlockState,
 } from "./game.interfaces";
-import { WsG~uard } from "src/common/guards";
+import { WsGuard } from "src/common/guards";
 
 @WebSocketGateway(8081)
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {

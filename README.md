@@ -23,6 +23,7 @@ This README explains how the project is structured, required environment variabl
 
 - **Getting Started**
 - **Run Using Docker**
+- **Run Without Docker**
 - **Database / Prisma**
 - **Environment variables**
 - **Architecture & Important files**
@@ -35,42 +36,76 @@ This README explains how the project is structured, required environment variabl
 **Getting Started**
 
 - Docker & Docker Compose (or docker CLI supporting `docker compose`).
-- Node.js (v18+ recommended) and `npm` if you run services without Docker.
-- A PostgreSQL-compatible client (optional) or `pgAdmin` (available in `docker-compose`).
+- Node.js 18+ and npm if you want to run services outside Docker.
+- Optional: a PostgreSQL client or pgAdmin (already provided in Compose).
 
 ---
 
 **Run Using Docker**
 
-1. Create a `.env` file at repository root or set environment variables (see "Environment variables" below).
-2. From project root run (Makefile wraps docker compose):
+1. Create a `.env` file at the repository root (see "Environment variables" for keys) or export the variables in your shell.
+2. Build and start the stack from the project root:
 
 ```bash
-# Builds and runs all services (backend, frontend, postgres, pgadmin)
+# Builds and runs backend, frontend, postgres, pgadmin
 make all
 # OR directly
 docker compose up --build
 ```
 
-3. After containers are healthy:
+3. Once the containers are healthy you can reach the services at:
 
 - Frontend: http://localhost:8080
 - Backend API: http://localhost:3000/api
+- Game gateway: ws://localhost:8081
+- Chat gateway: ws://localhost:8082
 - pgAdmin: http://localhost:5555
 
-Note: The backend depends on the DB service health; docker-compose uses a healthcheck for Postgres.
-> **Postgres 18+ data note**: the official Postgres images now expect the volume to be mounted at `/var/lib/postgresql` (not `/var/lib/postgresql/data`). If you launched the stack before this change, remove the previous volume before running `make all` again:
+4. Stop and clean the environment when you are finished:
 
-> ```bash
-> docker compose down
-> docker volume rm ft_transcendence_postgres-data  # adjust name if your compose project differs
-> ```
+```bash
+docker compose down
+docker volume rm ft_transcendence_postgres-data  # adjust name if different
+```
 
 ---
 
-**Run Localy**
+**Run Without Docker**
 
+Run the backend and frontend directly on your machine while still relying on the containers for the database (or your own Postgres installation).
 
+1. Update `.env` to point the backend to localhost:
+
+```env
+POSTGRES_HOST=localhost
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/transcendance?schema=public
+FILES_DEST=./uploads
+```
+
+2. Start the Postgres (and optional pgAdmin) containers:
+
+```bash
+docker compose up -d postgres pgadmin
+```
+
+3. Run the backend locally:
+
+```bash
+cd backend
+npm install
+npx prisma generate
+npm run start:dev
+```
+
+4. Run the frontend locally:
+
+```bash
+cd frontend
+npm install
+npm run serve
+```
+
+The Vue dev server listens on http://localhost:8080 and proxies API/socket calls to the backend on http://localhost:3000 (HTTP) plus ports `8081`/`8082` for WebSockets. Stop the helper containers with `docker compose down` when you are done.
 
 ---
 
@@ -91,7 +126,7 @@ npm run start:prisma:push
 npm run start:prisma:migrate
 ```
 
-If you're using Docker, the backend container includes scripts and expects a `DATABASE_URL` env var. When running migrations against the containerized Postgres, ensure the DB env vars in `.env` point to the running Postgres instance.
+If you use Docker, the backend container already has Prisma and expects `DATABASE_URL` to point to the Postgres service defined in Compose. When running locally, ensure the env vars match your host database.
 
 ---
 

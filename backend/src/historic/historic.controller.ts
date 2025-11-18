@@ -1,16 +1,22 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
-  Get,
+  UseGuards,
 } from "@nestjs/common";
 import { HistoricService } from "../historic/historic.service";
 import { GetCurrentUserId } from "../common/decorators";
-import { Historic } from "@prisma/client";
+import { AtGuard } from "src/common/guards";
+import { CreateHistoricDto } from "./dto";
 
 @Controller("historic")
+@UseGuards(AtGuard)
 export class HistoricController {
   constructor(private historicService: HistoricService) {}
 
@@ -28,13 +34,23 @@ export class HistoricController {
 
   @Get(":id")
   @HttpCode(HttpStatus.OK)
-  getPlayerHistoric(@GetCurrentUserId() userId: number) {
+  getPlayerHistoric(
+    @GetCurrentUserId() userId: number,
+    @Param("id", ParseIntPipe) targetUserId: number,
+  ) {
+    if (userId !== targetUserId)
+      throw new ForbiddenException("Cannot read another player's history");
     return this.historicService.getGamesByPlayerId(userId);
   }
 
   @Post("ID")
   @HttpCode(HttpStatus.OK)
-  setHistoric(@Body() dto: Historic) {
+  setHistoric(
+    @Body() dto: CreateHistoricDto,
+    @GetCurrentUserId() userId: number,
+  ) {
+    if (userId !== dto.winnerId && userId !== dto.looserId)
+      throw new ForbiddenException("Cannot report games for other users");
     return this.historicService.setGameByGameId(dto);
   }
 }
