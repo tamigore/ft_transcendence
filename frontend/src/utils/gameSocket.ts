@@ -66,6 +66,8 @@ class SocketioGame {
         autoConnect: false,
       }
     );
+    this.wrapConnect();
+    this.syncAuth();
     this.socket.on("connect", () => {
       axios.post("/api/user/gamesocket", { socket: gameSocket.id }, {
         headers: { "Authorization": `Bearer ${store.state.user.hash}` }
@@ -74,6 +76,27 @@ class SocketioGame {
     this.socket.on("connect_error", () => {
       console.log("Ws connect failed");
     });
+  }
+
+  private wrapConnect() {
+    const originalConnect = this.socket.connect.bind(this.socket);
+    this.socket.connect = (...args: Parameters<typeof originalConnect>) => {
+      this.applyAuth();
+      return originalConnect(...args);
+    };
+  }
+
+  private syncAuth() {
+    this.applyAuth();
+    store.watch(
+      (state) => state.user?.hash,
+      () => this.applyAuth(),
+    );
+  }
+
+  private applyAuth() {
+    const token = store.state.user?.hash;
+    this.socket.auth = token ? { token: `Bearer ${token}` } : {};
   }
 }
 

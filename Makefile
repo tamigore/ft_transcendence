@@ -1,25 +1,25 @@
 NAME = transcendance
 
 all:
-	@printf "Execution de la configuration ${NAME}...\n"
+	@printf "Execution of configuration ${NAME}...\n"
 	@docker compose up --build
 
 down:
-	@printf "Arrêt de la configuration ${NAME}...\n"
+	@printf "Stopping configuration ${NAME}...\n"
 	@docker compose down
 
 stop:
-	@printf "Arret de la configuration ${NAME}...\n"
+	@printf "Stopping configuration ${NAME}...\n"
 	@docker compose stop
 
 clean: down
-	@printf "Nettoyage de la configuration ${NAME}...\n"
+	@printf "Cleaning configuration ${NAME}...\n"
 	@docker stop $$(docker ps -qa) | true
 	@docker rm $$(docker ps -qa) | true
 
 fclean: clean
-	@printf "Arrêt des configurations en cours\n"
-	@printf "Nettoyage complet des conteneurs, réseaux, volumes\n"
+	@printf "Stopping running configurations\n"
+	@printf "Complete cleanup of containers, networks, volumes\n"
 	@docker system prune --all --force
 	@docker system prune --volumes
 	@docker rmi -f $$(docker images -qa) | true
@@ -36,10 +36,10 @@ status:
 	docker volume ls
 
 test:
-	@printf "Lancement des tests...\n"
+	@printf "Tests start...\n"
 	@docker compose run --rm backend npm run test
 	@docker compose run --rm frontend npm run test:unit
-	@printf "Tests terminés.\n"
+	@printf "Tests end.\n"
 
 re: stop all
 

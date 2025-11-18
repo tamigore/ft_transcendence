@@ -36,6 +36,8 @@ class SocketioChat {
         upgrade: false,
       }
     );
+    this.wrapConnect();
+    this.syncAuth();
 
     this.socket.on('servMessage', async (msg: Message) => {
       const user = await axios.get("api/user/blocked", {
@@ -143,6 +145,27 @@ class SocketioChat {
 				user2username: e.user2.username,
 			});
     });
+  }
+
+  private wrapConnect() {
+    const originalConnect = this.socket.connect.bind(this.socket);
+    this.socket.connect = (...args: Parameters<typeof originalConnect>) => {
+      this.applyAuth();
+      return originalConnect(...args);
+    };
+  }
+
+  private syncAuth() {
+    this.applyAuth();
+    store.watch(
+      (state) => state.user?.hash,
+      () => this.applyAuth(),
+    );
+  }
+
+  private applyAuth() {
+    const token = store.state.user?.hash;
+    this.socket.auth = token ? { token: `Bearer ${token}` } : {};
   }
 }
 

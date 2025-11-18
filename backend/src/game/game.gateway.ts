@@ -9,7 +9,7 @@ import {
 } from "@nestjs/websockets";
 import { User, Game } from "@prisma/client";
 import { Server, Socket } from "socket.io";
-import { Logger } from "@nestjs/common";
+import { Logger, UseGuards } from "@nestjs/common";
 import { GameService } from "./game.service";
 import {
   GameMove,
@@ -38,7 +38,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("disconnecting")
   handleDisconnecting(@ConnectedSocket() client: Socket) {
-    import { Logger, UseGuards } from "@nestjs/common";
     console.log("client.rooms : ", client.rooms);
     client.rooms.forEach((room) => {
       this.logger.log(

@@ -15,6 +15,8 @@ import {
   UsePipes,
   ValidationPipe,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
 import { UserService } from "src/user/user.service";
 import { ChatService } from "./chat.service";
 import { RoomService } from "src/room/room.service";
@@ -44,13 +46,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private chatService: ChatService,
     private userService: UserService,
     private roomService: RoomService,
+    private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
   ) {}
 
   @WebSocketServer()
   server: Server;
 
   async handleConnection(client: AuthenticatedSocket) {
-    const user = this.getSocketUser(client);
+    const user = await this.getSocketUser(client);
     await this.userService.updateChatSocket(user.id, client.id);
     await client.join("general");
     this.logger.debug(`user ${user.username} connected with socket ${client.id}`);
@@ -75,7 +79,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: SendMessageDto,
   ) {
     this.logger.log("onMessage");
-    const user = this.getSocketUser(client);
+    const user = await this.getSocketUser(client);
     const sanitizedText = body.text.trim();
     if (!sanitizedText.length) {
       this.logger.warn(`User ${user.id} tried to send an empty message to room ${body.roomId}`);
@@ -114,7 +118,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: RoomEventPayload,
   ): Promise<void> {
-    const user = this.getSocketUser(client);
+    const user = await this.getSocketUser(client);
     const roomId = this.getRoomIdFromPayload(payload);
     if (!roomId) return;
     const room = await this.roomService.findByIdWithAll(roomId);
@@ -158,10 +162,53 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(payload.user2.chatSocket).emit("inviteGame", payload);
   }
 
-  private getSocketUser(client: AuthenticatedSocket): User {
-    const user = client.data?.user;
-    if (!user) throw new BadRequestException("Socket missing authenticated user context");
+  private async getSocketUser(client: AuthenticatedSocket): Promise<User> {
+    if (client.data?.user) return client.data.user;
+    const token = this.extractToken(client);
+    if (!token)
+      throw new BadRequestException("Socket missing authenticated user context");
+    const payload = await this.jwtService.verifyAsync<{ sub: number }>(token, {
+      secret: this.config.get<string>("AT_SECRET"),
+    });
+    if (!payload?.sub)
+      throw new BadRequestException("Socket JWT payload missing subject");
+    const user = await this.userService.findById(payload.sub);
+    if (!user)
+      throw new BadRequestException("Socket user could not be resolved from token");
+    client.data = client.data ?? {};
+    client.data.user = user;
     return user;
+  }
+
+  private extractToken(client: Socket): string | null {
+    const candidates = [
+      client.handshake.auth?.token,
+      client.handshake.headers?.authorization,
+      this.normalizeQueryToken(client.handshake.query?.token),
+    ];
+
+    for (const raw of candidates) {
+      const normalized = this.normalizeToken(raw);
+      if (normalized) return normalized;
+    }
+    return null;
+  }
+
+  private normalizeToken(raw?: string | string[]): string | null {
+    if (!raw) return null;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    if (trimmed.toLowerCase().startsWith("bearer ")) {
+      return trimmed.slice(7).trim();
+    }
+    return trimmed;
+  }
+
+  private normalizeQueryToken(token?: string | string[]): string | undefined {
+    if (!token) return undefined;
+    return Array.isArray(token) ? token[0] : token;
   }
 
   private canUserSpeak(room: RoomWithAll, userId: number): boolean {
